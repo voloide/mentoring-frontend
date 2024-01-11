@@ -17,9 +17,9 @@ export default class Mentor extends Model {
       phonenumber: this.attr(''),
       email: this.attr(''),
       isUser: Boolean,
-      Career: {},
-      Partner: {},
-      User: {},
+      career: this.belongTo(Career, 'id'),
+      partner: this.belongTo(Partner, 'id'),
+      user: this.belongTo(User, 'id'),
     };
   }
 

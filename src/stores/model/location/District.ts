@@ -10,7 +10,7 @@ export default class District extends Model {
       id: this.number(() => 0),
       uuid: this.attr(''),
       district: this.attr(''),
-      Province: {},
+      province: this.belongTo(Province, 'id'),
     };
   }
 

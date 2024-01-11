@@ -10,7 +10,7 @@ export default class HealthFacility extends Model {
       id: this.number(() => 0),
       uuid: this.attr(''),
       healthFacility: this.attr(''),
-      District: {},
+      district: this.belongTo(District, 'id'),
     };
   }
 

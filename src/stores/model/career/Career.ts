@@ -10,7 +10,7 @@ export default class Career extends Model {
       id: this.number(() => 0),
       uuid: this.attr(''),
       position: this.attr(''),
-      CareerType: {},
+      careerType: this.belongTo(CareerType, 'id'),
     };
   }
   static piniaOptions = {

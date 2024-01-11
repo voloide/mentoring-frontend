@@ -1,7 +1,7 @@
 import { Model } from 'pinia-orm';
 
-export default class Ronda extends Model {
-  static entity = 'rondas';
+export default class Round extends Model {
+  static entity = 'rounds';
   static primaryKey = 'id';
   static fields() {
     return {
