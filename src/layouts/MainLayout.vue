@@ -1,116 +1,166 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+  <q-layout view="hHh lpR fFf">
+    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" class="menu">
+    <!-- drawer content -->
+        <div class="row q-mb-lg">
+            <div class="col text-center" style="margin-top: 20%">
+                <q-icon name="account_circle" color="white" size="7.4em" />
+                <div class="text-grey-1  text-subtitle1 q-mt-md">Nome utilizador</div>
+                <div class="text-grey-1  text-subtitle1 q-mt-sm">email.utilizador@email.com</div>
+            </div>
+        </div>
+        <div class="row q-mt-md">
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+            <q-list padding class="text-white col">
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'home'"
+                    @click="link = 'home'"
+                    active-class="my-menu-link"
+                    to="/home" exact
+                >
+                    <q-item-section avatar>
+                        <q-icon name="home" />
+                    </q-item-section>
+                    <q-item-section>Início</q-item-section>
+                </q-item>
 
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'tables'"
+                    @click="link = 'tables'"
+                    active-class="my-menu-link"
+                >
+                    <q-item-section avatar>
+                        <q-icon name="fact_check" />
+                    </q-item-section>
+                    <q-item-section>Tabelas de Competências</q-item-section>
+                </q-item>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'mentores'"
+                    @click="link = 'mentores'"
+                    active-class="my-menu-link"
+                    to="/mentors" exact
+                >
+                    <q-item-section avatar>
+                    <q-icon name="person" />
+                    </q-item-section>
 
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
+                    <q-item-section>Mentores</q-item-section>
+                </q-item>
+
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'mentorandos'"
+                    @click="link = 'mentorandos'"
+                    active-class="my-menu-link"
+                >
+                    <q-item-section avatar>
+                    <q-icon name="diversity_3" />
+                    </q-item-section>
+
+                    <q-item-section>Mentorandos</q-item-section>
+                </q-item>
+
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'ea'"
+                    @click="link = 'ea'"
+                    active-class="my-menu-link"
+                >
+                    <q-item-section avatar>
+                    <q-icon name="library_books" />
+                    </q-item-section>
+
+                    <q-item-section>Recursos de EA</q-item-section>
+                </q-item>
+
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'rondas'"
+                    @click="link = 'rondas'"
+                    active-class="my-menu-link"
+                >
+                    <q-item-section avatar>
+                    <q-icon name="playlist_add_check_circle" />
+                    </q-item-section>
+
+                    <q-item-section>Rondas/Ciclos de Mentoria</q-item-section>
+                </q-item>
+
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'reports'"
+                    @click="link = 'reports'"
+                    active-class="my-menu-link"
+                    style="margin-bottom: 50%"
+                >
+                    <q-item-section avatar>
+                    <q-icon name="legend_toggle" />
+                    </q-item-section>
+
+                    <q-item-section>Relatórios</q-item-section>
+                </q-item>
+
+                <q-separator spaced color="white"/>
+
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'settings'"
+                    @click="link = 'settings'"
+                    active-class="my-menu-link"
+                >
+                    <q-item-section avatar>
+                    <q-icon name="settings" />
+                    </q-item-section>
+
+                    <q-item-section>Configurações</q-item-section>
+                </q-item>
+
+                <q-item
+                    clickable
+                    v-ripple
+                    :active="link === 'logout'"
+                    @click="link = 'logout'"
+                    active-class="my-menu-link"
+                >
+                    <q-item-section avatar>
+                    <q-icon name="logout" />
+                    </q-item-section>
+
+                    <q-item-section>Log out</q-item-section>
+                </q-item>
+                </q-list>
+        </div>
     </q-drawer>
-
     <q-page-container>
       <router-view />
     </q-page-container>
   </q-layout>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-import EssentialLink from 'components/EssentialLink.vue';
+<script setup>
+import { ref } from 'vue'
+const leftDrawerOpen = ref(false);
+const link = ref('tables')
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
-
-export default defineComponent({
-  name: 'MainLayout',
-
-  components: {
-    EssentialLink
-  },
-
-  setup () {
-    const leftDrawerOpen = ref(false)
-
-    return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      }
-    }
-  }
-});
 </script>
+<style lang="scss">
+    .menu {
+        background-color: $primary;
+    }
+    .my-menu-link {
+        color: black;
+        background: white;
+    }
+</style>

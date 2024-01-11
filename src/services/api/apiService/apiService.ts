@@ -1,6 +1,6 @@
 import axios, { Axios, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { plainToClass, classToPlainFromExist } from 'class-transformer';
-import UsersService from 'src/services/UsersService';
+import UsersService from 'src/services/api/user/UsersService';
 import { useSystemUtils } from 'src/composables/shared/systemUtils/systemUtils';
 import { LocalStorage } from 'quasar';
 import useNotify from 'src/composables/shared/notify/useNotify';
@@ -15,7 +15,7 @@ const instance = axios.create({
    // ? process.env.API_URL
    // : LocalStorage.getItem('backend_url'),
 
-    baseURL: LocalStorage.getItem('backend_url'),
+    baseURL: 'http://localhost:8087',
     responseType: 'json',
     validateStatus(status) {
       return [200].includes(status)
