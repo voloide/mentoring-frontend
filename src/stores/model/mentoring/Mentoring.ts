@@ -2,8 +2,8 @@ import { Model } from 'pinia-orm';
 import Career from '../career/Career';
 import User from '../user/User';
 
-export default class Mentorando extends Model {
-  static entity = 'mentorados';
+export default class Mentoring extends Model {
+  static entity = 'mentorings';
   static primaryKey = 'id';
 
   fields() {
@@ -16,8 +16,8 @@ export default class Mentorando extends Model {
       phonenumber: this.attr(''),
       email: this.attr(''),
       version: this.number(),
-      Career: {},
-      User: {},
+      career: this.belongTo(Career, 'id'),
+      user: this.belongTo(User, 'id'),
     };
   }
 

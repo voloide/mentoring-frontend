@@ -10,8 +10,8 @@ export default class MentorLocation extends Model {
     return {
       id: this.number(() => 0),
       uuid: this.attr(''),
-      Mentor: {},
-      HealthFacility: {},
+      mentor: this.belongTo(Mentor, 'id'),
+      healthFaciity: this.belongTo(HealthFacility, 'id'),
     };
   }
 
