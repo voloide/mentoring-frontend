@@ -143,7 +143,13 @@
                 </q-list>
         </div>
     </q-drawer>
-    <q-page-container>
+    <q-page-container style="padding-top: 10px;">
+        <q-banner dense inline-actions class="text-white bg-primary q-mx-md q-px-md">
+            You have lost connection to the internet. This app is offline.
+            <template v-slot:action>
+                <q-img src="~assets/mentoring.png" />
+            </template>
+        </q-banner>
       <router-view />
     </q-page-container>
   </q-layout>
@@ -152,7 +158,7 @@
 <script setup>
 import { ref } from 'vue'
 const leftDrawerOpen = ref(false);
-const link = ref('tables')
+const link = ref('home')
 
 </script>
 <style lang="scss">
