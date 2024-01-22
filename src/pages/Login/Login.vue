@@ -129,8 +129,9 @@
                       localStorage.setItem('access_token', response.data.access_token);
                       localStorage.setItem('refresh_token', response.data.refresh_token);
                       localStorage.setItem('username', response.data.username);
-                      localStorage.setItem('user_info', JSON.stringify(response.data.user_info));
+                      localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo));
                       localStorage.setItem('tokenExpiration', String(Date.now() + 3600));
+                      
                       router.push({ path: '/' });
                   }
                   Loading.hide()
