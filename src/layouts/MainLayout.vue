@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="hHh lpR fFf" style="height: 100%;">
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" class="menu">
     <!-- drawer content -->
         <div class="row q-mb-lg">
@@ -143,8 +143,14 @@
                 </q-list>
         </div>
     </q-drawer>
-    <q-page-container>
-      <router-view />
+    <q-page-container style="padding-top: 10px; height: 100%;">
+        <q-banner dense inline-actions class="text-white bg-primary q-mx-md q-px-md">
+            You have lost connection to the internet. This app is offline.
+            <template v-slot:action>
+                <q-img src="~assets/mentoring.png" />
+            </template>
+        </q-banner>
+      <router-view style="height: 100%;"/>
     </q-page-container>
   </q-layout>
 </template>
@@ -152,7 +158,7 @@
 <script setup>
 import { ref } from 'vue'
 const leftDrawerOpen = ref(false);
-const link = ref('tables')
+const link = ref('home')
 
 </script>
 <style lang="scss">

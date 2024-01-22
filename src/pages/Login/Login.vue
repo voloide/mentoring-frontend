@@ -94,7 +94,7 @@
     import { ref } from 'vue'
     import UsersService from 'src/services/api/user/UsersService'
     import { useRouter } from 'vue-router';
-    import { LocalStorage } from 'quasar';
+    import { Loading, QSpinnerGears } from 'quasar';
 
     const username = ref('');
     const password = ref('');
@@ -104,6 +104,9 @@
     const router = useRouter();
 
     const authUser = async () => {
+      Loading.show({
+        spinner: QSpinnerGears,
+      })
         const encodedStringBtoA = btoa(
             String(username.value).concat(':').concat(password.value)
         );
@@ -111,7 +114,7 @@
         passwordRef.value.validate();
 
         if (!passwordRef.value.hasError && !usernameRef.value.hasError) {
-            submitting.value = true;
+            // submitting.value = true;
             UsersService.login({
                 username: username.value,
                 password: password.value,
@@ -119,31 +122,35 @@
                 .then((response) => {
                 // localStorage.setItem('tokenExpiration', String(Date.now() + 600000)); // 10min
                 
-                submitting.value = false;
-                // userLogin.save(resp.data);
-                if (response !== undefined && response.status === 200) {
-                    console.log(response);
-                    localStorage.setItem('access_token', response.data.access_token);
-                    localStorage.setItem('username', response.data.username);
-                    localStorage.setItem('user_info', JSON.stringify(response.data.user_info));
-                    localStorage.setItem('tokenExpiration', String(Date.now() + 3600));
-                    router.push({ path: '/' });
-                }
+                  submitting.value = false;
+                  // userLogin.save(resp.data);
+                  if (response !== undefined && response.status === 200) {
+                      console.log(response);
+                      localStorage.setItem('access_token', response.data.access_token);
+                      localStorage.setItem('refresh_token', response.data.refresh_token);
+                      localStorage.setItem('username', response.data.username);
+                      localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo));
+                      localStorage.setItem('tokenExpiration', String(Date.now() + 3600));
+                      
+                      router.push({ path: '/' });
+                  }
+                  Loading.hide()
                 })
                 .catch((error) => {
-                console.log(error);
-                submitting.value = false;
-                if (error.request.response != null) {
-                    const arrayErrors = JSON.parse(error.request.response);
-                    if (arrayErrors.total == null) {
-                    listErrors.push(arrayErrors.message);
-                    } else {
-                    arrayErrors._embedded.errors.forEach((element) => {
-                        listErrors.push(element.message);
-                    });
-                    }
-                    console.log(listErrors);
-                }
+                  Loading.hide()
+                  console.log(error);
+                  submitting.value = false;
+                  if (error.request.response != null) {
+                      const arrayErrors = JSON.parse(error.request.response);
+                      if (arrayErrors.total == null) {
+                      listErrors.push(arrayErrors.message);
+                      } else {
+                      arrayErrors._embedded.errors.forEach((element) => {
+                          listErrors.push(element.message);
+                      });
+                      }
+                      console.log(listErrors);
+                  }
                 });
         }
     }

@@ -40,15 +40,11 @@ function fixNextTokenExpirationTime() {
   // localStorage.setItem('tokenExpiration', String(Date.now() + 30000)); // 30 segundos sem request para teste
 }
 
-export async function request<T>(config: AxiosRequestConfig, Model: any): Promise<T> {
-  const response = await instance.request<T>(config);
-  return plainToClass<T, AxiosResponse['data']>(Model, response.data);
-}
-
 // Request interceptor for API calls
 instance.interceptors.request.use(
   (request) => {
-    const userloged = localStorage.getItem('user');
+    const userloged = localStorage.getItem('userInfo');
+    console.log(userloged);
     request.headers = {
       Accept: 'application/json',
     };
@@ -74,8 +70,8 @@ instance.interceptors.request.use(
         // logout();
         // return; // Interromper a solicitação
       }
-      const localuser = UsersService.getUserByUserName(String(userloged));
-      request.headers['X-Auth-Token'] = ['', localuser.access_token].join(' ');
+      const authToken = localStorage.getItem('access_token');
+      request.headers.Authorization = `Bearer ${authToken}`;
     } else {
       delete request.headers.Authorization;
     }
