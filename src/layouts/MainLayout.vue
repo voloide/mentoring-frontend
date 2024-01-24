@@ -131,7 +131,7 @@
                     clickable
                     v-ripple
                     :active="link === 'logout'"
-                    @click="link = 'logout'"
+                    @click="logout"
                     active-class="my-menu-link"
                 >
                     <q-item-section avatar>
@@ -156,9 +156,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-const leftDrawerOpen = ref(false);
-const link = ref('home')
+    import { ref } from 'vue'
+    import UsersService from 'src/services/api/user/UsersService'
+    import { Loading, QSpinnerGears } from 'quasar';
+    import { useRouter } from 'vue-router';
+
+    const leftDrawerOpen = ref(false);
+    const link = ref('home')
+    const router = useRouter();
+
+    const logout = ()=>{
+        Loading.show({
+            spinner: QSpinnerGears,
+        })
+        UsersService.logout()
+        Loading.hide()
+        router.push({ path: '/login' });
+    }
 
 </script>
 <style lang="scss">

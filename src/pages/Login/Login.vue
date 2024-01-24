@@ -120,17 +120,14 @@
                 password: password.value,
             })
                 .then((response) => {
-                // localStorage.setItem('tokenExpiration', String(Date.now() + 600000)); // 10min
                 
                   submitting.value = false;
-                  // userLogin.save(resp.data);
                   if (response !== undefined && response.status === 200) {
-                      console.log(response);
                       localStorage.setItem('access_token', response.data.access_token);
                       localStorage.setItem('refresh_token', response.data.refresh_token);
                       localStorage.setItem('username', response.data.username);
                       localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo));
-                      localStorage.setItem('tokenExpiration', String(Date.now() + 3600));
+                      localStorage.setItem('tokenExpiration', String(Date.now() + 600000));
                       
                       router.push({ path: '/' });
                   }

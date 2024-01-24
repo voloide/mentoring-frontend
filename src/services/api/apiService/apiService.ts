@@ -25,11 +25,11 @@ const numTries = 0;
 
 // Função para fazer o logout
 function logout () {
-  localStorage.removeItem('authUser');
-  localStorage.removeItem('user');
-  localStorage.removeItem('username');
+  localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
-  localStorage.removeItem('password');
+  localStorage.removeItem('username');
+  localStorage.removeItem('userInfo');
+  localStorage.removeItem('tokenExpiration');
   // localStorage.removeItem('tokenExpiration');
   window.location.reload();
 }
@@ -44,7 +44,6 @@ function fixNextTokenExpirationTime() {
 instance.interceptors.request.use(
   (request) => {
     const userloged = localStorage.getItem('userInfo');
-    console.log(userloged);
     request.headers = {
       Accept: 'application/json',
     };
