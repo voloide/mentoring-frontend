@@ -9,10 +9,9 @@ export default class User extends Model {
     return {
       id: this.number(() => 0),
       uuid: this.attr(''),
-      firstName: this.attr(''),
-      lastName: this.attr(''),
+      salt: this.attr(''),
       employee_id: this.attr(''),
-      age: this.number(() => 0),
+      username: this.attr(''),
       password: this.attr(''),
       // relationships
       employee: this.belongsTo(Employee, 'employee_id'),

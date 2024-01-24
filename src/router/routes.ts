@@ -4,6 +4,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    beforeEnter(o, from, next) {
+      const authUser = localStorage.getItem('userInfo');
+      if (authUser === null || String(authUser).includes('null')) {
+        next('/Login');
+      } else {
+        next();
+      }
+    },
     children: [
       { path: '/mentors', component: () => import('pages/Mentors/Mentors.vue') },
       { path: '/home', component: () => import('pages/home/Home.vue') }
