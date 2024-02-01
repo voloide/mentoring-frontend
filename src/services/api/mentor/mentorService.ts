@@ -3,8 +3,6 @@ import { useRepo } from 'pinia-orm';
 import { UserDTO } from 'src/services/dto/user/UserDTO';
 import { plainToClass } from 'class-transformer';
 import Mentor from 'src/stores/model/mentor/Mentor';
-import Employee from 'src/stores/model/employee/Employee';
-import ProfessionalCategory from 'src/stores/model/professionalCategory/ProfessionalCategory';
 import useMentor from "src/composables/mentor/mentorMethods"
 
 const mentorRepo = useRepo(Mentor);

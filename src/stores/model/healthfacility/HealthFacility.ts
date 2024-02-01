@@ -5,12 +5,13 @@ export default class HealthFacility extends Model {
   static entity = 'health_facilities';
   static primaryKey = 'id';
 
-  fields() {
+  static fields() {
     return {
       id: this.number(() => 0),
       uuid: this.attr(''),
       healthFacility: this.attr(''),
-      district: this.belongTo(District, 'id'),
+      districtId: this.attr(''),
+      district: this.belongsTo(District, 'districtId'),
     };
   }
 
