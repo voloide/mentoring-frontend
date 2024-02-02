@@ -13,9 +13,9 @@ export default function useLocation() {
             id: locationDTO.id,
             uuid: locationDTO.uuid,
             locationLevel: locationDTO.healthFacilityDTO,
-            district: createDistrictFromDTO(locationDTO.districtDTO),
-            healthFacility: createHealthFacilityFromDTO(locationDTO.healthFacilityDTO),
-            province: createProvinceFromDTO(locationDTO.provinceDTO),
+            district: locationDTO.districtDTO !== undefined ? createDistrictFromDTO(locationDTO.districtDTO) : '',
+            healthFacility: locationDTO.healthFacilityDTO !== undefined ? createHealthFacilityFromDTO(locationDTO.healthFacilityDTO) : '',
+            province: locationDTO.provinceDTO !== undefined ? createProvinceFromDTO(locationDTO.provinceDTO) : '',
           })
     }
 

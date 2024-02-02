@@ -3,10 +3,11 @@
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" class="menu">
     <!-- drawer content -->
         <div class="row q-mb-lg">
+
             <div class="col text-center" style="margin-top: 20%">
                 <q-icon name="account_circle" color="white" size="7.4em" />
-                <div class="text-grey-1  text-subtitle1 q-mt-md">Nome utilizador</div>
-                <div class="text-grey-1  text-subtitle1 q-mt-sm">email.utilizador@email.com</div>
+                <div class="text-grey-1  text-subtitle1 q-mt-md">{{ fullName(currUser.employee) }}</div>
+                <div class="text-grey-1  text-subtitle1 q-mt-sm">{{ currUser.employee.email }}</div>
             </div>
         </div>
         <div class="row q-mt-md">
@@ -156,14 +157,20 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue'
+    import { ref, computed } from 'vue'
     import UsersService from 'src/services/api/user/UsersService'
     import { Loading, QSpinnerGears } from 'quasar';
     import { useRouter } from 'vue-router';
+    import useEmployee from 'src/composables/employee/employeeMethods'
 
     const leftDrawerOpen = ref(false);
     const link = ref('home')
     const router = useRouter();
+    const { fullName } = useEmployee();
+
+    const currUser = computed(() => {
+        return UsersService.getLogedUser();
+    });
 
     const logout = ()=>{
         Loading.show({
