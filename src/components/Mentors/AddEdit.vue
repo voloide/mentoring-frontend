@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="q-ma-md page-container">
-            <form @submit.prevent="submitForm">
+            <form @submit.prevent="submitForm" ref="myForm">
             <div class="q-ma-md">
                 <q-banner dense inline-actions class="text-white bg-primary  q-px-md">
                     Dados do Mentor
@@ -70,6 +70,10 @@
                             ref="nuitRef"
                             class="col"
                             mask="#########"
+                            lazy-rules
+                            :rules="[
+                              (val) => isValidNuit(val) || 'Por favor indicar um NUIT válido.'
+                            ]"
                             fill-mask="#"
                             v-model="mentor.employee.nuit"
                             @update:model-value="(value) => (filter = value)"
@@ -101,6 +105,10 @@
                             ref="phoneNumberRef"
                             mask="+2588#######"
                             hint="Formato: +2588#######"
+                            lazy-rules
+                            :rules="[
+                              (val) => isValidPhoneNumber(val) || 'Por favor indicar um contacto válido.'
+                            ]"
                             fill-mask="_"
                             class="col"
                             v-model="mentor.employee.phoneNumber"
@@ -178,6 +186,7 @@
                             label="Ano de Formação"
                             dense
                             ref="trainingYearRef"
+                            :rules="[val => isValidTrainingYear(val) || 'Ano de formação inválido']"
                             lazy-rules
                             mask="####"
                             fill-mask="#"
@@ -355,7 +364,6 @@ import districtService from 'src/services/api/district/districtService';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService'
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 import Location from 'src/stores/model/location/Location'
-import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { useStringUtils } from 'src/composables/shared/stringutils/stringUtils';
 import partnerService from 'src/services/api/partner/partnerService';
 
@@ -367,7 +375,6 @@ const mentor = ref(new Mentor({
     }),
 }));
 
-const { alertSucess, alertError, alertInfo, alertWarningAction } = useSwal();
 const { stringContains } = useStringUtils();
 const filterRedDistricts = ref([]);
 const filterRedHealthFacilities = ref([]);
@@ -380,6 +387,7 @@ const location = ref(new Location())
 //Ref's
 const nameRef = ref(null);
 const surnameRef = ref(null);
+const nuitRef = ref(null);
 const phoneNumberRef = ref(null);
 const emailRef = ref(null);
 const categoryRef = ref(null);
@@ -421,30 +429,34 @@ const partners = computed(() => {
   return partnerService.piniaGetAll()
 });
 
-const submitForm = () => {
-  nameRef.value.validade();
-  surnameRef.value.validade();
-  emailRef.value.validade();
-  categoryRef.value.validade();
-  vinculoRef.value.validade();
-  provinceRef.value.validade();
-  districtRef.value.validade();
-  hfRef.value.validade();
+const myForm = ref(null)
 
-  if (
-    !nameRef.value.validade() &&
-    !surnameRef.value.validade() &&
-    !emailRef.value.validade() &&
-    !categoryRef.value.validade() &&
-    !vinculoRef.value.validade() &&
-    !provinceRef.value.validade() &&
-    !districtRef.value.validade() &&
-    !hfRef.value.validade()
-  ) {
-    if (stringContains(mentor.value.employee.nuit, '#')) {
-      console.log(mentor.value.employee.nuit)
-      alertError('O NUIT informádo é inváldo');
-    }
+const submitForm = () => {
+  nameRef.value.validate();
+  surnameRef.value.validate();
+  nuitRef.value.validate();
+  phoneNumberRef.value.validate();
+  emailRef.value.validate();
+  categoryRef.value.validate();
+  trainingYearRef.value.validate();
+  vinculoRef.value.validate();
+  if (partnerRef.value !== null) partnerRef.value.validate();
+  provinceRef.value.validate();
+  districtRef.value.validate();
+  hfRef.value.validate();
+
+  if (!nameRef.value.hasError && 
+     (partnerRef.value !== null && !partnerRef.value.hasError) &&
+     !surnameRef.value.hasError && 
+     !phoneNumberRef.value.hasError && 
+     !emailRef.value.hasError && 
+     !categoryRef.value.hasError && 
+     !trainingYearRef.value.hasError && 
+     !vinculoRef.value.hasError && 
+     !provinceRef.value.hasError && 
+     !districtRef.value.hasError && 
+     !hfRef.value.hasError) {
+    console.log(mentor.value);
   }
 
 };
@@ -452,6 +464,18 @@ const isValidEmail = (email) => {
   const regex = /^[A-Za-z0-9+_.-]+@(.+)$/;
   return regex.test(email);
 };
+const isValidNuit = (nuit) => {
+  return nuit !== '' && !stringContains(nuit, '#')
+};
+
+const isValidTrainingYear = (year) => {
+  return year !== '' && !stringContains(year, '#')
+};
+
+const isValidPhoneNumber = (phoneNumber) => {
+  return phoneNumber !== '' && !stringContains(phoneNumber, '_')
+};
+
 const filterPartners = (val, update, abort) => {
   const stringOptions = partners;
   if (val === '') {
