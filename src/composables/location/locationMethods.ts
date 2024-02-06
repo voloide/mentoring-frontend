@@ -19,7 +19,24 @@ export default function useLocation() {
           })
     }
 
+    function createDTOFromLocation(location: Location) {
+        const { createDTOFromDistrict } = useDistrict();
+        const { createDTOFromProvince } = useProvince();
+        const { createDTOFromHealthFacility } = useHealthFacility();
+
+        const locationDTO = {
+            id: location.id,
+            uuid: location.uuid,
+            locationLevel: location.locationLevel,
+            districtDTO: location.district !== undefined ? createDTOFromDistrict(location.district) : '',
+            healthFacilityDTO: location.healthFacility !== undefined ? createDTOFromHealthFacility(location.healthFacility) : '',
+            provinceDTO: location.province !== undefined ? createDTOFromProvince(location.province) : '',
+          }
+        return locationDTO;
+    }
+
     return {
-        createLocationFromDTO
+        createLocationFromDTO,
+        createDTOFromLocation
     }
 }

@@ -13,7 +13,19 @@ export default function useHealthFacility() {
           })
     }
 
+    function createDTOFromHealthFacility(healthFacility: HealthFacility) {
+        const { createDTOFromDistrict } = useDistrict();
+        const healthFacilityDTO = {
+            id: healthFacility.id,
+            uuid: healthFacility.uuid,
+            healthFacility: healthFacility.healthFacility,
+            districtDTO: createDTOFromDistrict(healthFacility.district)
+          }
+        return  healthFacilityDTO
+    }
+
     return {
         createHealthFacilityFromDTO,
+        createDTOFromHealthFacility
     }
 }

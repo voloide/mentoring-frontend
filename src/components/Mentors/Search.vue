@@ -205,6 +205,7 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
+const emit = defineEmits(['goToMentoringAreas']);
 const currUser = ref(new User())
 
 onMounted(() => {
@@ -233,10 +234,9 @@ const search = () => {
       });
 };
 
-const changeStep = (stepp) => {
-        step.value = stepp;
-    };
+const manageMentoringAreas = (mentor) => {
+    emit('goToMentoringAreas', mentor);
+}
 
-    provide('selectedMentor', selectedMentor);
 
 </script>

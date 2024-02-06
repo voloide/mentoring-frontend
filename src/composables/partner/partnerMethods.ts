@@ -11,7 +11,18 @@ export default function usePartner() {
           })
     }
 
+    function createDTOFromPartner(partner: Partner) {
+        const partnerDTO = {
+            id: partner.id,
+            uuid: partner.uuid,
+            description: partner.description,
+            name: partner.name,
+          }
+        return  partnerDTO;
+    }
+
     return {
         createPartnerFromDTO,
+        createDTOFromPartner,
     }
 }

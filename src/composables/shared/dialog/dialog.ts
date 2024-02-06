@@ -10,6 +10,16 @@ export function useSwal() {
     });
   }
 
+  function alertSucessAction(message: string) {
+    return swal({
+      title: 'Sucesso',
+      text: message,
+      icon: 'success',
+      buttons: ['Não', 'Sim'],
+      closeOnClickOutside: false,
+      closeOnEsc: false,
+    });
+  }
   function alertWarning(message: string) {
     return swal({
       title: 'Aviso',
@@ -55,5 +65,6 @@ export function useSwal() {
     alertError,
     alertInfo,
     alertWarningAction,
+    alertSucessAction,
   };
 }

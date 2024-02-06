@@ -5,7 +5,7 @@ export default class Partner extends Model {
   static primaryKey = 'id';
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       name: this.attr(''),
       description: this.attr(''),

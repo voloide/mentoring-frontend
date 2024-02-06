@@ -7,7 +7,7 @@ export default class HealthFacility extends Model {
 
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       healthFacility: this.attr(''),
       districtId: this.attr(''),

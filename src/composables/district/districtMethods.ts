@@ -8,12 +8,25 @@ export default function useDistrict() {
         return  new District({
             id: districtDTO.id,
             uuid: districtDTO.uuid,
-            district: districtDTO.district,
-            province: createProvinceFromDTO(districtDTO.provinceDTO)
+            description: districtDTO.description,
+            province: (districtDTO.provinceDTO !== undefined && districtDTO.provinceDTO !== null) ? createProvinceFromDTO(districtDTO.provinceDTO) : null
           })
+    }
+
+    function createDTOFromDistrict(district: District) {
+        const { createDTOFromProvince } = useProvince();
+        const districtDTO = {
+            id: district.id,
+            uuid: district.uuid,
+            description: district.description,
+            provinceDTO: (district.province !== undefined && district.province !== null) ? createDTOFromProvince(district.province) : null
+
+        }
+        return  districtDTO;
     }
 
     return {
         createDistrictFromDTO,
+        createDTOFromDistrict
     }
 }

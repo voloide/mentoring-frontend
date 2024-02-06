@@ -7,9 +7,9 @@ export default class District extends Model {
 
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
-      district: this.attr(''),
+      description: this.attr(''),
       province_id: this.attr(''),
       province: this.belongsTo(Province, 'province_id'),
     };

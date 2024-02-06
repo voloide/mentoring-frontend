@@ -8,7 +8,7 @@ export default class Employee extends Model {
   static primaryKey = 'id';
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       name: this.attr(''),
       surname: this.attr(''),

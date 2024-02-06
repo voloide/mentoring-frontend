@@ -295,7 +295,7 @@
                         v-model="mentor.employee.locations[0].district"
                         :options="filterRedDistricts"
                         option-value="id"
-                        option-label="district"
+                        option-label="description"
                         @filter="filterDistricts"
                         label="Distrito"
                         >
@@ -337,7 +337,7 @@
                     </div>
                     <div class="row q-my-sm">
                         <q-space />
-                        <q-btn label="Cancelar" class="float-right" color="red" @click="closePatient" />
+                        <q-btn label="Cancelar" class="float-right" color="red" @click="cancel" />
                         <q-btn
                         class="float-right q-ml-md"
                         type="submit"
@@ -348,7 +348,6 @@
                     </div>
                 </div>
             </div>
-            <pre>{{ mentor }}</pre>
         </form>
         </div>
     </div>
@@ -366,6 +365,9 @@ import professionalCategoryService from 'src/services/api/professionalcategory/p
 import Location from 'src/stores/model/location/Location'
 import { useStringUtils } from 'src/composables/shared/stringutils/stringUtils';
 import partnerService from 'src/services/api/partner/partnerService';
+import useMentor from 'src/composables/mentor/mentorMethods'
+import mentorService from 'src/services/api/mentor/mentorService'
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
 const mentor = ref(new Mentor({
     employee: new Employee({
@@ -375,7 +377,11 @@ const mentor = ref(new Mentor({
     }),
 }));
 
+const emit = defineEmits(['goToMentoringAreas', 'close']);
+
+const { createDTOFromMentor } = useMentor();
 const { stringContains } = useStringUtils();
+const { alertSucess, alertError, alertSucessAction } = useSwal();
 const filterRedDistricts = ref([]);
 const filterRedHealthFacilities = ref([]);
 const filterRedCategories = ref([]);
@@ -432,6 +438,7 @@ const partners = computed(() => {
 const myForm = ref(null)
 
 const submitForm = () => {
+
   nameRef.value.validate();
   surnameRef.value.validate();
   nuitRef.value.validate();
@@ -446,7 +453,6 @@ const submitForm = () => {
   hfRef.value.validate();
 
   if (!nameRef.value.hasError && 
-     (partnerRef.value !== null && !partnerRef.value.hasError) &&
      !surnameRef.value.hasError && 
      !phoneNumberRef.value.hasError && 
      !emailRef.value.hasError && 
@@ -456,7 +462,20 @@ const submitForm = () => {
      !provinceRef.value.hasError && 
      !districtRef.value.hasError && 
      !hfRef.value.hasError) {
-    console.log(mentor.value);
+      
+      const target_copy = Object.assign({}, mentor.value);
+      mentorService.save(createDTOFromMentor(new Mentor(target_copy))).then((resp) => {
+        alertSucessAction(
+          'Mentor criado com sucesso, avançar para áreas de mentória'
+        ).then((result) => {
+          if (result) {
+            emit('goToMentoringAreas', mentorService.getById(resp.data.id));
+          }
+        });
+      }).catch((error) => {
+        console.log('Error', error.message);
+        alertError('Ocorreu um erro inesperado nesta operação.');
+      });
   }
 
 };
@@ -521,7 +540,7 @@ const filterDistricts = (val, update, abort) => {
         .filter((district) => {
           return (
             district &&
-            district.district.toLowerCase().indexOf(val.toLowerCase()) !== -1
+            district.description.toLowerCase().indexOf(val.toLowerCase()) !== -1
           );
         });
     });
@@ -601,11 +620,12 @@ const onChangeProvincia = () =>{
     mentor.value.employee.locations[0].district = '';
     mentor.value.employee.locations[0].district = '';
 }
+const cancel = () => {
+  emit('close');
+}
 
 const onChangeVinculo = (selected) => {
-  console.log(selected);
   if (selected === 'SNS') {
-    console.log(partnerService.getByName('MISAU'))
     mentor.value.employee.partner = partnerService.getByName('MISAU')
   } else {
     mentor.value.employee.partner = '';

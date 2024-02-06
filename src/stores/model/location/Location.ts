@@ -10,7 +10,7 @@ export default class Location extends Model {
 
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       locationLevel: this.attr(''),
       district_id: this.attr(''),

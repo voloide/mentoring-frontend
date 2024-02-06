@@ -10,7 +10,17 @@ export default function useProvince() {
           })
     }
 
+    function createDTOFromProvince(province: Province) {
+        const provinceDTO = {
+            id: province.id,
+            uuid: province.uuid,
+            designation: province.designation,
+          }
+        return  provinceDTO;
+    }
+
     return {
         createProvinceFromDTO,
+        createDTOFromProvince
     }
 }
