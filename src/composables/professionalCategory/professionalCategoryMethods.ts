@@ -11,7 +11,18 @@ export default function useProfessionalCategory() {
           })
     }
 
+    function createDTOFromProfessionalCategory(professionalCategory: ProfessionalCategory) {
+        const professionalCategoryDTO = {
+            id: professionalCategory.id,
+            uuid: professionalCategory.uuid,
+            code: professionalCategory.code,
+            description: professionalCategory.description,
+          }
+        return  professionalCategoryDTO;
+    }
+
     return {
         createProfessionalCategoryFromDTO,
+        createDTOFromProfessionalCategory
     }
 }

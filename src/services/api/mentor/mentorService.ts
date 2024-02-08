@@ -3,8 +3,6 @@ import { useRepo } from 'pinia-orm';
 import { UserDTO } from 'src/services/dto/user/UserDTO';
 import { plainToClass } from 'class-transformer';
 import Mentor from 'src/stores/model/mentor/Mentor';
-import Employee from 'src/stores/model/employee/Employee';
-import ProfessionalCategory from 'src/stores/model/professionalCategory/ProfessionalCategory';
 import useMentor from "src/composables/mentor/mentorMethods"
 
 const mentorRepo = useRepo(Mentor);
@@ -23,6 +21,17 @@ export default {
             console.log('Error', error.message);
           });
       },
+      async save(mentor: any) {
+        return await api()
+           .post(`/mentor/save`, mentor)
+          .then((resp) => {
+            mentorRepo.save(createMentorFromDTO(resp.data));
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error);
+          });
+      },
       generateAndSaveMentorsFromDTO(mentorList: any) {
         mentorList.forEach(mentorDTO => {
           const mentor = createMentorFromDTO(mentorDTO)
@@ -39,6 +48,14 @@ export default {
                       .withAllRecursive(2)
                       .orderBy('id', 'asc')
                       .get();
+      },
+      getById(id: number) {
+        return mentorRepo
+                      .query()
+                      .withAllRecursive(2)
+                      .where('id', id)
+                      .orderBy('id', 'asc')
+                      .first();
       }
 
 };

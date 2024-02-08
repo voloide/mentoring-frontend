@@ -161,8 +161,8 @@
                     icon="add"
                     direction="left"
                 >
-                    <q-fab-action label-position="left" color="primary" @click="onClick" icon="edit_square" label="Criar" />
-                    <q-fab-action label-position="left" color="secondary" @click="onClick" icon="cloud_upload" label="Importar" />
+                    <q-fab-action label-position="left" color="primary" @click="$emit('create')" icon="edit_square" label="Criar" />
+                    <q-fab-action label-position="left" color="secondary" @click="$emit('import')" icon="cloud_upload" label="Importar" />
                 </q-fab>
             </q-page-sticky>
         </div>
@@ -174,15 +174,18 @@ import mentorService from 'src/services/api/mentor/mentorService'
 import Mentor from 'src/stores/model/mentor/Mentor'
 import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
-import { onMounted, ref, toRaw } from 'vue'
+import { onMounted, ref, toRaw, inject } from 'vue'
 import UsersService from 'src/services/api/user/UsersService'
+import { provide } from 'vue'
 
 
 const searchParams = ref(new Mentor({
                             employee: new Employee()
                         }));
 const { fullName } = useEmployee();
+const step = inject('step');
 const searchResults = ref([]);
+const selectedMentor = ref('');
 const columns = [
   {
     name: 'nuit',
@@ -202,12 +205,16 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
+const emit = defineEmits(['goToMentoringAreas']);
 const currUser = ref(new User())
 
 onMounted(() => {
     currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });
 
+const editMentor = (mentor) => {
+    selectedMentor.value = mentor;
+}
 const search = () => {
     const params = {
         userId: currUser.value.id,
@@ -226,5 +233,10 @@ const search = () => {
         console.log(error);
       });
 };
+
+const manageMentoringAreas = (mentor) => {
+    emit('goToMentoringAreas', mentor);
+}
+
 
 </script>

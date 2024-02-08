@@ -7,7 +7,7 @@ export default class Mentor extends Model {
 
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       employee_id: this.attr(''),
       // Relationships

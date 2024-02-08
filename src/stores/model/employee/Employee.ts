@@ -1,13 +1,14 @@
 import { Model } from 'pinia-orm';
 import ProfessionalCategory from '../professionalCategory/ProfessionalCategory';
 import Partner from '../partner/Partner';
+import Location from '../location/Location';
 
 export default class Employee extends Model {
   static entity = 'employees';
   static primaryKey = 'id';
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       name: this.attr(''),
       surname: this.attr(''),
@@ -21,6 +22,7 @@ export default class Employee extends Model {
       // Relationships
       professionalCategory: this.belongsTo(ProfessionalCategory, 'category_id'),
       partner: this.belongsTo(Partner, 'partner_id'),
+      locations: this.hasMany(Location, 'employee_id'),
 
     };
   }

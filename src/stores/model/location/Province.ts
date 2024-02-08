@@ -4,9 +4,9 @@ export default class Province extends Model {
   static entity = 'provinces';
   static primaryKey = 'id';
 
-  fields() {
+  static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       designation: this.attr(''),
     };

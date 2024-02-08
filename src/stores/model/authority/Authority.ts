@@ -5,7 +5,7 @@ export default class Authority extends Model {
   static primaryKey = 'id';
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       code: this.attr(''),
       module: this.attr(''),
