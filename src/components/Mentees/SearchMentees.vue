@@ -121,7 +121,7 @@
                     class="q-ml-md"
                     color="green-8"
                     icon="edit"
-                    @click="editMentorados(props.row.id)"
+                    @click="editMentees(props.row)"
                   >
                     <q-tooltip class="bg-green-5">Editar Mentorados</q-tooltip>
                   </q-btn>
@@ -136,8 +136,8 @@
 </template>
 <script setup>
 import useEmployee from 'src/composables/employee/employeeMethods';
-import mentoradosService from 'src/services/api/mentorados/mentoradosService';
-import Mentorados from 'src/stores/model/mentorados/Mentorados';
+import menteesService from 'src/services/api/mentees/menteesService';
+import Mentees from 'src/stores/model/mentees/Mentees';
 import Employee from 'src/stores/model/employee/Employee';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref, toRaw, inject } from 'vue';
@@ -146,7 +146,7 @@ import { provide } from 'vue';
 import { useRouter } from 'vue-router';
 
 const searchParams = ref(
-  new Mentorados({
+  new Mentees({
     employee: new Employee(),
   })
 );
@@ -154,7 +154,7 @@ const searchParams = ref(
 const { fullName } = useEmployee();
 const step = inject('step');
 const searchResults = ref([]);
-const selectedMentorados = ref('');
+const selectedMentees = ref('');
 const router = useRouter();
 
 const columns = [
@@ -189,21 +189,21 @@ const columns = [
 
 const currUser = ref(new User());
 
-const emit = defineEmits(['goToMentoraosEdit']);
+const emit = defineEmits(['goToMenteesEdit']);
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
 });
 
-const editMentorados = async (id) => {
-  selectedMentorados.value = id;
+const editMentees = async (mentees) => {
+  selectedMentees.value = mentees;
 
-  router.push({ name: 'mentoradosEdit', params: { id } });
+  emit('goToMenteesEdit', mentees);
 };
 
-const search = async () => {
+const search = () => {
   const params = {
-    userId: 4,
+    userId: currUser.value.id,
     name: searchParams.value.employee.name,
     phoneNumber: searchParams.value.employee.phoneNumber,
     nuit: searchParams.value.employee.nuit,
@@ -212,10 +212,10 @@ const search = async () => {
     (key) => params[key] === '' && delete params[key]
   );
 
-  mentoradosService
+  menteesService
     .search(params)
     .then((response) => {
-      searchResults.value = mentoradosService.getMentoradosList();
+      searchResults.value = menteesService.getMenteesList();
     })
     .catch((error) => {
       console.log(error);

@@ -25,6 +25,8 @@ export default function useEmployee() {
         employeeDTO.professionalCategoryDTO
       ),
       partner: createPartnerFromDTO(employeeDTO.partnerDTO),
+      createdBy: employeeDTO.createdBy,
+      createdAt: employeeDTO.createdAt,
     });
   }
 
@@ -42,7 +44,7 @@ export default function useEmployee() {
       trainingYear: employee.trainingYear,
       phoneNumber: employee.phoneNumber,
       locationDTOSet: createLocationDTO(employee.locations),
-      // partnerDTO: createDTOFromPartner(employee.partner),
+      partnerDTO: createDTOFromPartner(employee.partner),
       professionalCategoryDTO: createDTOFromProfessionalCategory(
         employee.professionalCategory
       ),

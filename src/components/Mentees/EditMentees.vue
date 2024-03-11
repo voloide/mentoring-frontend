@@ -28,13 +28,13 @@
                 :rules="[(val) => !!val || 'Por favor indicar o nome']"
                 lazy-rules
                 class="col"
-                v-model="mentorado.employee.name"
+                v-model="mentee.employee.name"
                 @update:model-value="(value) => (filter = value)"
               >
                 <template v-slot:append>
                   <q-icon
                     name="close"
-                    @click="mentorado.employee.name = ''"
+                    @click="mentee.employee.name = ''"
                     class="cursor-pointer"
                   />
                 </template>
@@ -47,13 +47,13 @@
                 lazy-rules
                 ref="surnameRef"
                 class="col q-ml-md"
-                v-model="mentorado.employee.surname"
+                v-model="mentee.employee.surname"
                 @update:model-value="(value) => (filter = value)"
               >
                 <template v-slot:append>
                   <q-icon
                     name="close"
-                    @click="mentorado.employee.surname = ''"
+                    @click="mentee.employee.surname = ''"
                     class="cursor-pointer"
                   />
                 </template>
@@ -73,13 +73,13 @@
                     isValidNuit(val) || 'Por favor indicar um NUIT válido.',
                 ]"
                 fill-mask="#"
-                v-model="mentorado.employee.nuit"
+                v-model="mentee.employee.nuit"
                 @update:model-value="(value) => (filter = value)"
               >
                 <template v-slot:append>
                   <q-icon
                     name="close"
-                    @click="mentorado.employee.nuit = ''"
+                    @click="mentee.employee.nuit = ''"
                     class="cursor-pointer"
                   />
                 </template>
@@ -109,13 +109,13 @@
                 ]"
                 fill-mask="_"
                 class="col"
-                v-model="mentorado.employee.phoneNumber"
-                @update:mentorado-value="(value) => (filter = value)"
+                v-model="mentee.employee.phoneNumber"
+                @update:mentee-value="(value) => (filter = value)"
               >
                 <template v-slot:append>
                   <q-icon
                     name="close"
-                    @click="mentorado.employee.phoneNumber = ''"
+                    @click="mentee.employee.phoneNumber = ''"
                     class="cursor-pointer"
                   />
                 </template>
@@ -129,13 +129,13 @@
                 class="col q-ml-md"
                 :rules="[(val) => isValidEmail(val) || 'Email inválido']"
                 lazy-rules
-                v-model="mentorado.employee.email"
-                @update:mentorado-value="(value) => (filter = value)"
+                v-model="mentee.employee.email"
+                @update:mentee-value="(value) => (filter = value)"
               >
                 <template v-slot:append>
                   <q-icon
                     name="close"
-                    @click="mentorado.employee.email = ''"
+                    @click="mentee.employee.email = ''"
                     class="cursor-pointer"
                   />
                 </template>
@@ -163,7 +163,7 @@
                     !!val || 'Por favor indicar a categoria profissional',
                 ]"
                 lazy-rules
-                v-model="mentorado.employee.professionalCategory"
+                v-model="mentee.employee.professionalCategory"
                 :options="filterRedCategories"
                 option-value="id"
                 option-label="description"
@@ -191,13 +191,13 @@
                 mask="####"
                 fill-mask="#"
                 class="col q-ml-md"
-                v-model="mentorado.employee.trainingYear"
+                v-model="mentee.employee.trainingYear"
                 @update:model-value="(value) => (filter = value)"
               >
                 <template v-slot:append>
                   <q-icon
                     name="close"
-                    @click="mentorado.employee.trainingYear = ''"
+                    @click="mentee.employee.trainingYear = ''"
                     class="cursor-pointer"
                   />
                 </template>
@@ -217,14 +217,14 @@
                 :rules="[
                   (val) => !!val || 'Por favor indicar o Vínculo Laboral',
                 ]"
-                v-model="selectedMentoradoLaborInfo"
-                :options="mentoradoLaborInfo"
+                v-model="selectedMenteeLaborInfo"
+                :options="menteeLaborInfo"
                 label="Vínculo Laboral"
               />
             </div>
             <div class="row q-my-sm">
               <q-select
-                v-if="isPartnerMentorado"
+                v-if="isPartnerMentee"
                 class="col-4"
                 use-input
                 hide-selected
@@ -235,7 +235,7 @@
                 ref="partnerRef"
                 lazy-rules
                 :rules="[(val) => !!val || 'Por favor indicar o Nome da ONG']"
-                v-model="mentorado.employee.partner"
+                v-model="mentee.employee.partner"
                 :options="filterRedPartners"
                 option-value="id"
                 option-label="description"
@@ -271,7 +271,7 @@
                 ref="provinceRef"
                 lazy-rules
                 :rules="[(val) => !!val || 'Por favor indicar a Província']"
-                v-model="mentorado.employee.locations[0].province"
+                v-model="mentee.employee.locations[0].province"
                 :options="provinces"
                 option-value="id"
                 option-label="designation"
@@ -289,7 +289,7 @@
                 ref="districtRef"
                 lazy-rules
                 :rules="[(val) => !!val || 'Por favor indicar o Distrito']"
-                v-model="mentorado.employee.locations[0].district"
+                v-model="mentee.employee.locations[0].district"
                 :options="filterRedDistricts"
                 option-value="id"
                 option-label="description"
@@ -318,7 +318,7 @@
                 :rules="[
                   (val) => !!val || 'Por favor indicar a Unidade Sanitária',
                 ]"
-                v-model="mentorado.employee.locations[0].healthFacility"
+                v-model="mentee.employee.locations[0].healthFacility"
                 :options="filterRedHealthFacilities"
                 option-value="id"
                 option-label="healthFacility"
@@ -340,7 +340,7 @@
                 label="Cancelar"
                 class="float-right"
                 color="red"
-                to="/mentorados"
+                @click="cancel()"
               />
               <q-btn
                 class="float-right q-ml-md"
@@ -358,7 +358,7 @@
 </template>
 <script setup>
 import { inject, ref, computed, onMounted } from 'vue';
-import Mentorados from 'src/stores/model/mentorados/Mentorados';
+import Mentees from 'src/stores/model/mentees/Mentees';
 import Employee from 'src/stores/model/employee/Employee';
 import provinceService from 'src/services/api/province/provinceService';
 import districtService from 'src/services/api/district/districtService';
@@ -367,14 +367,13 @@ import professionalCategoryService from 'src/services/api/professionalcategory/p
 import Location from 'src/stores/model/location/Location';
 import { useStringUtils } from 'src/composables/shared/stringutils/stringUtils';
 import partnerService from 'src/services/api/partner/partnerService';
-import userMentorados from 'src/composables/mentorados/mentoradosMethods';
-import mentoradosService from 'src/services/api/mentorados/mentoradosService';
+import userMentees from 'src/composables/mentees/menteesMethods';
+import menteesService from 'src/services/api/mentees/menteesService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { useRouter, useRoute } from 'vue-router';
-import mentorService from 'src/services/api/mentor/mentorService';
 
-const mentorado = ref(
-  new Mentorados({
+const mentee = ref(
+  new Mentees({
     employee: new Employee({
       locations: [
         {
@@ -385,17 +384,17 @@ const mentorado = ref(
   })
 );
 
-const emit = defineEmits(['Mentorados', 'close']);
+const emit = defineEmits(['editMentees', 'close']);
 
-const { createDTOFromMentorado } = userMentorados();
+const { createDTOFromMentees } = userMentees();
 const { stringContains } = useStringUtils();
 const { alertSucess, alertError, alertSucessAction } = useSwal();
 const filterRedDistricts = ref([]);
 const filterRedHealthFacilities = ref([]);
 const filterRedCategories = ref([]);
 const filterRedPartners = ref([]);
-const selectedMentoradoLaborInfo = ref('');
-const mentoradoLaborInfo = ref(['SNS', 'ONG']);
+const selectedMenteeLaborInfo = ref('');
+const menteeLaborInfo = ref(['SNS', 'ONG']);
 const location = ref(new Location());
 
 //Ref's
@@ -412,23 +411,23 @@ const provinceRef = ref(null);
 const districtRef = ref(null);
 const hfRef = ref(null);
 
-const route = useRoute();
 const router = useRouter();
 
 onMounted(() => {
-  if (route.params.id) {
-    mentorado.value = mentoradosService.getById(route.params.id);
-    console.log(mentorado.value);
-  }
+  // const selectedMentee = inject('selectedMentee');
 });
+
+const selectedMentee = inject('selectedMentee');
+const step = inject('step');
+mentee.value = menteesService.getById(selectedMentee.value.id);
 
 const provinces = computed(() => {
   provinceService.getAll();
   return provinceService.piniaGetAll();
 });
 
-const isPartnerMentorado = computed(() => {
-  return selectedMentoradoLaborInfo.value === 'ONG';
+const isPartnerMentee = computed(() => {
+  return selectedMenteeLaborInfo.value === 'ONG';
 });
 
 const categories = computed(() => {
@@ -437,13 +436,12 @@ const categories = computed(() => {
 
 const districts = computed(() => {
   if (
-    mentorado.value.employee.locations[0].province !== null &&
-    mentorado.value.employee.locations[0].province !== undefined
+    mentee.value.employee.locations[0].province !== null &&
+    mentee.value.employee.locations[0].province !== undefined
   ) {
     districtService.getAll();
-    console.log(districtService.getAll());
     return districtService.getAllDistrictByProvinceId(
-      mentorado.value.employee.locations[0].province.id
+      mentee.value.employee.locations[0].province.id
     );
   } else {
     return null;
@@ -482,17 +480,15 @@ const submitForm = () => {
     !districtRef.value.hasError &&
     !hfRef.value.hasError
   ) {
-    const target_copy = Object.assign({}, mentorado.value);
-    mentoradosService
-      .update(createDTOFromMentorado(new Mentorados(target_copy)))
+    const target_copy = Object.assign({}, mentee.value);
+    menteesService
+      .update(createDTOFromMentees(new Mentees(target_copy)))
       .then((resp) => {
-        alertSucessAction('Mentorado Actualizado com sucesso,').then(
-          (result) => {
-            if (result) {
-              route.push({ name: 'mentorados' });
-            }
+        alertSucess('Mentorado Actualizado com sucesso,').then((result) => {
+          if (result) {
+            cancel();
           }
-        );
+        });
       })
       .catch((error) => {
         console.log('Error', error.message);
@@ -568,12 +564,12 @@ const filterDistricts = (val, update, abort) => {
 
 const healthFacilities = computed(() => {
   if (
-    mentorado.value.employee.locations[0].district !== null &&
-    mentorado.value.employee.locations[0].district !== undefined
+    mentee.value.employee.locations[0].district !== null &&
+    mentee.value.employee.locations[0].district !== undefined
   ) {
     healthFacilityService.getAll();
     return healthFacilityService.getAllOfDistrict(
-      mentorado.value.employee.locations[0].district.id
+      mentee.value.employee.locations[0].district.id
     );
   } else {
     return null;
@@ -634,14 +630,13 @@ const filterCategories = (val, update, abort) => {
   }
 };
 
-const step = inject('step');
 const init = () => {
-  mentorado.value.employee.locations.push(location);
+  mentee.value.employee.locations.push(location);
 };
 
 const onChangeProvincia = () => {
-  mentorado.value.employee.locations[0].district = '';
-  mentorado.value.employee.locations[0].district = '';
+  mentee.value.employee.locations[0].district = '';
+  mentee.value.employee.locations[0].district = '';
 };
 const cancel = () => {
   emit('close');
@@ -649,9 +644,9 @@ const cancel = () => {
 
 const onChangeVinculo = (selected) => {
   if (selected === 'SNS') {
-    mentorado.value.employee.partner = partnerService.getByName('MISAU');
+    mentee.value.employee.partner = partnerService.getByName('MISAU');
   } else {
-    mentorado.value.employee.partner = '';
+    mentee.value.employee.partner = '';
   }
 };
 </script>

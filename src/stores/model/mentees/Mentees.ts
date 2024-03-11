@@ -1,7 +1,7 @@
 import { Model } from 'pinia-orm';
 import Employee from '../employee/Employee';
 
-export default class Mentorados extends Model {
+export default class Mentees extends Model {
   static entity = 'mentorados';
   static primaryKey = 'id';
 

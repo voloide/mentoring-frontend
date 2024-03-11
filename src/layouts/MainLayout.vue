@@ -65,7 +65,7 @@
             :active="link === 'mentorandos'"
             @click="link = 'mentorandos'"
             active-class="my-menu-link"
-            to="/mentorados"
+            to="/mentees"
             exact
           >
             <q-item-section avatar>
