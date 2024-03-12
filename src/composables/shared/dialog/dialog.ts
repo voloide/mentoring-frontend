@@ -6,7 +6,7 @@ export function useSwal() {
       title: 'Sucesso',
       text: message,
       icon: 'success',
-      // buttons: 'Aceitar',
+      buttons: 'OK',
     });
   }
 

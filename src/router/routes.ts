@@ -13,8 +13,15 @@ const routes: RouteRecordRaw[] = [
       }
     },
     children: [
-      { path: '/mentors', component: () => import('pages/Mentors/Mentors.vue') },
-      { path: '/home', component: () => import('pages/home/Home.vue') }
+      {
+        path: '/mentors',
+        component: () => import('pages/Mentors/Mentors.vue'),
+      },
+      { path: '/home', component: () => import('pages/home/Home.vue') },
+      {
+        path: '/mentees',
+        component: () => import('pages/Mentees/Mentees.vue'),
+      },
     ],
   },
   {
