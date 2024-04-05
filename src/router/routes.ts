@@ -22,6 +22,10 @@ const routes: RouteRecordRaw[] = [
         path: '/mentees',
         component: () => import('pages/Mentees/Mentees.vue'),
       },
+      {
+        path: '/tables',
+        component: () => import('pages/Forms/Forms.vue'),
+      },
     ],
   },
   {
