@@ -36,6 +36,7 @@
             :active="link === 'tables'"
             @click="link = 'tables'"
             active-class="my-menu-link"
+            to="/tables"
           >
             <q-item-section avatar>
               <q-icon name="fact_check" />
