@@ -1,12 +1,22 @@
 <template>
-  <q-card style="width: 85vw; max-width: 90vw; height: 50vw;">
-        <div class="q-ma-md page-container">
-                <div class="page-input-container q-pa-md">
-                    <div class="q-mt-lg">
-                      <div class="row items-center q-mb-md title">
-                        <span class="q-pl-sm text-subtitle2">Pesquisa de Competências</span>
-                      </div>
-                    </div>
+  <q-card style="width: 85vw; max-width: 90vw;">
+        <div class="page-container">
+          <q-banner dense inline-actions class="text-white bg-primary q-px-md">
+            Pesquisa de Competências
+            <template v-slot:action>
+              <q-btn
+                flat
+                round
+                class="q-ml-md"
+                color="red"
+                icon="close"
+                @click="showAddOrRemoveQuestions = false"
+                >
+                <q-tooltip class="bg-green-5">Pesquisa de Competências</q-tooltip>
+                </q-btn>
+            </template>
+          </q-banner>
+                <div class="page-input-container q-pa-md q-mt-lg">
                     <div class="row">
                       <q-input
                           outlined
@@ -30,7 +40,7 @@
       
                       <q-input
                           outlined
-                          label="Código da Ficha"
+                          label="Código na Ficha"
                           dense
                           ref="recordCodeRef"
                           class="col q-ml-md"
@@ -77,10 +87,6 @@
                       dense
                       outlined
                       ref="questionCategoryRef"
-                      :rules="[
-                        (val) =>
-                          !!val || 'Por favor indicar a Categoria',
-                      ]"
                       lazy-rules
                       :options="filterCategories"
                       option-value="id"
@@ -120,117 +126,121 @@
                       </q-btn>
                 </div> 
                 
-                <div>
-                <q-table
-                      class="col"
+                <div class="q-mt-md">
+                  <q-table
                       dense
+                      flat
                       :rows="searchResults"
                       :columns="columns"
                       row-key="id"
                       :filter="filter">
-                  <template v-slot:no-data="{ icon, filter }">
-                      <div
-                          class="full-width row flex-center text-primary q-gutter-sm text-body2"
-                      >
+                    <template #header="props">
+                      <q-tr class="text-left bg-grey-3" :props="props">
+                        <q-th style="width: 100px;">{{ columns[0].label }}</q-th>
+                        <q-th style="width: 160px;">{{ columns[1].label }}</q-th>
+                        <q-th style="width: 160px;">{{ columns[2].label }}</q-th>
+                        <q-th style="width: 190px;">{{ columns[3].label }}</q-th>
+                        <q-th style="width: 190px;">{{ columns[4].label }}</q-th>
+                        <q-th style="width: 60px;">{{ columns[5].label }}</q-th>
+                        <q-th style="width: 70px;">{{ columns[6].label }}</q-th>
+                      </q-tr>
+                    </template>
+                    <template v-slot:no-data="{ icon, filter }">
+                      <div class="full-width row flex-center text-primary q-gutter-sm text-body2"  >
                           <span> Sem resultados para visualizar </span>
                           <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
                       </div>
-                      </template>
-                      <template #body="props">
-                          {{ console.log(props.row) }}
-                          <q-tr :props="props">
-                              <q-td key="code" :props="props">
-                                 {{ props.row.question.code }}
-                              </q-td>
-                              <q-td key="questionCategory" :props="props">
-                                {{ props.row.question.questionCategory.category }}
-                              </q-td>
-                              <q-td key="question" :props="props">
-                                {{ props.row.question.question }}
-                            </q-td>
-                              <q-td key="sequence" :props="props">
-                                <q-input 
-                                class="col q-ml-md" 
-                                ref="recodeCodeRef" 
-                                :rules="[
-                                    (val) =>
-                                      !!val || 'Por favor indicar o Codigo da Ficha',
-                                  ]"
-                                lazy-rules
-                                type="number" 
-                                :min="1">
-                              </q-input>
-                              </q-td>
-                              <q-td key="questionType">
-                                <q-select
-                        class="col q-ml-md"
-                        use-input
-                        hide-selected
-                        fill-input
-                        input-debounce="0"
-                        dense
-                        outlined
-                        ref="questionTypeRef"
-                        :rules="[
-                          (val) =>
-                            !!val || 'Por favor indicar o Tipo de Avaliação',
-                        ]"
-                        lazy-rules
-                        option-value="id"
-                        option-label="description"
-                        @filter="questionTypes"
-                        label="Tipo de Avaliação"
-                      >
-                        <template v-slot:no-option>
-                          <q-item>
-                            <q-item-section class="text-grey">
-                              Sem Resultados
-                            </q-item-section>
-                          </q-item>
-                        </template>
-                      </q-select>
-                      </q-td>
-                      <q-td key="responseType">
-                      <q-select
-                        class="col q-ml-md"
-                        use-input
-                        hide-selected
-                        fill-input
-                        input-debounce="0"
-                        dense
-                        outlined
-                        ref="responseTypeRef"
-                        :rules="[
-                          (val) =>
-                            !!val || 'Por favor indicar o Tipo de Resposta',
-                        ]"
-                        lazy-rules
-                        option-value="id"
-                        option-label="name"
-                        @filter="responseTypes"
-                        label="Tipo de Resposta"
-                      >
-                        <template v-slot:no-option>
-                          <q-item>
-                            <q-item-section class="text-grey">
-                              Sem Resultados
-                            </q-item-section>
-                          </q-item>
-                        </template>
-                      </q-select>
-                    </q-td>
-                    <q-td key="options" :props="props">
-                              <div class="col">
-                                <q-checkbox
-                                  v-model="val"
-                                  @click="addQuestion(props.row)"
-                                  >
-                                </q-checkbox>
-                              </div>
-                    </q-td>
-                    </q-tr>
                     </template>
-                  </q-table>
+                    <template #body="props">
+                            <q-tr :props="props">
+                                <q-td key="code" :props="props">
+                                  {{ props.row.question.code }}
+                                </q-td>
+                                <q-td key="questionCategory" :props="props">
+                                  {{ props.row.question.questionCategory.category }}
+                                </q-td>
+                                <q-td key="question" :props="props">
+                                 {{ props.row.question.question }}
+                                </q-td>
+                                <q-td key="sequence" :props="props">
+                                  <q-input 
+                                  outlined
+                                  dense
+                                  :disable="!props.row.selected"
+                                    v-model="props.row.sequence"
+                                  ref="recodeCodeRef" 
+                                  :rules="[
+                                      (val) =>
+                                        !!val || 'Por favor indicar o Codigo da Ficha',
+                                    ]"
+                                  lazy-rules
+                                  type="number" 
+                                  :min="1">
+                                </q-input>
+                                </q-td>
+                                <q-td key="questionType">
+                                  <q-select
+                                    use-input
+                                    hide-selected
+                                    fill-input
+                                    :disable="!props.row.selected"
+                                    dense
+                                    outlined
+                                    v-model="props.row.assessmentType"
+                                    ref="questionTypeRef"
+                                    :rules="[
+                                      (val) =>
+                                        !!val || 'Por favor indicar o Tipo de Avaliação',
+                                    ]"
+                                    lazy-rules
+                                    :options="accessmentTypes"
+                                    option-value="id"
+                                    option-label="description"
+                                    label="Tipo de Avaliação"
+                                  />
+                                </q-td>
+                        <q-td key="responseType">
+                        <q-select
+                          use-input
+                          hide-selected
+                          :disable="!props.row.selected"
+                          fill-input
+                          input-debounce="0"
+                          dense
+                          outlined
+                          v-model="props.row.anwserType"
+                          ref="responseTypeRef"
+                          :rules="[
+                            (val) =>
+                              !!val || 'Por favor indicar o Tipo de Resposta',
+                          ]"
+                          lazy-rules
+                          option-value="id"
+                          option-label="name"
+                          @filter="responseTypes"
+                          label="Tipo de Resposta"
+                        >
+                          <template v-slot:no-option>
+                            <q-item>
+                              <q-item-section class="text-grey">
+                                Sem Resultados
+                              </q-item-section>
+                            </q-item>
+                          </template>
+                        </q-select>
+                      </q-td>
+                      <q-td key="options" :props="props">
+                        <div class="col">
+                          <q-checkbox
+                            v-model="props.row.selected"
+                            @click="addQuestion(props.row)"
+                            >
+                          </q-checkbox>
+                        </div>
+                      </q-td>
+                      </q-tr>
+                      </template>
+                    </q-table>
               </div>
               
            <div class="row q-my-sm">
@@ -270,6 +280,19 @@ const addedFormQuestions = inject('addedFormQuestions');
 const removedFormQuestions = inject('removedFormQuestions');
 
 const filterRedCategories = ref([]);
+
+const accessmentTypes = ref([{
+                              id: 1,
+                              description: "Avaliação de Ficha"
+                            },
+                            {
+                              id: 2,
+                              description: "Observação de Consulta"
+                            },
+                            {
+                              id: 3,
+                              description: "Ambos"
+                            }])
 
 const formQuestion = ref(
   new FormQuestion({
@@ -387,17 +410,16 @@ const initFormData = () => {
 
 const composeFormQuestions = () => {
   questions.value.forEach((question) => {
-    const fQuestion = ref(new FormQuestion({
+    const fQuestion = new FormQuestion({
                               question: new Question({
                               questionType: new QuestionType(),
                               questionCategory: new QuestionCategory(),
                                                      }),
-                                           })
-                         );
-       fQuestion.value.question = question;
-       fQuestion.value.question.questionType = question.questionType;
-       fQuestion.value.question.questionCategory = question.questionCategory;
-       searchResults.value.push(fQuestion.value);
+                                           });
+       fQuestion.question = question;
+       fQuestion.question.questionType = question.questionType;
+       fQuestion.question.questionCategory = question.questionCategory;
+       searchResults.value.push(fQuestion);
   });
 };
 
@@ -409,7 +431,9 @@ const filterQuestions = () => {
 }
 
 const addQuestion = (formQuestion) => {
-  console.log(formQuestion);
+  const {proxy, revoke} = Proxy.revocable(formQuestion, {});
+  formQuestion.selected = !formQuestion.selected
+  proxy.selected = !proxy.selected;
 }
 
 </script>

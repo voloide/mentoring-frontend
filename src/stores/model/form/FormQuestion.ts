@@ -12,7 +12,10 @@ export default class FormQuestion extends Model {
       uuid: this.attr(''),
       mandatory: this.attr(''),
       sequence: this.attr(''),
+      assessmentType: this.attr(''),
+      anwserType: this.attr(''),
       applicable: this.attr(''),
+      selected: this.boolean(false),
       form_id: this.attr(''),
       question_id: this.attr(''),
       // Relationships
