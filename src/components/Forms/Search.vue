@@ -197,7 +197,7 @@
     </div>
 </template>
 <script setup>
-import { inject, ref, computed, onMounted } from 'vue';
+import { inject, ref, computed, onMounted, reactive } from 'vue';
 import Form from 'src/stores/model/form/Form';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
@@ -214,7 +214,7 @@ const searchParams = ref(new Form({
                         }));
 const step = inject('step');
 const searchResults = ref([]);
-const selectedForm = ref('');
+const selectedForm = reactive(ref(''));
 const isNewForm = ref(false);
 const filterRedProgrammaticAreas = ref([]);
 

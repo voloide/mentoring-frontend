@@ -239,11 +239,9 @@
                     <q-table
                         class="col"
                         dense
-                        :rows="searchResults"
+                        :rows="form.formQuestions"
                         :columns="columns"
-                        row-key="id"
-                        :filter="filter"
-                        :key="tableKey"
+                        row-key="uuid"
                     >
                     <template v-slot:no-data="{ icon, filter }">
                         <div
@@ -261,8 +259,8 @@
                                 <q-td key="code" :props="props">
                                     {{ props.row.question.code }}
                                 </q-td>
-                                <q-td key="questionType" :props="props">
-                                    {{ props.row.question.questionType.description }}
+                                <q-td key="evaluationType" :props="props">
+                                    {{ props.row.evaluationType.description }}
                                 </q-td>
                                 <q-td key="questionCategory" :props="props">
                                   {{ props.row.question.questionCategory.category }}
@@ -300,7 +298,7 @@
                   <q-btn
                     class="float-right q-ml-md"
                     type="submit"
-                    :loading="submitLoading"
+                    :loading="submitLoading()"
                     label="Terminar"
                     color="primary"
                     @click="saveOrUpdate(form)"
@@ -317,8 +315,13 @@
     </q-dialog>
 </template>
 <script setup>
-import { inject, ref, computed, onMounted, provide } from 'vue';
+import { inject, ref, computed, onMounted, provide, reactive } from 'vue';
 import Form from 'src/stores/model/form/Form';
+import FormQuestion from 'src/stores/model/form/FormQuestion';
+import Question from 'src/stores/model/question/Question';
+import QuestionCategory from 'src/stores/model/question/QuestionCategory';
+import EvaluationType from 'src/stores/model/question/EvaluationType';
+import ResponseType from 'src/stores/model/question/ResponseType';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
 import User from 'src/stores/model/user/User';
@@ -327,16 +330,17 @@ import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';
 import formQuestionService from 'src/services/api/form/formQuestionService';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
 import AddOrRemoveQuestions from './AddOrRemoveQuestions.vue';
 
-const form = ref(
+const form = reactive(ref(
   new Form({
     programmaticArea: new ProgrammaticArea({
           program: new Program(),
     }),
   })
-);
+));
 
 const step = inject('step');
 const filterRedProgrammaticAreas = ref([]);
@@ -354,15 +358,18 @@ const targetFileRef = ref(null);
 const isFormDataVisible = ref(false);
 const isFormQuestionsDataVisible = ref(false);
 const showAddOrRemoveQuestions = ref(false);
-const tableKey = ref(0);
 
 const searchResults = ref([]);
 
-const existingFormQuestions = ref([]);
+const addedFormQuestions = reactive(ref(new FormQuestion({
+                              question: new Question({
+                              questionCategory: new QuestionCategory(),
+                         }),
+                         evaluationType: new EvaluationType(),
+                         responseType: new ResponseType(),
+                        })));
 
-const addedFormQuestions = ref([]);
-
-const removedFormQuestions = ref([]);
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 
 const columns = [
   {
@@ -380,10 +387,10 @@ const columns = [
     sortable: false,
   },
   {
-    name: 'questionType',
+    name: 'evaluationType',
     align: 'left',
     label: 'Tipo de Avaliação',
-    field: (row) => (row.question.questionType),
+    field: (row) => (row.evaluationType),
     sortable: false,
   },
   {
@@ -417,8 +424,6 @@ const initFormData = () => {
     form.value = formService.getById(selectedForm.value.id);
    }
    selectedForm.value = null;
-   removedFormQuestions.value = [];
-   removedFormQuestions.value = [];
    isFormDataVisible.value = true;
    isFormQuestionsDataVisible.value = false;
 };
@@ -426,6 +431,10 @@ const initFormData = () => {
 const programs = computed(() => {
   return programService.piniaGetAll();
 });
+
+const submitLoading = () => {
+  searchResults.value = form.value.formQuestions;
+}
 
 const programmaticAreas = computed(() => {
   if (
@@ -467,6 +476,7 @@ const filterProgrammaticAreas = (val, update, abort) => {
 };
 
 const cancel = () => {
+  addedFormQuestions.value = null;
   selectedForm.value = null;
   isNewForm.value = true;
   emit('close');
@@ -504,42 +514,67 @@ const searchFormQuestions = (form) => {
     }
     Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
     formQuestionService.search(params).then((response) => {
-    searchResults.value = response.data;
-    form.formQuestions = searchResults.value;
+    addedFormQuestions.value = response.data;
+    addedFormQuestions.value.forEach((fQ) => {
+      form.formQuestions.push(fQ);
+    });
     }).catch((error) => {
         console.log(error);
       });
 };
 
 const removeFormQuestions = (formQuestion) => {
-  const results = searchResults.value.filter((fQ) => {
-    if(fQ.id === formQuestion.id) {
-      removedFormQuestions.value.push(formQuestion);
+  alertWarningAction(
+          'Tem certeza que deseja remover esta competência?'
+        ).then((result) => {
+          if (result) {
+            if(formQuestion.id === null) {
+    form.value.formQuestions.pop(formQuestion);
+  } else {
+  const params = {
+        userId: currUser.value.id,
+        formId: form.value.id
     }
+  Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
+  formQuestionService.remove(params, formQuestion).then((resp) => {
+        alertSucess('Competência removida com sucesso!');
+  }).catch((error) => {
+        console.log(error);
+        alertError(
+          'Ocorreu um erro ao remover esta competência!'
+        );
+        return;
+  });
+  const results = form.value.formQuestions.filter((fQ) => {
     return fQ.id !== formQuestion.id;
   });
-  console.log(removedFormQuestions.value);
-  searchResults.value = results;
+  form.value.formQuestions = results;
+}
+          }
+        });
 };
 
 const saveOrUpdate = (form) => {
-  const params = {
+    const params = {
         userId: currUser.value.id
     }
     Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
-    form.addedFormQuestionDTOs = addedFormQuestions;
-    form.removedFormQuestionDTOs = removedFormQuestions;
-    formService.saveOrUpdate(params, form).then((response) => {
-            //form.value = response.data;
+    alertWarningAction(
+          'Tem certeza que deseja guardar as alterações?'
+        ).then((result) => {
+          if (result) {
+    formService.saveOrUpdate(form).then((response) => {
             searchResults.value = form.formQuestions;
             }).catch((error) => {
                  console.log(error);
              });
+    alertSucess('Tabela de Competência registada com sucesso!');
+            }});
 }
 
 provide('showAddOrRemoveQuestions', showAddOrRemoveQuestions);
 provide('addedFormQuestions', addedFormQuestions);
-provide('removedFormQuestions', removedFormQuestions);
+provide('searchResults', searchResults);
 provide('selectedForm', form);
 
 </script>
@@ -547,4 +582,4 @@ provide('selectedForm', form);
     .title {
         background-color: $primary;
     }
-</style>
+</style>src/stores/model/question/EvaluationType

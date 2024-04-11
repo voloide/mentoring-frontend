@@ -18,13 +18,13 @@ export default {
             console.log('Error', error.message);
           });
       },
-      async saveOrUpdate(searchParam: string, formDTO: any) {
-        let resp = null;
-        console.log(searchParam);
-        console.log(formDTO);
+      async saveOrUpdate(formDTO: any) {
+          let resp = null;
           resp = await api()
-          .post(`/forms/saveOrUpdate?${new URLSearchParams(searchParam).toString()}`, formDTO)
+          .post(`/forms/saveOrUpdate`, formDTO)
           .then((resp) => {
+            this.generateAndSaveEntityFromDTO(resp.data);
+            this.update(formDTO);
             return resp;
           })
           .catch((error) => {
@@ -58,5 +58,8 @@ export default {
                       .where('id', id)
                       .orderBy('id', 'asc')
                       .first();
-      }
+      },
+      update(form: any) {
+        repo.save(form);
+      },
 }

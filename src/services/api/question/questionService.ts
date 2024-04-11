@@ -7,9 +7,9 @@ const repo = useRepo(Question);
 const { createQuestionFromDTO } = useQuestion();
 
 export default {
-  async getAll() {
+  async search(searchParam: string) {
     return await api()
-      .get('/questions/getAll')
+      .get(`/questions/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;

@@ -9,13 +9,15 @@ export default class Form extends Model {
 
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       code: this.attr(''),
       description: this.attr(''),
       name: this.attr(''),
       targetPatient: this.attr(''),
       targetFile: this.attr(''),
+      createdBy: this.attr(null),
+      createdAt: this.attr(null),
       programmatic_area_id: this.attr(''),
       partner_id: this.attr(''),
       // Relationships

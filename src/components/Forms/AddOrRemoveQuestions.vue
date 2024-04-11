@@ -74,6 +74,7 @@
                       hide-selected
                       fill-input
                       input-debounce="0"
+                      v-model="searchParams.question.questionCategory"
                       dense
                       outlined
                       ref="questionCategoryRef"
@@ -82,10 +83,10 @@
                           !!val || 'Por favor indicar a Categoria',
                       ]"
                       lazy-rules
-                      :options="filterCategories"
+                      :options="filterRedCategories"
                       option-value="id"
                       option-label="category"
-                      @filter="filterRedCategories"
+                      @filter="filterCategories"
                       label="Categoria"
                     >
                       <template v-slot:no-option>
@@ -100,7 +101,7 @@
                       <q-space />
                       <q-btn
                          
-                          @click="filterQuestions()"
+                          @click="searchQuestions()"
                           class="q-ml-md q-mb-xs float-right"
                           square
                           color="primary"
@@ -126,8 +127,7 @@
                       dense
                       :rows="searchResults"
                       :columns="columns"
-                      row-key="id"
-                      :filter="filter">
+                      row-key="id">
                   <template v-slot:no-data="{ icon, filter }">
                       <div
                           class="full-width row flex-center text-primary q-gutter-sm text-body2"
@@ -137,7 +137,6 @@
                       </div>
                       </template>
                       <template #body="props">
-                          {{ console.log(props.row) }}
                           <q-tr :props="props">
                               <q-td key="code" :props="props">
                                  {{ props.row.question.code }}
@@ -151,17 +150,19 @@
                               <q-td key="sequence" :props="props">
                                 <q-input 
                                 class="col q-ml-md" 
-                                ref="recodeCodeRef" 
+                                ref="recodeCodeRef"
+                                v-model="props.row.sequence" 
                                 :rules="[
                                     (val) =>
                                       !!val || 'Por favor indicar o Codigo da Ficha',
                                   ]"
                                 lazy-rules
+                                @update:model-value="val => updateSequence(props.row, val)" 
                                 type="number" 
                                 :min="1">
                               </q-input>
                               </q-td>
-                              <q-td key="questionType">
+                              <q-td key="evaluationType">
                                 <q-select
                         class="col q-ml-md"
                         use-input
@@ -170,7 +171,8 @@
                         input-debounce="0"
                         dense
                         outlined
-                        ref="questionTypeRef"
+                        ref="evaluationTypeRef"
+                        v-model="props.row.evaluationType" 
                         :rules="[
                           (val) =>
                             !!val || 'Por favor indicar o Tipo de Avaliação',
@@ -178,7 +180,8 @@
                         lazy-rules
                         option-value="id"
                         option-label="description"
-                        @filter="questionTypes"
+                        :options="evaluationTypes"
+                        @update:model-value="val => updateEvaluationType(props.row, val)" 
                         label="Tipo de Avaliação"
                       >
                         <template v-slot:no-option>
@@ -200,14 +203,16 @@
                         dense
                         outlined
                         ref="responseTypeRef"
+                        v-model="props.row.responseType" 
                         :rules="[
                           (val) =>
                             !!val || 'Por favor indicar o Tipo de Resposta',
                         ]"
                         lazy-rules
                         option-value="id"
-                        option-label="name"
-                        @filter="responseTypes"
+                        option-label="description"
+                        :options="responseTypes"
+                        @update:model-value="val => updateResponseType(props.row, val)" 
                         label="Tipo de Resposta"
                       >
                         <template v-slot:no-option>
@@ -221,11 +226,7 @@
                     </q-td>
                     <q-td key="options" :props="props">
                               <div class="col">
-                                <q-checkbox
-                                  v-model="val"
-                                  @click="addQuestion(props.row)"
-                                  >
-                                </q-checkbox>
+                              <q-checkbox  v-model="props.row.selected"  @click="val => addQuestion(props.row)"/>
                               </div>
                     </q-td>
                     </q-tr>
@@ -246,6 +247,7 @@
                   type="submit"
                   label="Adicionar Seleccionadas"
                   color="primary"
+                  @click="addSelectedQuestions()"
                 />
               </div>
           </div>
@@ -253,45 +255,48 @@
   </q-card>
 </template>
 <script setup>
-import { inject, ref, computed, onMounted } from 'vue';
+import { inject, ref, computed, onMounted, provide } from 'vue';
 import FormQuestion from 'src/stores/model/form/FormQuestion';
 import Question from 'src/stores/model/question/Question';
 import QuestionCategory from 'src/stores/model/question/QuestionCategory';
-import QuestionType from 'src/stores/model/question/QuestionType';
+import ResponseType from 'src/stores/model/question/ResponseType';
+import EvaluationType from 'src/stores/model/question/EvaluationType';
 import questionService from 'src/services/api/question/questionService';
 import questionCategoryService from 'src/services/api/question/questionCategoryService';
 import responseTypeService from 'src/services/api/question/responseTypeService';
-import questionTypeService from 'src/services/api/question/questionTypeService';
+import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
 const showAddOrRemoveQuestions = inject('showAddOrRemoveQuestions');
 
+import { v4 as uuid } from 'uuid';
+
 const selectedForm = inject('selectedForm');
-const addedFormQuestions = inject('addedFormQuestions');
-const removedFormQuestions = inject('removedFormQuestions');
 
 const filterRedCategories = ref([]);
+
+const { alertError } = useSwal();
 
 const formQuestion = ref(
   new FormQuestion({
     question: new Question({
-      questionType: new QuestionType(),
       questionCategory: new QuestionCategory(),
     }),
+    evaluationType: new EvaluationType(),
+    responseType: new ResponseType(),
   })
 );
 
 const searchParams = ref(new FormQuestion({
                               question: new Question({
-                              questionType: new QuestionType(),
                               questionCategory: new QuestionCategory(),
                          }),
+                         evaluationType: new EvaluationType(),
                         }));
 
 const searchResults = ref([]);
 
-const questions = computed(() => {
-  return questionService.piniaGetAll();
-});
+const addedFormQuestions = ref([]);
 
 const categories = computed(() => {
   return questionCategoryService.piniaGetAll();
@@ -301,8 +306,8 @@ const responseTypes = computed(() => {
   return responseTypeService.piniaGetAll();
 });
 
-const questionTypes = computed(() => {
-  return questionTypeService.piniaGetAll();
+const evaluationTypes = computed(() => {
+  return evaluationTypeService.piniaGetAll();
 });
 
 const filterCategories = (val, update, abort) => {
@@ -330,6 +335,20 @@ const filterCategories = (val, update, abort) => {
     });
   }
 };
+
+const searchQuestions = () => {
+  const params = {
+        code: searchParams.value.question.code,
+        description: searchParams.value.question.question,
+        categoryId: searchParams.value.question.questionCategory.id === undefined? undefined: searchParams.value.question.questionCategory.id
+    }
+    Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
+    questionService.search(params).then((response) => {
+    composeFormQuestions(response.data);
+    }).catch((error) => {
+        console.log(error);
+      });
+}
 
 const columns = [
   {
@@ -361,55 +380,85 @@ const columns = [
     sortable: false,
   },
   {
-    name: 'questionType',
+    name: 'evaluationType',
     align: 'left',
     label: 'Tipo de Avaliação',
-    field: (row) => (row.question.questionType),
+    field: (row) => (row.evaluationType),
     sortable: false,
   },
   {
     name: 'responseType',
     align: 'left',
     label: 'Tipo de Resposta',
-    field: (row) => (row.question.responseType),
+    field: (row) => (row.responseType),
     sortable: false,
   },
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-onMounted(() => {
-  initFormData();
-});
-
-const initFormData = () => {
-   composeFormQuestions();
-};
-
-const composeFormQuestions = () => {
-  questions.value.forEach((question) => {
+const composeFormQuestions = (questions) => {
+  questions.forEach((question) => {
+    let myUUID = uuid();
     const fQuestion = ref(new FormQuestion({
                               question: new Question({
-                              questionType: new QuestionType(),
                               questionCategory: new QuestionCategory(),
                                                      }),
+                              evaluationType: new EvaluationType(),
+                              responseType: new ResponseType(),
                                            })
                          );
+       fQuestion.value.uuid = myUUID;
        fQuestion.value.question = question;
-       fQuestion.value.question.questionType = question.questionType;
        fQuestion.value.question.questionCategory = question.questionCategory;
        searchResults.value.push(fQuestion.value);
   });
 };
 
-const filterQuestions = () => {
-  if(!searchParams.value.question.question) {
-    console.log(searchParams.value.question.question);
-  }
-  console.log(``);
+const updateSequence = (formQuestion, selectedValue) => {
+  formQuestion.sequence = selectedValue;
+}
+
+const updateEvaluationType = (formQuestion, selectedValue) => {
+  formQuestion.evaluationType = selectedValue;
+}
+
+const updateResponseType = (formQuestion, selectedValue) => {
+  formQuestion.responseType = selectedValue;
 }
 
 const addQuestion = (formQuestion) => {
-  console.log(formQuestion);
+  const exists = addedFormQuestions.value.filter(val => val === formQuestion).length > 0;
+  if(exists) {
+    addedFormQuestions.value.pop(formQuestion);
+    selectedForm.value.formQuestions.pop(formQuestion);
+  } else {
+    addedFormQuestions.value.push(formQuestion);
+    selectedForm.value.formQuestions.push(formQuestion);
+  }
+}
+
+const addSelectedQuestions = () => {
+  addedFormQuestions.value.forEach((formQuestion) => {
+    if(formQuestion.sequence===undefined || formQuestion.sequence==='') {
+      alertError(
+          'Indique a Sequência!'
+        );
+        return;
+  }
+  if(formQuestion.evaluationType === undefined || formQuestion.evaluationType === null) {
+      alertError(
+          'Indique o Tipo de Avaliação!'
+        );
+        return;
+  }
+  if(formQuestion.responseType === undefined || formQuestion.responseType === null) {
+      alertError(
+          'Indique o Tipo de Resposta!'
+        );
+        return;
+  }
+  });
+  showAddOrRemoveQuestions.value = false;
 }
 
 </script>
@@ -417,4 +466,4 @@ const addQuestion = (formQuestion) => {
     .title {
         background-color: $primary;
     }
-</style>
+</style>src/stores/model/question/EvaluationType

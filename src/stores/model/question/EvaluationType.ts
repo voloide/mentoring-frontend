@@ -1,7 +1,7 @@
 import { Model } from 'pinia-orm';
 
-export default class QuestionType extends Model {
-  static entity = 'question_type';
+export default class EvaluationType extends Model {
+  static entity = 'evaluation_type';
   static primaryKey = 'id';
 
   static fields() {
