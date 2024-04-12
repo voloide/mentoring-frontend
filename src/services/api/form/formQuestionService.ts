@@ -44,5 +44,19 @@ export default {
                       .where('id', id)
                       .orderBy('id', 'asc')
                       .first();
-      }
+      },
+      async remove(searchParam: string, formQuestion: any) {
+        return await api()
+          .patch(`/formQuestions/remove?${new URLSearchParams(searchParam).toString()}`, formQuestion)
+          .then((resp) => {
+            this.update(formQuestion);
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+      },
+      update(formQuestion: any) {
+        repo.save(formQuestion);
+      },
 }
