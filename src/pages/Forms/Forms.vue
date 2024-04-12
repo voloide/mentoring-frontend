@@ -13,8 +13,7 @@ import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import questionCategoryService from 'src/services/api/question/questionCategoryService';
 import responseTypeService from 'src/services/api/question/responseTypeService';
-import questionTypeService from 'src/services/api/question/questionTypeService';
-import questionService from 'src/services/api/question/questionService';
+import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
 
 const { closeLoading, showloading } = useLoading();
 const step = ref('');
@@ -48,8 +47,7 @@ const isNewForm = ref(true);
         programmaticAreaService.getAll();
         questionCategoryService.getAll();
         responseTypeService.getAll();
-        questionTypeService.getAll();
-        questionService.getAll();
+        evaluationTypeService.getAll();
         closeLoading();
     }
     const close = () => {

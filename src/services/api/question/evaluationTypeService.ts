@@ -1,15 +1,15 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import QuestionType from 'src/stores/model/question/QuestionType';
-import useQuestionType from 'src/composables/question/questionTypeMethods';
+import EvaluationType from 'src/stores/model/question/EvaluationType';
+import useEvaluationType from 'src/composables/question/evaluationTypeMethods';
 
-const repo = useRepo(QuestionType);
-const { createQuestionTypeFromDTO } = useQuestionType();
+const repo = useRepo(EvaluationType);
+const { createEvaluationTypeFromDTO } = useEvaluationType();
 
 export default {
   async getAll() {
     return await api()
-      .get('/questionTypes/getAll')
+      .get('/evaluationTypes/getAll')
       .then((resp) => {
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
@@ -20,7 +20,7 @@ export default {
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto) => {
-      const entity = createQuestionTypeFromDTO(dto);
+      const entity = createEvaluationTypeFromDTO(dto);
       repo.save(entity);
     });
   },
