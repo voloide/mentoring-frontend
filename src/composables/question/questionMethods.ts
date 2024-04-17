@@ -1,9 +1,9 @@
-import Question from "src/stores/model/question/Question";
+import Question from 'src/stores/model/question/Question';
 import useQuestionCategory from './questionCategoryMethods';
 
 export default function useQuestion() {
 
-    function createQuestionFromDTO(questionDTO: any) {
+    function createQuestionFromDTO(questionDTO) {
       const { createQuestionCategoryFromDTO } = useQuestionCategory();
         return  new Question({
             id: questionDTO.id,

@@ -16,6 +16,7 @@ export default class Form extends Model {
       name: this.attr(''),
       targetPatient: this.attr(''),
       targetFile: this.attr(''),
+      lifeCycleStatus: this.attr(''),
       createdBy: this.attr(null),
       createdAt: this.attr(null),
       programmatic_area_id: this.attr(''),
@@ -26,6 +27,7 @@ export default class Form extends Model {
       formQuestions: this.hasMany(FormQuestion, 'form_id'),
     };
   }
+
   static piniaOptions = {
     persist: true,
   };

@@ -1,5 +1,5 @@
-import FormQuestion from "src/stores/model/form/FormQuestion";
-import useQuestion from "src/composables/question/questionMethods";
+import FormQuestion from 'src/stores/model/form/FormQuestion';
+import useQuestion from 'src/composables/question/questionMethods';
 import useEvaluationType from 'src/composables/question/evaluationTypeMethods';
 import useResponseType from 'src/composables/question/responseTypeMethods';
 
