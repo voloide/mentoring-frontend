@@ -210,12 +210,14 @@
         <form @submit.prevent="submitForm" ref="myForm">
             <div class="page-input-container q-pa-md">
                 <div class="q-mt-lg">
-                  <q-banner dense inline-actions class="text-white bg-primary q-px-md">
-                    Competências Associadas à Tabela de Competências
+                  <q-banner dense inline-actions class="text-white bg-primary q-px-sm">
+                    Competências Associadas à <span style="color: amber-10;">[{{ form.name }}]</span>
                     <template v-slot:action>
                       <q-btn
                         flat
                         round
+                        dense
+                        size="md"
                         class="q-ml-md"
                         color="white"
                         icon="add_circle"
@@ -231,6 +233,8 @@
                     <q-table
                         class="col"
                         dense
+                        flat
+                        wrap-cells
                         :rows="form.formQuestions"
                         :columns="columns"
                         row-key="uuid"
@@ -242,7 +246,17 @@
                             <span> Sem resultados para visualizar </span>
                             <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
                         </div>
-                        </template>
+                    </template>
+                    <template #header="props">
+                    <q-tr class="text-left bg-grey-3" :props="props">
+                      <q-th style="width: 70px">{{ columns[0].label }}</q-th>
+                      <q-th style="width: 110px">{{ columns[1].label }}</q-th>
+                      <q-th style="width: 120px">{{ columns[2].label }}</q-th>
+                      <q-th style="width: 190px">{{ columns[3].label }}</q-th>
+                      <q-th class="col">{{ columns[4].label }}</q-th>
+                      <q-th style="width: 80px">{{ columns[5].label }}</q-th>
+                    </q-tr>
+                  </template>  
                         <template #body="props">
                             <q-tr :props="props">
                                 <q-td key="sequence" :props="props">
@@ -261,25 +275,23 @@
                                     {{ props.row.question.question }}
                                 </q-td>
                                 <q-td key="options" :props="props">
-                                <div class="col">
-                                    <q-btn
+                                  <q-btn
                                     flat
                                     round
-                                    class="q-ml-md"
+                                    class=""
                                     color="red"
                                     icon="close"
                                     @click="removeFormQuestions(props.row)"
                                     >
                                     <q-tooltip class="bg-green-5">Remover a Competência</q-tooltip>
                                     </q-btn>
-                                </div>
                                 </q-td>
                             </q-tr>
                             </template>
                     </q-table>
                 </div>
                 
-             <div class="row q-my-sm">
+             <div class="row q-my-sm q-mt-lg">
                   <q-space />
                   <q-btn
                     label="Cancelar"

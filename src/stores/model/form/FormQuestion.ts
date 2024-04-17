@@ -18,6 +18,7 @@ export default class FormQuestion extends Model {
       anwserType: this.attr(''),
       applicable: this.attr(''),
       selected: this.boolean(false),
+      lifeCycleStatus: this.attr(''),
       form_id: this.attr(''),
       question_id: this.attr(''),
       evaluation_type_id: this.attr(''),

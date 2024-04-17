@@ -1,23 +1,23 @@
 <template>
   <q-card style="width: 85vw; max-width: 90vw;">
         <div class="page-container">
-          <q-banner dense inline-actions class="text-white bg-primary q-px-md">
-            Pesquisa de Competências
-            <template v-slot:action>
-              <q-btn
-                flat
-                round
-                class="q-ml-md"
-                color="red"
-                icon="close"
-                @click="showAddOrRemoveQuestions = false"
-                >
-                <q-tooltip class="bg-green-5">Pesquisa de Competências</q-tooltip>
-                </q-btn>
-            </template>
-          </q-banner>
-                <div class="page-input-container q-pa-md q-mt-lg">
-                    <div class="row">
+                <div class="">
+                  <q-banner dense inline-actions class="text-white bg-primary q-px-md">
+                    Pesquisa de Competências
+                    <template v-slot:action>
+                      <q-btn
+                        flat
+                        round
+                        class="q-ml-md"
+                        color="red"
+                        icon="close"
+                        @click="showAddOrRemoveQuestions = false"
+                        >
+                        <q-tooltip class="bg-green-5">Pesquisa de Competências</q-tooltip>
+                        </q-btn>
+                    </template>
+                  </q-banner>
+                    <div class="row q-pa-md q-mt-lg">
                       <q-input
                           outlined
                           label="Código"
@@ -40,7 +40,7 @@
       
                       <q-input
                           outlined
-                          label="Código na Ficha"
+                          label="Código da Ficha"
                           dense
                           ref="recordCodeRef"
                           class="col q-ml-md"
@@ -88,7 +88,6 @@
                       dense
                       outlined
                       ref="questionCategoryRef"
-                      lazy-rules
                       :options="filterRedCategories"
                       option-value="id"
                       option-label="category"
@@ -127,209 +126,106 @@
                       </q-btn>
                 </div> 
                 
-                <div class="q-mt-md">
-                  <q-table
-                      dense
-                      flat
-                      :rows="searchResults"
-                      :columns="columns"
-                      row-key="id">
+                <div class="q-mx-md">
+                <q-table
+                  class="col"
+                  flat
+                  dense
+                  wrap-cells
+                  :rows="searchResults"
+                  :columns="columns"
+                  row-key="id">
                   <template v-slot:no-data="{ icon, filter }">
-                      <div
-                          class="full-width row flex-center text-primary q-gutter-sm text-body2"
-                      >
-                          <span> Sem resultados para visualizar </span>
-                          <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
-                      </div>
-                      </template>
-                      <template #body="props">
-                          <q-tr :props="props">
-                              <q-td key="code" :props="props">
-                                 {{ props.row.question.code }}
-                              </q-td>
-                              <q-td key="questionCategory" :props="props">
-                                {{ props.row.question.questionCategory.category }}
-                              </q-td>
-                              <q-td key="question" :props="props">
-                                {{ props.row.question.question }}
-                            </q-td>
-                              <q-td key="sequence" :props="props">
-                                <q-input 
-                                class="col q-ml-md" 
-                                ref="recodeCodeRef"
-                                v-model="props.row.sequence" 
-                                :rules="[
-                                    (val) =>
-                                      !!val || 'Por favor indicar o Codigo da Ficha',
-                                  ]"
-                                lazy-rules
-                                @update:model-value="val => updateSequence(props.row, val)" 
-                                type="number" 
-                                :min="1">
-                              </q-input>
-                              </q-td>
-                              <q-td key="evaluationType">
-                                <q-select
-                        class="col q-ml-md"
-                        use-input
-                        hide-selected
-                        fill-input
-                        input-debounce="0"
-                        dense
-                        outlined
-                        ref="evaluationTypeRef"
-                        v-model="props.row.evaluationType" 
-                        :rules="[
-                          (val) =>
-                            !!val || 'Por favor indicar o Tipo de Avaliação',
-                        ]"
-                        lazy-rules
-                        option-value="id"
-                        option-label="description"
-                        :options="evaluationTypes"
-                        @update:model-value="val => updateEvaluationType(props.row, val)" 
-                        label="Tipo de Avaliação"
-                      >
-                        <template v-slot:no-option>
-                          <q-item>
-                            <q-item-section class="text-grey">
-                              Sem Resultados
-                            </q-item-section>
-                          </q-item>
-                        </template>
-                      </q-select>
+                    <div  class="full-width row flex-center text-primary q-gutter-sm text-body2">
+                        <span> Sem resultados para visualizar </span>
+                        <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
+                    </div>
+                  </template>
+                  
+                  <template #header="props">
+                    <q-tr class="text-left bg-grey-3" :props="props">
+                      <q-th style="width: 70px">{{ columns[0].label }}</q-th>
+                      <q-th style="width: 110px">{{ columns[1].label }}</q-th>
+                      <q-th class="col">{{ columns[2].label }}</q-th>
+                      <q-th style="width: 190px">{{ columns[3].label }}</q-th>
+                      <q-th style="width: 190px">{{ columns[4].label }}</q-th>
+                      <q-th style="width: 190px">{{ columns[5].label }}</q-th>
+                      <q-th style="width: 70px">{{ columns[6].label }}</q-th>
+                    </q-tr>
+                  </template>  
+                  <template #body="props">
+                    <q-tr :props="props">
+                      <q-td key="code" :props="props"> {{ props.row.question.code }}</q-td>
+                      <q-td key="questionCategory" :props="props">{{ props.row.question.questionCategory.category }}</q-td>
+                      <q-td key="question" :props="props">{{ props.row.question.question }}</q-td>
+                      <q-td key="sequence" :props="props">
+                        <q-input 
+                          ref="recodeCodeRef"
+                          class="vertical-middle"
+                          dense
+                          outlined
+                          :disable="!props.row.selected"
+                          v-model="props.row.sequence" 
+                          :rules="[
+                              (val) =>
+                                !!val || 'Por favor indicar a Sequência/codigo na Ficha',
+                            ]"
+                          lazy-rules
+                          type="number" 
+                          :min="1">
+                        </q-input>
+                      </q-td>
+                      <q-td key="evaluationType">
+                        <q-select
+                          class="vertical-middle"
+                          fill-input
+                          input-debounce="0"
+                          :disable="!props.row.selected"
+                          dense
+                          outlined
+                          ref="evaluationTypeRef"
+                          v-model="props.row.evaluationType" 
+                          :rules="[
+                            (val) =>
+                              !!val || 'Por favor indicar o Tipo de Avaliação',
+                          ]"
+                          lazy-rules
+                          option-value="id"
+                          option-label="description"
+                          :options="evaluationTypes"
+                        />
                       </q-td>
                       <q-td key="responseType">
-                      <q-select
-                        class="col q-ml-md"
-                        use-input
-                        hide-selected
-                        fill-input
-                        input-debounce="0"
-                        dense
-                        outlined
-                        ref="responseTypeRef"
-                        v-model="props.row.responseType" 
-                        :rules="[
-                          (val) =>
-                            !!val || 'Por favor indicar o Tipo de Resposta',
-                        ]"
-                        lazy-rules
-                        option-value="id"
-                        option-label="description"
-                        :options="responseTypes"
-                        @update:model-value="val => updateResponseType(props.row, val)" 
-                        label="Tipo de Resposta"
-                      >
-                        <template v-slot:no-option>
-                          <q-item>
-                            <q-item-section class="text-grey">
-                              Sem Resultados
-                            </q-item-section>
-                          </q-item>
-                        </template>
-                      </q-select>
-                    </q-td>
-                    <q-td key="options" :props="props">
-                              <div class="col">
-                              <q-checkbox  v-model="props.row.selected"  @click="val => addQuestion(props.row)"/>
-                              </div>
-                    </q-td>
-                    </q-tr>
-                    </template>
-                    <template #body="props">
-                            <q-tr :props="props">
-                                <q-td key="code" :props="props">
-                                  {{ props.row.question.code }}
-                                </q-td>
-                                <q-td key="questionCategory" :props="props">
-                                  {{ props.row.question.questionCategory.category }}
-                                </q-td>
-                                <q-td key="question" :props="props">
-                                 {{ props.row.question.question }}
-                                </q-td>
-                                <q-td key="sequence" :props="props">
-                                  <q-input 
-                                  outlined
-                                  dense
-                                  :disable="!props.row.selected"
-                                    v-model="props.row.sequence"
-                                  ref="recodeCodeRef" 
-                                  :rules="[
-                                      (val) =>
-                                        !!val || 'Por favor indicar o Codigo da Ficha',
-                                    ]"
-                                  lazy-rules
-                                  type="number" 
-                                  :min="1">
-                                </q-input>
-                                </q-td>
-                                <q-td key="questionType">
-                                  <q-select
-                                    use-input
-                                    hide-selected
-                                    fill-input
-                                    :disable="!props.row.selected"
-                                    dense
-                                    outlined
-                                    v-model="props.row.assessmentType"
-                                    ref="questionTypeRef"
-                                    :rules="[
-                                      (val) =>
-                                        !!val || 'Por favor indicar o Tipo de Avaliação',
-                                    ]"
-                                    lazy-rules
-                                    :options="accessmentTypes"
-                                    option-value="id"
-                                    option-label="description"
-                                    label="Tipo de Avaliação"
-                                  />
-                                </q-td>
-                        <q-td key="responseType">
                         <q-select
-                          use-input
-                          hide-selected
-                          :disable="!props.row.selected"
+                          class="vertical-middle"
                           fill-input
                           input-debounce="0"
                           dense
                           outlined
-                          v-model="props.row.anwserType"
+                          :disable="!props.row.selected"
                           ref="responseTypeRef"
+                          v-model="props.row.responseType" 
                           :rules="[
                             (val) =>
                               !!val || 'Por favor indicar o Tipo de Resposta',
                           ]"
                           lazy-rules
                           option-value="id"
-                          option-label="name"
-                          @filter="responseTypes"
-                          label="Tipo de Resposta"
-                        >
-                          <template v-slot:no-option>
-                            <q-item>
-                              <q-item-section class="text-grey">
-                                Sem Resultados
-                              </q-item-section>
-                            </q-item>
-                          </template>
-                        </q-select>
+                          option-label="description"
+                          :options="responseTypes"
+                        />
                       </q-td>
                       <q-td key="options" :props="props">
                         <div class="col">
-                          <q-checkbox
-                            v-model="props.row.selected"
-                            @click="addQuestion(props.row)"
-                            >
-                          </q-checkbox>
+                        <q-checkbox  v-model="props.row.selected"  @click="val => addQuestion(props.row)"/>
                         </div>
-                      </q-td>
-                      </q-tr>
-                      </template>
-                    </q-table>
+                    </q-td>
+                    </q-tr>
+                  </template>  
+                  </q-table>
               </div>
               
-           <div class="row q-my-sm">
+           <div class="row q-ma-md">
                 <q-space />
                 <q-btn
                   label="Cancelar"
@@ -470,7 +366,7 @@ const columns = [
   {
     name: 'sequence',
     align: 'left',
-    label: 'Sequência/Código da Ficha',
+    label: 'Sequência/Código na Ficha',
     field: (row) => (row.sequence),
     sortable: false,
   },
@@ -505,6 +401,7 @@ const composeFormQuestions = (questions) => {
        fQuestion.value.uuid = myUUID;
        fQuestion.value.question = question;
        fQuestion.value.question.questionCategory = question.questionCategory;
+       fQuestion.value.lifeCycleStatus = 'ACTIVE';
        searchResults.value.push(fQuestion.value);
   });
 };
@@ -561,4 +458,4 @@ const addSelectedQuestions = () => {
     .title {
         background-color: $primary;
     }
-</style>src/stores/model/question/EvaluationType
+</style>

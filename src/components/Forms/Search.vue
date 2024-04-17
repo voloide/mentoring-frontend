@@ -2,62 +2,18 @@
     <div class="q-pt-sm" style="height: 100%;">
         <div class="q-ma-md q-pa-md page-container">
             <div class="row">
-                <q-input
-                    outlined
-                    label="Código"
-                    dense
-                    ref="codeRef"
-                    class="col"
-                    v-model="searchParams.code"
-                    @update:model-value="(value) => (filter = value)"
-                >
-                    <template
-                    v-slot:append
-                    >
-                    <q-icon
-                        name="close"
-                        @click="searchParams.code = ''"
-                        class="cursor-pointer"
-                    />
-                    </template>
-                </q-input>
-
-                <q-input
-                    outlined
-                    label="Nome"
-                    dense
-                    ref="nameRef"
-                    class="col q-ml-md"
-                    v-model="searchParams.name"
-                    @update:model-value="(value) => (filter = value)"
-                >
-                    <template
-                    v-slot:append
-                    >
-                    <q-icon
-                        name="close"
-                        @click="searchParams.name = ''"
-                        class="cursor-pointer"
-                    />
-                    </template>
-                </q-input>
-                
-             <q-select
-                class="col q-ml-md"
+              <q-select
+                class="col"
                 use-input
                 hide-selected
                 fill-input
                 input-debounce="0"
-                @update:model-value="onChangePrograma()"
+                @update:model-value="onChangePrograma(val)"
                 dense
                 outlined
                 ref="programRef"
-                :rules="[
-                  (val) =>
-                    !!val || 'Por favor indicar o Programa',
-                ]"
                 lazy-rules
-                v-model="searchParams.programmaticArea.program"
+                v-model="searchParams.program"
                 :options="programs"
                 option-value="id"
                 option-label="name"
@@ -80,10 +36,6 @@
                 dense
                 outlined
                 ref="programmaticAreaRef"
-                :rules="[
-                  (val) =>
-                    !!val || 'Por favor indicar a Área de Mentoria',
-                ]"
                 lazy-rules
                 v-model="searchParams.programmaticArea"
                 :options="filterRedProgrammaticAreas"
@@ -100,6 +52,44 @@
                   </q-item>
                 </template>
               </q-select>
+
+                <q-input
+                    outlined
+                    label="Código"
+                    dense
+                    ref="codeRef"
+                    class="col q-ml-md"
+                    v-model="searchParams.code"
+                >
+                    <template
+                    v-slot:append
+                    >
+                    <q-icon
+                        name="close"
+                        @click="searchParams.code = ''"
+                        class="cursor-pointer"
+                    />
+                    </template>
+                </q-input>
+
+                <q-input
+                    outlined
+                    label="Nome"
+                    dense
+                    ref="nameRef"
+                    class="col q-ml-md"
+                    v-model="searchParams.name"
+                >
+                    <template
+                    v-slot:append
+                    >
+                    <q-icon
+                        name="close"
+                        @click="searchParams.name = ''"
+                        class="cursor-pointer"
+                    />
+                    </template>
+                </q-input>
                 <q-space />
                 <q-btn
                    
@@ -129,7 +119,6 @@
                 </div>
              <q-separator color="pink-13" size="1px" />
             </div>
-
             <div>
                 <q-table
                     class="col"
@@ -164,11 +153,11 @@
                                 flat
                                 round
                                 class="q-ml-md"
-                                color="green"
+                                :color='isActive(props.row) ? "green" : "red"'
                                 icon="circle"
-                                @click="activateOrInactivateForm(props.row)"
+                                @click="confirmFormLifeCycleChange(props.row)"
                                 >
-                                <q-tooltip class="bg-green-5">Activar/Inactivar Tabela de Competências</q-tooltip>
+                                <q-tooltip class="bg-green-5">{{ isActive(props.row) ? 'Inactivar Tabela de Competências' : 'Activar Tabela de Competências'}}</q-tooltip>
                                 </q-btn>
 
                                 <q-btn
@@ -206,17 +195,22 @@ import UsersService from 'src/services/api/user/UsersService';
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
+import useForm from 'src/composables/form/formMethods'
 
-const searchParams = ref(new Form({
-                         programmaticArea: new ProgrammaticArea({
-                            program: new Program(),
-                         }),
-                        }));
+const searchParams = ref({
+        code: '',
+        name: '',
+        program: new Program(),
+        programmaticArea: new ProgrammaticArea()
+});
 const step = inject('step');
 const searchResults = ref([]);
 const selectedForm = reactive(ref(''));
 const isNewForm = ref(false);
 const filterRedProgrammaticAreas = ref([]);
+const { alertError, alertSucess, alertWarningAction } = useSwal();
+const { createDTOFromForm } = useForm();
 
 const columns = [
   {
@@ -255,11 +249,11 @@ const programs = computed(() => {
 
 const programmaticAreas = computed(() => {
   if (
-    searchParams.value.programmaticArea.program !== null &&
-    searchParams.value.programmaticArea.program !== undefined
+    searchParams.value.program !== null &&
+    searchParams.value.program !== undefined
   ) {
     return programmaticAreaService.getProgrammaticAreasByProgramaId(
-      searchParams.value.programmaticArea.program.id
+      searchParams.value.program.id
     );
   } else {
     return null;
@@ -293,12 +287,50 @@ const filterProgrammaticAreas = (val, update, abort) => {
 };
 
 const onChangePrograma = () => {
-  searchParams.value.programmaticArea.program = '';
+  searchParams.value.program = '';
 };
 
-const activateOrInactivateForm = (form) => {
-    selectedForm.value = form;
-}
+
+const isActive =(form)=>{
+  return form.lifeCycleStatus === 'ACTIVE';
+};
+
+const confirmFormLifeCycleChange =(form)=> {
+  var msg = '';
+  if (form.lifeCycleStatus === 'ACTIVE') {
+    msg = 'Confirma inactivar a tabela de competências?';
+  } else {
+    msg = 'Confirma activar a tabela de competências?';
+  }
+
+  alertWarningAction(
+                      msg
+                    ).then((result) => {
+                    if (result) {
+                      changeLifeCycle(form)
+                    }
+                    });
+};
+const changeLifeCycle =(form)=> {
+  if (form.lifeCycleStatus === 'ACTIVE') {
+    form.lifeCycleStatus = 'INACTIVE'
+  } else {
+    form.lifeCycleStatus = 'ACTIVE'
+  }
+  formService.changeLifeCycleStatus(createDTOFromForm(form)).then((resp) => {
+    alertSucess('Operação efectuada com sucesso');
+    formService.update(form);
+  })
+  .catch((error) => {
+    if (form.lifeCycleStatus === 'ACTIVE') {
+      form.lifeCycleStatus = 'INACTIVE'
+    } else {
+      form.lifeCycleStatus = 'ACTIVE'
+    }
+    console.log('Error', error.message);
+    alertError('Ocorreu um erro inesperado nesta operação.');
+  });
+};
 
 const editForm = (form) => {
   selectedForm.value = form;
@@ -311,6 +343,7 @@ const search = () => {
     const params = {
         code: searchParams.value.code,
         name: searchParams.value.name,
+        program: searchParams.value.program.uuid,
         programmaticAreaCode: searchParams.value.programmaticArea.code
     }
     Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
@@ -323,7 +356,7 @@ const search = () => {
 };
 
 const clearSearchParams = () => {
-  selectedForm.value = null;
+  selectedForm= ref('');
   formService.deleteAllFromStorage();
   searchResults.value = [];
 };

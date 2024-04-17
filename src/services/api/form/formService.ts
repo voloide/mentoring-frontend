@@ -32,6 +32,18 @@ export default {
           });
           return resp;
       },
+      async changeLifeCycleStatus(formDTO: any) {
+        let resp = null;
+        resp = await api()
+        .post(`/forms/changeLifeCicleStatus`, formDTO)
+        .then((resp) => {
+          return resp;
+        })
+        .catch((error) => {
+          console.log('Error', error.message);
+        });
+        return resp;
+    },
       generateAndSaveEntityFromDTO(dtoList: any) {
         dtoList.forEach((dto) => {
           const entity = createFormFromDTO(dto);
