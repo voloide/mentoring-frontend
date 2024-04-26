@@ -26,6 +26,7 @@ export default {
         return api()
       .post('/login', params)
       .then((resp) => {
+        console.log(resp.data)
         this.convertUserFromDTO(resp.data.userInfo);
         return resp;
       })

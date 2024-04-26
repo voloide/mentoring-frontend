@@ -2,6 +2,7 @@ import Employee from 'src/stores/model/employee/Employee';
 import useProfessionalCategory from 'src/composables/professionalCategory/professionalCategoryMethods';
 import useLocation from '../location/locationMethods';
 import usePartner from '../partner/partnerMethods';
+import locationService from 'src/services/api/location/locationService';
 
 export default function useEmployee() {
   function fullName(employee: Employee) {
@@ -33,7 +34,7 @@ export default function useEmployee() {
   function createDTOFromEmployee(employee: Employee) {
     const { createDTOFromProfessionalCategory } = useProfessionalCategory();
     const { createDTOFromPartner } = usePartner();
-    console.log(employee);
+    console.log(employee.locations);
     const employeeDTO = {
       id: employee.id,
       uuid: employee.uuid,
@@ -43,12 +44,14 @@ export default function useEmployee() {
       email: employee.email,
       trainingYear: employee.trainingYear,
       phoneNumber: employee.phoneNumber,
-      locationDTOSet: createLocationDTO(employee.locations),
+      locationDTOSet: [],
+      // locationDTOSet: createLocationDTO(employee.locations),
       partnerDTO: createDTOFromPartner(employee.partner),
       professionalCategoryDTO: createDTOFromProfessionalCategory(
         employee.professionalCategory
       ),
     };
+    console.log(employeeDTO);
     return employeeDTO;
   }
 
@@ -56,7 +59,7 @@ export default function useEmployee() {
     const { createLocationFromDTO } = useLocation();
     const generatedLocations = [];
     locationDTOS.forEach((location) => {
-      generatedLocations.push(createLocationFromDTO(location));
+      generatedLocations.push((location));
     });
     return generatedLocations;
   }
@@ -65,7 +68,8 @@ export default function useEmployee() {
     const { createDTOFromLocation } = useLocation();
     const generatedLocations = [];
     locations.forEach((location) => {
-      generatedLocations.push(createDTOFromLocation(location));
+      console.log(locationService.getById(location.id))
+      generatedLocations.push(createDTOFromLocation(loccationService.getById(location.id)));
     });
     return generatedLocations;
   }

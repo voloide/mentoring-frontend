@@ -2,6 +2,7 @@ import Location from 'src/stores/model/location/Location';
 import useDistrict from '../district/districtMethods';
 import useProvince from '../province/provinceMethods';
 import useHealthFacility from '../healthFacility/healthFacility';
+import locationService from 'src/services/api/location/locationService';
 
 export default function useLocation() {
   function createLocationFromDTO(locationDTO: any) {

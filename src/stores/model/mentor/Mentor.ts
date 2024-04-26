@@ -1,5 +1,7 @@
 import { Model } from 'pinia-orm';
 import Employee from '../employee/Employee';
+import ProgrammaticArea from '../programmaticArea/ProgrammaticArea';
+import TutorProgrammaticArea from '../TutorProgrammaticArea/TutorProgrammaticArea';
 
 export default class Mentor extends Model {
   static entity = 'mentores';
@@ -12,6 +14,7 @@ export default class Mentor extends Model {
       employee_id: this.attr(''),
       // Relationships
       employee: this.belongsTo(Employee, 'employee_id'),
+      tutorProgrammaticAreas: this.hasMany(TutorProgrammaticArea, 'mentor_id')
     };
   }
 

@@ -14,6 +14,7 @@ export default {
         return await api()
            .get(`/mentor/search?${new URLSearchParams(searchParam).toString()}`)
           .then((resp) => {
+            console.log(resp.data)
             this.generateAndSaveMentorsFromDTO(resp.data);
             return resp;
           })
