@@ -34,7 +34,6 @@ export default function useEmployee() {
   function createDTOFromEmployee(employee: Employee) {
     const { createDTOFromProfessionalCategory } = useProfessionalCategory();
     const { createDTOFromPartner } = usePartner();
-    console.log(employee.locations);
     const employeeDTO = {
       id: employee.id,
       uuid: employee.uuid,
@@ -51,7 +50,6 @@ export default function useEmployee() {
         employee.professionalCategory
       ),
     };
-    console.log(employeeDTO);
     return employeeDTO;
   }
 
@@ -68,8 +66,7 @@ export default function useEmployee() {
     const { createDTOFromLocation } = useLocation();
     const generatedLocations = [];
     locations.forEach((location) => {
-      console.log(locationService.getById(location.id))
-      generatedLocations.push(createDTOFromLocation(loccationService.getById(location.id)));
+      generatedLocations.push(createDTOFromLocation(locationService.getById(location.id)));
     });
     return generatedLocations;
   }

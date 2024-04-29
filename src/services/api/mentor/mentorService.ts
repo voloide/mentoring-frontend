@@ -14,7 +14,6 @@ export default {
         return await api()
            .get(`/mentor/search?${new URLSearchParams(searchParam).toString()}`)
           .then((resp) => {
-            console.log(resp.data)
             this.generateAndSaveMentorsFromDTO(resp.data);
             return resp;
           })
@@ -34,7 +33,7 @@ export default {
           });
       },
       generateAndSaveMentorsFromDTO(mentorList: any) {
-        mentorList.forEach(mentorDTO => {
+        mentorList.forEach((mentorDTO: any) => {
           const mentor = createMentorFromDTO(mentorDTO)
           mentorRepo.save(mentor);
         });

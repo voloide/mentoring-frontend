@@ -9,14 +9,14 @@
             </div>
             <q-space></q-space>
             <div class="text-right col-2">
-              <q-btn class="btn-associar" size="sm" @click="adicionarNovaLinha" dense round color="secondary" icon="add"></q-btn>                    
+              <q-btn class="btn-associar" size="sm" @click="adicionarNovaLinha" dense round color="secondary" icon="add"></q-btn>
             </div>
           </div>
         </q-banner>
       </div>
 
       <div class="page-input-container q-pa-md">
-        <div class="q-mt-lg"> 
+        <div class="q-mt-lg">
           <q-table
             :rows="mentorProgrammaticAreas"
             :columns="columns"
@@ -78,7 +78,7 @@
                         class="q-ml-md"
                         color="green-8"
                         icon="done"
-                        @click="salvarNovaLinha(props.row)"                        
+                        @click="salvarNovaLinha(props.row)"
                       >
                         <q-tooltip class="bg-green-5">Gravar</q-tooltip>
                       </q-btn>
@@ -97,14 +97,14 @@
                   <span v-else>
                     <div class="col">
                       <q-btn
-                        flat
-                        round
-                        class="q-ml-md"
-                        color="red-8"
-                        icon="delete"
-                        @click="editMentor(props.row)"
+                              flats
+                              round
+                              dense
+                              :color='isActive(props.row) ? "green" : "red"'
+                              icon="circle"
+                              @click="confirmFormLifeCycleChange(props.row)"
                       >
-                        <q-tooltip class="bg-red-5">Desassociar</q-tooltip>
+                        <q-tooltip class="bg-green-5">{{ isActive(props.row) ? 'Inactivar Área Programática' : 'Activar Área Programática'}}</q-tooltip>
                       </q-btn>
                     </div>
                   </span>
@@ -112,7 +112,7 @@
               </q-tr>
             </template>
           </q-table>
-        </div>            
+        </div>
       </div>
     </div>
   </div>
@@ -126,9 +126,12 @@ import programmaticAreaService from 'src/services/api/programmaticArea/programma
 import mentorService from 'src/services/api/mentor/mentorService';
 import { onMounted, ref, inject } from 'vue'
 import User from 'src/stores/model/user/User'
-// import useSwal from 'src/composables/shared/dialog/dialog'
+import useTutorProgrammaticArea from 'src/composables/tutorProgrammaticArea/tutorProgrammaticAreaMethods';
+import {useSwal} from 'src/composables/shared/dialog/dialog';
 
-// const {alertInfo} = useSwal()
+const { alertError, alertSucess, alertWarningAction } = useSwal();
+
+const { createDTOFromTutorProgrammaticArea } = useTutorProgrammaticArea()
 
 const selectedMentor = inject('selectedMentor');
 const currUser = ref(new User())
@@ -158,20 +161,19 @@ const programaticAreas = ref([])
 const newAreaBeingAdded = ref(false)
 
 const adicionarNovaLinha = () => {
-  console.log(newAreaBeingAdded.value)
   if(!newAreaBeingAdded.value){
     newAreaBeingAdded.value = true
     const novaLinha = {
-      id: null, 
-      programmaticArea: { 
+      id: null,
+      programmaticArea: {
         program: null,
         description: null,
       },
-      acao: 'ID_DA_NOVA_LINHA',
+      acao: 'NOVA_LINHA',
     };
-    mentorProgrammaticAreas.value.push(novaLinha);
+    mentorProgrammaticAreas.value.unshift(novaLinha);
   } else {
-    console.log('Há uma área sendo associado.')
+    alertError('Há uma área sendo associado.')
   }
 };
 
@@ -189,43 +191,86 @@ const salvarNovaLinha = (row) => {
     );
 
     if (!alreadyExists) {
-      // Criar um novo TutorProgrammaticArea (mentor_id, prgrammaticArea_id)
-      console.log(selectedMentor.value.id, '-',row.programmaticArea.id)
       const newTutorProgramaticArea = TutorProgrammaticAreaService.createNewTutorProgrammaticArea(selectedMentor.value.id,row.programmaticArea.id)
-      
-      TutorProgrammaticAreaService.save(newTutorProgramaticArea)
-      
+
+      TutorProgrammaticAreaService.save(newTutorProgramaticArea, selectedMentor.value).then((resp) => {
+        selectedMentor.value = mentorService.getById(selectedMentor.value.id)
+        mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas.map((item, index) => ({
+          id: item.id,
+          programmaticArea: item.programmaticArea,
+          acao: item.id,
+          lifeCycleStatus: item.lifeCycleStatus
+        }));
+      })
+
       removerLinha(row);
-      
-      console.log('Selecione uma área diferente.');
+
+      alertSucess('Área associada ao Mentor.');
     } else {
-      console.log('Área já selecionada pelo mentor.');
+      alertError('Área já associada ao mentor.');
     }
   } else {
-    console.log('Selecione uma area')
+      alertError('Selecione uma Área a ser associada ao mentor.');
   }
+};
+
+const isActive =(tpa)=>{
+    return tpa.lifeCycleStatus === 'ACTIVE';
 };
 
 const updateAreas = (row) => {
   const selectedProgramId = row.programmaticArea.program_id;
   const filteredAreas = programaticAreas.value.filter(area => area.program_id === selectedProgramId);
-  row.programmaticArea.id = null; // Limpa a área selecionada ao trocar de programa
+  row.programmaticArea.id = null;
   row.programmaticArea.areas = filteredAreas;
 };
 
 const getFilteredAreas = (selectedProgramId) => {
-  // Retorna as áreas programáticas filtradas com base no programa selecionado
   return programaticAreas.value.filter(area => area.program_id === selectedProgramId);
 };
 
-onMounted(() => {  
+const confirmFormLifeCycleChange = (tutorProgrammaticArea) => {
+    var msg = '';
+    if (tutorProgrammaticArea.lifeCycleStatus === 'ACTIVE') {
+        msg = 'Confirma inactivar a área programática?';
+    } else {
+        msg = 'Confirma activar a área programática?';
+    }
+
+    alertWarningAction(
+        msg
+    ).then((result) => {
+        if (result) {
+            const tpa = selectedMentor.value.tutorProgrammaticAreas.find(item => item.id === tutorProgrammaticArea.id);
+
+            if (tpa.lifeCycleStatus === 'ACTIVE') {
+                tpa.lifeCycleStatus = 'INACTIVE'
+            } else {
+                tpa.lifeCycleStatus = 'ACTIVE'
+            }
+
+            TutorProgrammaticAreaService.changeLifeCycleStatus(createDTOFromTutorProgrammaticArea(tpa), selectedMentor.value).then((resp) => {
+                selectedMentor.value = mentorService.getById(selectedMentor.value.id)
+                mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas.map((item, index) => ({
+                    id: item.id,
+                    programmaticArea: item.programmaticArea,
+                    acao: item.id,
+                    lifeCycleStatus: item.lifeCycleStatus
+                }));
+            })
+        }
+    });
+}
+
+onMounted(() => {
   programs.value = programService.getProgramList()
   programaticAreas.value = programmaticAreaService.piniaGetAll()
-  mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas ? 
+  mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas ?
     selectedMentor.value.tutorProgrammaticAreas.map((item, index) => ({
-      id: index + 1,
+      id: item.id,
       programmaticArea: item.programmaticArea,
       acao: item.id,
+      lifeCycleStatus: item.lifeCycleStatus
     })) : [];
   currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });

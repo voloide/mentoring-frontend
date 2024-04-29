@@ -2,7 +2,7 @@ import Program from "src/stores/model/program/Program";
 import useProgramaticArea from '../programmaticArea/programmaticAreaMethods'
 
 export default function useProgram() {
-    
+
     function createProgramFromDTO(programDTO: any) {
       return  new Program({
           id: programDTO.id,
@@ -10,10 +10,10 @@ export default function useProgram() {
           name: programDTO.name,
           description: programDTO.description,
         })
-    } 
+    }
 
-    function createDTOFromProgram(program: Program) {
-        const programDTO = { 
+    function createDTOFromProgram(program: Program | null) {
+        const programDTO = {
           id: program.id,
           uuid: program.uuid,
           name: program.name,
@@ -30,7 +30,7 @@ export default function useProgram() {
         generatedProgrammaticAreas.push(createDTOFromProgrammaticArea(programmaticArea));
       });
       return generatedProgrammaticAreas;
-    }  
+    }
 
     return {
       createProgramFromDTO,

@@ -3,6 +3,8 @@ import useProgrammaticArea from '../programmaticArea/programmaticAreaMethods';
 import useTutorProgrammaticArea from '../tutorProgrammaticArea/tutorProgrammaticAreaMethods'
 import Mentor from "src/stores/model/mentor/Mentor";
 import mentorService from 'src/services/api/mentor/mentorService';
+import partnerService from 'src/services/api/partner/partnerService';
+import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 
 export default function useMentor() {
 
@@ -28,6 +30,8 @@ export default function useMentor() {
     // }
 
     function createDTOFromMentor(mentor: Mentor) {
+      mentor.employee.partner = partnerService.getById(mentor.employee.partner_id)
+      mentor.employee.professionalCategory = professionalCategoryService.getById(mentor.employee.category_id)
         const { createDTOFromEmployee } = useEmployee();
         const mentorDTo = {
             id: mentor.id,
