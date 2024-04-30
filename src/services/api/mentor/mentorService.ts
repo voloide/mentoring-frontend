@@ -30,6 +30,7 @@ export default {
           })
           .catch((error) => {
             console.log('Error', error);
+            return error;
           });
       },
       generateAndSaveMentorsFromDTO(mentorList: any) {

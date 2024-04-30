@@ -11,7 +11,7 @@ export default {
 
     async getByDistrict(districtId: any) {
         return await api()
-           .get(`/healthfacility/getAllOfDistrict/${districtId}`)
+           .get(`/healthFacilities/getAllOfDistrict/${districtId}`)
           .then((resp) => {
             this.generateAndSaveEntityFromDTO(resp.data);
             return resp;
@@ -22,7 +22,7 @@ export default {
       },
       async getAll() {
         return await api()
-           .get(`/healthfacility/getall`)
+           .get(`/healthFacilities/getall`)
           .then((resp) => {
             this.generateAndSaveEntityFromDTO(resp.data);
             return resp;
@@ -33,7 +33,7 @@ export default {
       },
       async getByProvince(provinceId: any) {
         return await api()
-           .get(`/healthfacility/getAllOfProvince/${provinceId}`)   
+           .get(`/healthFacilities/getAllOfProvince/${provinceId}`)   
           .then((resp) => {
             this.generateAndSaveEntityFromDTO(resp.data);
             return resp;
