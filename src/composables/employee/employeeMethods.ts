@@ -2,6 +2,7 @@ import Employee from 'src/stores/model/employee/Employee';
 import useProfessionalCategory from 'src/composables/professionalCategory/professionalCategoryMethods';
 import useLocation from '../location/locationMethods';
 import usePartner from '../partner/partnerMethods';
+import locationService from 'src/services/api/location/locationService';
 
 export default function useEmployee() {
   function fullName(employee: Employee) {
@@ -33,7 +34,6 @@ export default function useEmployee() {
   function createDTOFromEmployee(employee: Employee) {
     const { createDTOFromProfessionalCategory } = useProfessionalCategory();
     const { createDTOFromPartner } = usePartner();
-    console.log(employee);
     const employeeDTO = {
       id: employee.id,
       uuid: employee.uuid,
@@ -43,7 +43,8 @@ export default function useEmployee() {
       email: employee.email,
       trainingYear: employee.trainingYear,
       phoneNumber: employee.phoneNumber,
-      locationDTOSet: createLocationDTO(employee.locations),
+      locationDTOSet: [],
+      // locationDTOSet: createLocationDTO(employee.locations),
       partnerDTO: createDTOFromPartner(employee.partner),
       professionalCategoryDTO: createDTOFromProfessionalCategory(
         employee.professionalCategory
@@ -56,7 +57,7 @@ export default function useEmployee() {
     const { createLocationFromDTO } = useLocation();
     const generatedLocations = [];
     locationDTOS.forEach((location) => {
-      generatedLocations.push(createLocationFromDTO(location));
+      generatedLocations.push((location));
     });
     return generatedLocations;
   }
@@ -65,7 +66,7 @@ export default function useEmployee() {
     const { createDTOFromLocation } = useLocation();
     const generatedLocations = [];
     locations.forEach((location) => {
-      generatedLocations.push(createDTOFromLocation(location));
+      generatedLocations.push(createDTOFromLocation(locationService.getById(location.id)));
     });
     return generatedLocations;
   }

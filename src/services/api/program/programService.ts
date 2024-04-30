@@ -18,8 +18,23 @@ export default {
         console.log('Error', error.message);
       });
   },
+  getProgramList() {
+    return repo
+              .query()
+              .withAllRecursive(2)
+              .orderBy('id', 'asc')
+              .get();
+  },
+  getById(id:any) {
+    return repo
+      .query()
+      .withAllRecursive(2)
+      .where('id', id)
+      .orderBy('id', 'asc')
+      .first();
+  },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto) => {      
       const entity = createProgramFromDTO(dto);
       repo.save(entity);
     });

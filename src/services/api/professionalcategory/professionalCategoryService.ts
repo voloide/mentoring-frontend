@@ -21,7 +21,7 @@ export default {
           });
       },
       generateAndSaveEntityFromDTO(dtoList: any) {
-        dtoList.forEach(dto => {
+        dtoList.forEach((dto: any) => {
           const entity = createProfessionalCategoryFromDTO(dto)
           repo.save(entity);
         });
@@ -34,6 +34,11 @@ export default {
         return repo.query()
                    .orderBy('description', 'asc')
                    .get();
-      }
-
+      },
+      getById(id: string) {
+        return repo
+          .query()
+          .where('id', id)
+          .first();
+      },
 };

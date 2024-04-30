@@ -107,7 +107,7 @@
                         <span> Sem resultados para visualizar </span>
                         <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
                     </div>
-                    </template>
+                </template>
                     <template #body="props">
                         <q-tr :props="props">
                             <q-td key="nuit" :props="props">
@@ -176,6 +176,9 @@ import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
 import { onMounted, ref, toRaw, inject } from 'vue'
 import UsersService from 'src/services/api/user/UsersService'
+import programService from 'src/services/api/program/programService';
+import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
+import TutorProgrammaticAreaService from 'src/services/api/TutorProgrammaticArea/TutorProgrammaticAreaService'
 import { provide } from 'vue'
 
 
@@ -209,6 +212,8 @@ const emit = defineEmits(['goToMentoringAreas']);
 const currUser = ref(new User())
 
 onMounted(() => {
+    programService.getAll()
+    programmaticAreaService.getAll()
     currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });
 
@@ -224,11 +229,8 @@ const search = () => {
     }
     Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
 
-    console.log(params);
     mentorService.search(params).then((response) => {
-        console.log(response);
         searchResults.value = mentorService.getMentorList();
-        console.log(searchResults.value);
     }).catch((error) => {
         console.log(error);
       });

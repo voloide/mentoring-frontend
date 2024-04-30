@@ -38,4 +38,12 @@ export default {
       .orderBy('description', 'asc')
       .first();
   },
+
+  getById(id: string) {
+    return repo
+      .query()
+      .where('id', id)
+      .orderBy('description', 'asc')
+      .first();
+  },
 };
