@@ -22,6 +22,7 @@ export default {
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto) => {
       const entity = createProgrammaticAreaFromDTO(dto);
+      // console.log(entity)
       repo.save(entity);
     });
   },
@@ -35,6 +36,13 @@ export default {
     return repo
       .query()
       .where('name', name)
+      .orderBy('description', 'asc')
+      .first();
+  },
+  getById(id: string) {
+    return repo
+      .query()
+      .where('id', id)
       .orderBy('description', 'asc')
       .first();
   },

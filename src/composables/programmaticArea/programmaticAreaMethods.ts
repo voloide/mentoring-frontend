@@ -1,21 +1,23 @@
 import ProgrammaticArea from "src/stores/model/programmaticArea/ProgrammaticArea";
 import useProgram from "src/composables/program/programMethods";
+import programService from 'src/services/api/program/programService';
 
 export default function useProgrammaticArea() {
 
     function createProgrammaticAreaFromDTO(programmaticAreaDTO: any) {
-      const { createProgramFromDTO } = useProgram();
+      const {createProgramFromDTO } = useProgram();
         return  new ProgrammaticArea({
-            id: programmaticAreaDTO.id,
-            uuid: programmaticAreaDTO.uuid,
-            code: programmaticAreaDTO.code,
-            name: programmaticAreaDTO.name,
-            description: programmaticAreaDTO.description,
-            program: createProgramFromDTO(programmaticAreaDTO.program),
-          })
+          id: programmaticAreaDTO.id,
+          uuid: programmaticAreaDTO.uuid,
+          code: programmaticAreaDTO.code,
+          name: programmaticAreaDTO.name,
+          description: programmaticAreaDTO.description,
+          program: createProgramFromDTO(programmaticAreaDTO.program)
+        })
     }
 
     function createDTOFromProgrammaticArea(programmaticArea: ProgrammaticArea) {
+      const program = programService.getById(programmaticArea.program_id)
       const { createDTOFromProgram } = useProgram();
         const programmaticAreaDTO = {
             id: programmaticArea.id,
@@ -23,7 +25,7 @@ export default function useProgrammaticArea() {
             code: programmaticArea.code,
             name: programmaticArea.name,
             description: programmaticArea.description,
-            programDTO: createDTOFromProgram(programmaticArea.program),
+            programDTO: createDTOFromProgram(programService.getById(programmaticArea.program_id)),
           }
         return  programmaticAreaDTO;
     }
