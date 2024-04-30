@@ -3,85 +3,71 @@
 
         <div class="q-ma-md q-pa-md page-container">
             <div class="row">
-                <q-input
+                <q-file
+                    v-model="file"
                     outlined
-                    label="Nome"
+                    label="Seleccione o Ficheiro"
+                    accept=".xls,.xlsx"
+                    counter
                     dense
-                    ref="nameRef"
-                    class="col"
-                    v-model="searchParams.employee.name"
-                    @update:model-value="(value) => (filter = value)"
+                    class="col-3 q-ml-md"
+                    ref="fileRef"
+                    :rules="[(val) => !!val || 'Por favor indicar o ficheiro.']"
+                    @update:model-value="excelExport"
+                    :disable="submitSend"
                 >
-                    <template
-                    v-slot:append
-                    >
+                  <template v-slot:prepend>
+                    <q-icon name="attach_file" />
+                  </template>
+                  <template v-if="file" v-slot:append>
                     <q-icon
-                        name="close"
-                        @click="searchParams.employee.name = ''"
+                        name="cancel"
+                        @click.stop.prevent="file = null"
                         class="cursor-pointer"
                     />
-                    </template>
-                </q-input>
-
-                <q-input
-                    outlined
-                    label="NUIT"
-                    dense
-                    ref="nuitRef"
-                    class="col q-ml-md"
-                    v-model="searchParams.employee.nuit"
-                    @update:model-value="(value) => (filter = value)"
-                >
-                    <template
-                    v-slot:append
-                    >
-                    <q-icon
-                        name="close"
-                        @click="searchParams.employee.nuit = ''"
-                        class="cursor-pointer"
-                    />
-                    </template>
-                </q-input>
-
-                <q-input
-                    outlined
-                    label="Telefone"
-                    dense
-                    ref="phoneRef"
-                    class="col q-ml-md"
-                    v-model="searchParams.employee.phoneNumber"
-                    @update:model-value="(value) => (filter = value)"
-                >
-                    <template
-                    v-slot:append
-                    >
-                    <q-icon
-                        name="close"
-                        @click="searchParams.employee.phoneNumber = ''"
-                        class="cursor-pointer"
-                    />
-                    </template>
-                </q-input>
-                <q-space />
+                  </template>
+                </q-file>
+              <q-select
+                  class="col q-ml-md"
+                  dense
+                  outlined
+                  ref="selectedSheetRef"
+                  :rules="[(val) => !!val || 'Por favor indicar a planilha.']"
+                  v-model="selectedSheet"
+                  :options="sheets"
+                  label="Planilha"
+                  :disable="submitSend"
+              >
+                <template v-if="selectedSheet" v-slot:append>
+                  <q-icon
+                      name="cancel"
+                      @click.stop.prevent="selectedSheet = null"
+                      class="cursor-pointer"
+                  />
+                </template>
+              </q-select>
+<!--                <q-space />-->
                 <q-btn
-
-                    @click="search"
                     class="q-ml-md q-mb-xs float-right"
                     square
-                    color="primary"
-                    icon="search"
-                >
-                    <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
-                </q-btn>
-                <q-btn
-
-                    @click="clearSearchParams"
-                    class="q-ml-md q-mb-xs float-right"
-                    square
+                    @click="cleanForm"
                     color="amber"
                     icon="clear"
                 >
                     <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
+                </q-btn>
+
+                <q-btn
+                    unelevated
+                    color="primary"
+                    dense
+                    label="Carregar"
+                    class="all-pointer-events q-ml-md q-mb-xs float-right"
+                    :loading="submitLoading"
+                    :disable="submitSend"
+                    @click="loadList()"
+                >
+                  <q-tooltip class="bg-primary-5">Carregar</q-tooltip>
                 </q-btn>
             </div>
             <div class=" q-mt-lg q-mb-md">
@@ -151,26 +137,12 @@
                         </template>
                 </q-table>
             </div>
-
-            <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
-                <q-fab
-                    v-model="fabRight"
-                    vertical-actions-align="right"
-                    color="primary"
-                    glossy
-                    icon="add"
-                    direction="left"
-                >
-                    <q-fab-action label-position="left" color="primary" @click="$emit('create')" icon="edit_square" label="Criar" />
-                    <q-fab-action label-position="left" color="secondary" @click="$emit('import')" icon="cloud_upload" label="Importar" />
-                </q-fab>
-            </q-page-sticky>
         </div>
     </div>
 </template>
 <script setup>
+import * as XLSX from 'xlsx';
 import useEmployee from 'src/composables/employee/employeeMethods'
-import mentorService from 'src/services/api/mentor/mentorService'
 import Mentor from 'src/stores/model/mentor/Mentor'
 import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
@@ -178,17 +150,21 @@ import { onMounted, ref, toRaw, inject } from 'vue'
 import UsersService from 'src/services/api/user/UsersService'
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
-import TutorProgrammaticAreaService from 'src/services/api/TutorProgrammaticArea/TutorProgrammaticAreaService'
-import { provide } from 'vue'
+import {useSwal} from 'src/composables/shared/dialog/dialog';
+import districtService from 'src/services/api/district/districtService';
+
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 
 
 const searchParams = ref(new Mentor({
                             employee: new Employee()
                         }));
 const { fullName } = useEmployee();
-const step = inject('step');
+const fileRef = ref(null);
 const searchResults = ref([]);
 const selectedMentor = ref('');
+const selectedSheet = ref('');
+const selectedSheetRef = ref(null);
 const columns = [
   {
     name: 'nuit',
@@ -208,35 +184,109 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['goToMentoringAreas', 'import']);
+const emit = defineEmits(['goToMentoringAreas']);
 const currUser = ref(new User())
+const submitSend = ref(false);
+const file = ref(null);
+const selectedFile = ref('');
+const sheets = ref([]);
+const submitLoading = ref(false);
+const selectedList = ref([]);
+const loadedList = ref([]);
 
 onMounted(() => {
+    programService.getAll()
+    programmaticAreaService.getAll()
     currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });
 
 const editMentor = (mentor) => {
     selectedMentor.value = mentor;
 }
-
-const search = () => {
-    const params = {
-        userId: currUser.value.id,
-        name: searchParams.value.employee.name,
-        phoneNumber: searchParams.value.employee.phoneNumber,
-        nuit: searchParams.value.employee.nuit,
-    }
-    Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
-
-    mentorService.search(params).then((response) => {
-        searchResults.value = mentorService.getMentorList();
-    }).catch((error) => {
-        console.log(error);
-      });
+const cleanForm = () => {
+  submitLoading.value = false;
+  submitSend.value = false;
+  file.value = null;
+  selectedFile.value = null;
+  selectedSheet.value = null;
+  sheets.value = [];
 };
 
-const manageMentoringAreas = (mentor) => {
-    emit('goToMentoringAreas', mentor);
-}
+const loadList = () => {
+  submitLoading.value = true;
+  fileRef.value.validate();
+  selectedSheetRef.value.validate();
+
+  if (
+      !fileRef.value.hasError &&
+      !selectedSheetRef.value.hasError
+  ) {
+    selectedList.value = [];
+    loadedList.value = [];
+    const worksheet = selectedFile.value.Sheets[selectedSheet.value];
+    let range = XLSX.utils.decode_range(worksheet['!ref']);
+
+    range.s.r = 0;
+    worksheet['!ref'] = XLSX.utils.encode_range(range);
+    console.log(worksheet['!ref'])
+    const rowsFromFile = XLSX.utils.sheet_to_json(worksheet, {
+      range: range,
+      raw: false,
+      defval: '',
+    });
+
+    rowsFromFile.forEach(async (element) => {
+      console.log(element)
+      // pegar Distrito (JA vem com Provincia)
+      // const district = districtService.get
+      // Pegar HealthFacility
+
+
+
+
+      // showloading();
+      // let objectListed = {};
+      // patientServiceIdentifier.value = element.NID;
+      // currPatient.identifiers.push(patientServiceIdentifier);
+      // objectListed.identifier = element.NID;
+      // objectListed.name = element.Nome;
+      // objectListed.gender = element.Sexo;
+      // objectListed.age = element.Idade;
+      // objectListed.lastPickup = element['Último Levant'];
+      // objectListed.type = element.Tipo;
+      // objectListed.destinationId = selectedClinicSector.value.id;
+      // objectListed.existInIDMED = await patientService.apiSearchExist(
+      //     currPatient
+      // );
+      // objectListed.status = objectListed.existInIDMED
+      //     ? 'Encontrado'
+      //     : 'Não Encontrado';
+      // objectListed.processed = false;
+      //
+      // if (element.Tipo !== 'Activo') {
+      //   selectedList.value.push(objectListed);
+      //   if (objectListed.existInIDMED) {
+      //     loadedList.value.push(objectListed);
+      //   }
+      // }
+    });
+
+    submitLoading.value = false;
+  } else {
+    alertError('Todos os campos à vemelho devem ser preenchidos');
+    submitLoading.value = false;
+  }
+};
+
+const excelExport = (event) => {
+  let input = event;
+  let reader = new FileReader();
+  reader.onload = () => {
+    let fileData = reader.result;
+    selectedFile.value = XLSX.read(fileData, { type: 'binary' });
+    sheets.value = selectedFile.value.SheetNames;
+  };
+  reader.readAsBinaryString(input);
+};
 
 </script>
