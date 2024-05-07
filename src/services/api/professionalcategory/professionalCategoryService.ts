@@ -11,7 +11,7 @@ export default {
 
       async getAll() {
         return await api()
-           .get(`/professionalcategory/getall`)
+           .get('/professionalCategories/getall')
           .then((resp) => {
             this.generateAndSaveEntityFromDTO(resp.data);
             return resp;
@@ -21,7 +21,7 @@ export default {
           });
       },
       generateAndSaveEntityFromDTO(dtoList: any) {
-        dtoList.forEach(dto => {
+        dtoList.forEach((dto: any) => {
           const entity = createProfessionalCategoryFromDTO(dto)
           repo.save(entity);
         });

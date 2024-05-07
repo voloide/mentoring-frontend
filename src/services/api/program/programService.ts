@@ -19,7 +19,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto: any) => {
       const entity = createProgramFromDTO(dto);
       repo.save(entity);
     });

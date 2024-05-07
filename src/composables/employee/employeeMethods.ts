@@ -55,7 +55,7 @@ export default function useEmployee() {
   function createLocation(locationDTOS: any) {
     const { createLocationFromDTO } = useLocation();
     const generatedLocations = [];
-    locationDTOS.forEach((location) => {
+    locationDTOS?.forEach((location) => {
       generatedLocations.push(createLocationFromDTO(location));
     });
     return generatedLocations;
@@ -64,7 +64,7 @@ export default function useEmployee() {
   function createLocationDTO(locations: any) {
     const { createDTOFromLocation } = useLocation();
     const generatedLocations = [];
-    locations.forEach((location) => {
+    locations?.forEach((location) => {
       generatedLocations.push(createDTOFromLocation(location));
     });
     return generatedLocations;

@@ -1,6 +1,6 @@
 <template>
     <div class="q-pt-sm" style="height: 100%;">
-    
+
         <div class="q-ma-md q-pa-md page-container">
             <div class="row">
                 <q-input
@@ -64,7 +64,7 @@
                 </q-input>
                 <q-space />
                 <q-btn
-                   
+
                     @click="search"
                     class="q-ml-md q-mb-xs float-right"
                     square
@@ -74,7 +74,7 @@
                     <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
                 </q-btn>
                 <q-btn
-                    
+
                     @click="clearSearchParams"
                     class="q-ml-md q-mb-xs float-right"
                     square
@@ -151,7 +151,7 @@
                         </template>
                 </q-table>
             </div>
-            
+
             <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
                 <q-fab
                     v-model="fabRight"
@@ -175,7 +175,7 @@ import Mentor from 'src/stores/model/mentor/Mentor'
 import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
 import { onMounted, ref, toRaw, inject } from 'vue'
-import UsersService from 'src/services/api/user/UsersService'
+import UsersService from 'src/services/api/user/userService'
 import { provide } from 'vue'
 
 

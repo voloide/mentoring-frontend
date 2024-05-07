@@ -169,7 +169,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import UsersService from 'src/services/api/user/UsersService';
+import UsersService from 'src/services/api/user/userService';
 import { Loading, QSpinnerGears } from 'quasar';
 import { useRouter } from 'vue-router';
 import useEmployee from 'src/composables/employee/employeeMethods';

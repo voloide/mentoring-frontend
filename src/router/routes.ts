@@ -26,6 +26,34 @@ const routes: RouteRecordRaw[] = [
         path: '/tables',
         component: () => import('pages/Forms/Forms.vue'),
       },
+      {
+        path: '/questions',
+        component: () => import('pages/Questions/Questions.vue'),
+      },
+      {
+        path: '/programs',
+        component: () => import('pages/Programs/Programs.vue'),
+      },
+      {
+        path: '/partners',
+        component: () => import('pages/Partners/Partners.vue'),
+      },
+      {
+        path: '/programmatic-areas',
+        component: () => import('pages/ProgrammaticArea/ProgrammaticArea.vue'),
+      },
+      {
+        path: '/professional-categories',
+        component: () => import('pages/ProfessionalCategories/ProfessionalCategories.vue'),
+      },
+      {
+        path: '/health-facilities',
+        component: () => import('pages/HealthFacilities/HealthFacilities.vue'),
+      },
+      {
+        path: '/users',
+        component: () => import('pages/Users/Users.vue'),
+      },
     ],
   },
   {

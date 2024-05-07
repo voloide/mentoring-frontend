@@ -152,34 +152,34 @@
                   </div>
                   <div class="col">
                     <div class="row">
-                      <q-input 
-                      class="col q-ml-md" 
+                      <q-input
+                      class="col q-ml-md"
                       label="Número de Observações de Consulta"
                       outlined
                       dense
-                      ref="targetPatientRef" 
+                      ref="targetPatientRef"
                       :rules="[
                           (val) =>
                             !!val || 'Por favor indicar o Número de Observações de Consulta',
                         ]"
                       lazy-rules
-                      v-model="form.targetPatient" 
-                      type="number" 
+                      v-model="form.targetPatient"
+                      type="number"
                       :min="1">
                     </q-input>
-                    <q-input 
-                      class="col q-ml-md" 
+                    <q-input
+                      class="col q-ml-md"
                       outlined
                       label="Número de Avaliação de Fichas"
                       dense
-                      ref="targetFileRef" 
+                      ref="targetFileRef"
                       :rules="[
                           (val) =>
                             !!val || 'Por favor indicar o Número de Avaliação de Fichas',
                         ]"
                       lazy-rules
-                      v-model="form.targetFile" 
-                      type="number" 
+                      v-model="form.targetFile"
+                      type="number"
                       :min="1">
                     </q-input>
                     </div>
@@ -256,7 +256,7 @@
                       <q-th class="col">{{ columns[4].label }}</q-th>
                       <q-th style="width: 80px">{{ columns[5].label }}</q-th>
                     </q-tr>
-                  </template>  
+                  </template>
                         <template #body="props">
                             <q-tr :props="props">
                                 <q-td key="sequence" :props="props">
@@ -290,7 +290,7 @@
                             </template>
                     </q-table>
                 </div>
-                
+
              <div class="row q-my-sm q-mt-lg">
                   <q-space />
                   <q-btn
@@ -329,7 +329,7 @@ import ResponseType from 'src/stores/model/question/ResponseType';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
 import User from 'src/stores/model/user/User';
-import UsersService from 'src/services/api/user/UsersService';
+import UsersService from 'src/services/api/user/userService';
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';
@@ -506,7 +506,7 @@ const goToFormQuestions = (form) => {
     if(!isNewForm.value) {
         searchFormQuestions(form);
     }
-    addedFormQuestions.value = searchResults.value; 
+    addedFormQuestions.value = searchResults.value;
     isFormDataVisible.value = false;
     isFormQuestionsDataVisible.value = true;
   }
@@ -586,4 +586,4 @@ provide('selectedForm', form);
     .title {
         background-color: $primary;
     }
-</style>src/stores/model/question/EvaluationType
+</style>

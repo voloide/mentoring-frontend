@@ -33,7 +33,7 @@ export default {
           });
       },
       generateAndSaveMentorsFromDTO(mentorList: any) {
-        mentorList.forEach(mentorDTO => {
+        mentorList.forEach((mentorDTO: any) => {
           const mentor = createMentorFromDTO(mentorDTO)
           mentorRepo.save(mentor);
         });

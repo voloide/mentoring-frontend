@@ -92,7 +92,7 @@
                 </q-input>
                 <q-space />
                 <q-btn
-                   
+
                     @click="search"
                     class="q-ml-md q-mb-xs float-right"
                     square
@@ -102,7 +102,7 @@
                     <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
                 </q-btn>
                 <q-btn
-                    
+
                     @click="clearSearchParams"
                     class="q-ml-md q-mb-xs float-right"
                     square
@@ -191,7 +191,7 @@ import Form from 'src/stores/model/form/Form';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
 import User from 'src/stores/model/user/User';
-import UsersService from 'src/services/api/user/UsersService';
+import UsersService from 'src/services/api/user/userService';
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';

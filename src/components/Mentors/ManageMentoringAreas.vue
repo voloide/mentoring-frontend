@@ -12,7 +12,7 @@
 </template>
 <script setup>
 import useEmployee from 'src/composables/employee/employeeMethods'
-import UsersService from 'src/services/api/user/UsersService';
+import UsersService from 'src/services/api/user/userService';
 import { onMounted, ref, inject, provide } from 'vue'
 import User from 'src/stores/model/user/User'
 

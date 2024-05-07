@@ -20,7 +20,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto: any) => {
       const entity = createPartnerFromDTO(dto);
       repo.save(entity);
     });
