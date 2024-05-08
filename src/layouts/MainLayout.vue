@@ -127,6 +127,8 @@
             :active="link === 'settings'"
             @click="link = 'settings'"
             active-class="my-menu-link"
+            to="/settings"
+            exact
           >
             <q-item-section avatar>
               <q-icon name="settings" />
