@@ -43,8 +43,7 @@ export default function useEmployee() {
       email: employee.email,
       trainingYear: employee.trainingYear,
       phoneNumber: employee.phoneNumber,
-      locationDTOSet: [],
-      // locationDTOSet: createLocationDTO(employee.locations),
+      locationDTOSet: createLocationDTO(employee.locations),
       partnerDTO: createDTOFromPartner(employee.partner),
       professionalCategoryDTO: createDTOFromProfessionalCategory(
         employee.professionalCategory
@@ -54,10 +53,12 @@ export default function useEmployee() {
   }
 
   function createLocation(locationDTOS: any) {
+    if (locationDTOS === undefined || locationDTOS === null) return null;
+
     const { createLocationFromDTO } = useLocation();
     const generatedLocations = [];
     locationDTOS.forEach((location) => {
-      generatedLocations.push((location));
+      generatedLocations.push(createLocationFromDTO(location));
     });
     return generatedLocations;
   }

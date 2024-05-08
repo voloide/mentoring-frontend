@@ -168,20 +168,40 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeMount} from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import { Loading, QSpinnerGears } from 'quasar';
 import { useRouter } from 'vue-router';
 import useEmployee from 'src/composables/employee/employeeMethods';
+import useUser from "src/composables/user/userMethods";
 
 const leftDrawerOpen = ref(false);
 const link = ref('home');
 const router = useRouter();
 const { fullName } = useEmployee();
+const { createUserFromDTO } = useUser();
 
 const currUser = computed(() => {
   return UsersService.getLogedUser();
 });
+
+onBeforeMount(() => {
+      initUserInfo();
+    });
+
+
+const initUserInfo =()=> {
+  const currentTimestamp = Date.now();
+  const tokenExpiration = localStorage.getItem('tokenExpiration');
+
+  if (tokenExpiration > currentTimestamp) {
+    const userInfo = localStorage.getItem('userInfo');
+    const user = createUserFromDTO(JSON.parse(userInfo));
+    UsersService.piniaSave(user);
+  } else {
+    UsersService.logout();
+  }
+};
 
 const logout = () => {
   Loading.show({
