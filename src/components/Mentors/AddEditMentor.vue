@@ -475,17 +475,20 @@ const submitForm = () => {
     mentorService
       .save(createDTOFromMentor(new Mentor(target_copy)))
       .then((resp) => {
-        alertSucessAction(
-          'Mentor criado com sucesso, avançar para áreas de mentória'
-        ).then((result) => {
-          if (result) {
-            emit('goToMentoringAreas', mentorService.getById(resp.data.id));
-          }
-        });
+        if (resp.response.data.status ===201) {
+          alertSucessAction(
+            'Mentor criado com sucesso, avançar para áreas de mentória'
+          ).then((result) => {
+            if (result) {
+              emit('goToMentoringAreas', mentorService.getById(resp.data.id));
+            }
+          });
+        } else {
+          alertError(resp.response.data.message);
+        }
       })
       .catch((error) => {
-        console.log('Error', error.message);
-        alertError('Ocorreu um erro inesperado nesta operação.');
+        console.log('Error', error);
       });
   }
 };

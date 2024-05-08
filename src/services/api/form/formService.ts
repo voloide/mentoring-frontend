@@ -35,7 +35,7 @@ export default {
       async changeLifeCycleStatus(formDTO: any) {
         let resp = null;
         resp = await api()
-        .post(`/forms/changeLifeCicleStatus`, formDTO)
+        .patch(`/forms/changeLifeCicleStatus`, formDTO)
         .then((resp) => {
           return resp;
         })

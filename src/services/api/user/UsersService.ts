@@ -26,12 +26,13 @@ export default {
         return api()
       .post('/login', params)
       .then((resp) => {
-        console.log(resp.data)
-        this.convertUserFromDTO(resp.data.userInfo);
+        if (resp.status === 200) {
+          this.convertUserFromDTO(resp.data.userInfo);
+        }
         return resp;
       })
       .catch((error) => {
-          console.log('Error', error);
+          return error;
       });
 
     },
@@ -54,6 +55,9 @@ export default {
                      //.where('username', userloged)
                      .first();
                   
+    },
+    piniaSave(user: User) {
+      return userRepo.save(user);;
     }
 
 };

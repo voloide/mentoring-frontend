@@ -30,9 +30,11 @@ export default {
           })
           .catch((error) => {
             console.log('Error', error);
+            return error;
           });
       },
       generateAndSaveMentorsFromDTO(mentorList: any) {
+        console.log(mentorList);
         mentorList.forEach((mentorDTO: any) => {
           const mentor = createMentorFromDTO(mentorDTO)
           mentorRepo.save(mentor);
