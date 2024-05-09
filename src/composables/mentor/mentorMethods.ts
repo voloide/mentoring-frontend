@@ -25,6 +25,8 @@ export default function useMentor() {
     const mentorDTo = {
       id: mentor.id,
       uuid: mentor.uuid,
+      perfil: mentor.perfil,
+      nivel_de_acesso: mentor.nivel_de_acesso,
       employeeDTO: createDTOFromEmployee(mentor.employee),
       tutorProgrammaticAreaDTOS: createDTOsFromTPAs(mentor.tutorProgrammaticAreas)
     };

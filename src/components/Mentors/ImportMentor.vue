@@ -140,7 +140,7 @@ import TutorProgrammaticArea from 'stores/model/TutorProgrammaticArea/TutorProgr
 import mentorService from 'src/services/api/mentor/mentorService';
 import { v4 as uuidv4 } from 'uuid';
 
-const { alertError, alertSucess, alertWarningAction } = useSwal();
+const { alertError, alertSucess, alertWarningAction, alertInfo } = useSwal();
 
 
 const searchParams = ref(new Mentor({
@@ -305,8 +305,6 @@ const startComposingMentor = (rowFromExcel) => {
                 partner: partner,
                 locations: [location]
               })
-              // verificar se nao existe alguem com mesmo nuit
-              if(!employeeService.verifyExistance(employee.nuit)) {
                 // Pegar Area Programatica
                 programmaticArea = programmaticAreaService.getByName(rowFromExcel.Area_de_Mentoria)
 
@@ -323,10 +321,12 @@ const startComposingMentor = (rowFromExcel) => {
                     mentor: null,
                     programmaticArea: programmaticArea
                   })
-                  // Criar mentor e mandar para post
+                  // Criar mentor e mandar post
                   mentor = new Mentor({
                     id: null,
                     uuid: null,
+                    perfil: rowFromExcel.Perfil_de_Acesso,
+                    nivel_de_acesso: rowFromExcel.Nivel_de_Acesso,
                     employee_id: employee.id,
                     employee: employee,
                     tutorProgrammaticAreas: [tutorProgrammaticArea]
@@ -336,8 +336,15 @@ const startComposingMentor = (rowFromExcel) => {
                   // Salvar
                   mentorService.save(mentorDTO)
                     .then((resp) => {
-                      totalImported.value += 1
-                      alertSucess(
+                      console.log(resp)
+                      if(resp.response.data.status !== 200){
+                        totalNotImported.value += 1
+                        addErrorRow(resp.response.data.message)
+                      } else {
+                        totalImported.value += 1
+                      }
+
+                      alertInfo(
                         'Importação Terminada.'
                       )
                     })
@@ -346,11 +353,6 @@ const startComposingMentor = (rowFromExcel) => {
                   totalNotImported.value += 1
                   addErrorRow('Area programatica não encontrada')
                 }
-
-              } else {
-                totalNotImported.value += 1
-                addErrorRow('Ja existe um Mentor com mesmo NUIT')
-              }
             } else {
               // Categoria Profissional Nao Existe
               totalNotImported.value += 1

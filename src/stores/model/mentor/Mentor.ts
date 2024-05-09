@@ -12,6 +12,8 @@ export default class Mentor extends Model {
       id: this.attr(null),
       uuid: this.attr(''),
       employee_id: this.attr(''),
+      perfil: this.attr(''),
+      nivel_de_acesso: this.attr(''),
       // Relationships
       employee: this.belongsTo(Employee, 'employee_id'),
       tutorProgrammaticAreas: this.hasMany(TutorProgrammaticArea, 'mentor_id')
