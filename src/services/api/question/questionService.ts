@@ -11,7 +11,7 @@ export default {
     return await api()
       .get(`/questions/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
+        //return this.generateEntityFromDTO(resp.data);
         return resp;
       })
       .catch((error) => {
@@ -23,6 +23,13 @@ export default {
       const entity = createQuestionFromDTO(dto);
       repo.save(entity);
     });
+  },
+  generateEntityFromDTO(dtoList: any) {
+    const entities = [];
+    dtoList.forEach((dto) => {
+      entities.push(createQuestionFromDTO(dto));
+    });
+    return entities;
   },
   deleteAllFromStorage() {
     repo.flush();

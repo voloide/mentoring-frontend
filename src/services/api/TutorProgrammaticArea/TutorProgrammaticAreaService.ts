@@ -52,6 +52,7 @@ export default {
 },
 
   async save(tutorProgrammaticArea: any, selectedMentor:any) {
+    console.log(tutorProgrammaticArea);
     return await api()
        .post(`/tutorprogrammaticareas/save`, tutorProgrammaticArea)
       .then((resp) => {

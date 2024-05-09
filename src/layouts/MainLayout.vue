@@ -155,9 +155,9 @@
       <q-banner
         dense
         inline-actions
-        class="text-white bg-primary q-mx-md q-px-md"
+        class="text-white bg-primary q-mx-md q-px-md text-center"
       >
-        You have lost connection to the internet. This app is offline.
+        Mentoria
         <template v-slot:action>
           <q-img src="~assets/mentoring.png" />
         </template>
@@ -170,7 +170,7 @@
 <script setup>
 import { ref, computed, onBeforeMount} from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
-import { Loading, QSpinnerGears } from 'quasar';
+import { Loading, QSpinnerRings } from 'quasar';
 import { useRouter } from 'vue-router';
 import useEmployee from 'src/composables/employee/employeeMethods';
 import useUser from "src/composables/user/userMethods";
@@ -205,7 +205,7 @@ const initUserInfo =()=> {
 
 const logout = () => {
   Loading.show({
-    spinner: QSpinnerGears,
+    spinner: QSpinnerRings,
   });
   UsersService.logout();
   Loading.hide();

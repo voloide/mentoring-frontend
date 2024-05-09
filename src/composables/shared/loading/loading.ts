@@ -1,4 +1,4 @@
-import { Loading, QSpinnerGears, QSpinnerFacebook, QSpinnerBall } from 'quasar';
+import { Loading, QSpinnerRings, QSpinnerFacebook, QSpinnerBall } from 'quasar';
 
 export function useLoading() {
   function QSpinnerGearsShow(
@@ -9,7 +9,7 @@ export function useLoading() {
     message: string
   ) {
     return Loading.show({
-      spinner: QSpinnerGears,
+      spinner: QSpinnerRings,
       spinnerColor: spinnerColor,
       spinnerSize: spinnerSize,
       messageColor: messageColor,

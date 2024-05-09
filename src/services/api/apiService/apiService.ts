@@ -11,11 +11,7 @@ const { notifyError } = useNotify()
 
 
 const instance = axios.create({
-  // baseURL: website.value
-   // ? process.env.API_URL
-   // : LocalStorage.getItem('backend_url'),
-
-    baseURL: 'http://localhost:8087',
+    baseURL: process.env.API_URL,
     responseType: 'json',
     validateStatus(status) {
       return [200].includes(status)
@@ -48,12 +44,7 @@ instance.interceptors.request.use(
       Accept: 'application/json',
     };
     if (
-      request.url === '/province' ||
-      request.url === '/district' ||
-      request.url.includes('/clinic/district') ||
-      request.url === '/systemConfigs' ||
-      request.url === '/menu' ||
-      request.url.includes('/clinic/uuid')
+      request.url === '/province' 
     ) {
       delete request.headers.Authorization;
     } else if (userloged != null && userloged != 'null') {
