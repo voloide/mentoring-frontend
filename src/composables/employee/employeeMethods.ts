@@ -2,7 +2,6 @@ import Employee from 'src/stores/model/employee/Employee';
 import useProfessionalCategory from 'src/composables/professionalCategory/professionalCategoryMethods';
 import useLocation from '../location/locationMethods';
 import usePartner from '../partner/partnerMethods';
-import locationService from 'src/services/api/location/locationService';
 
 export default function useEmployee() {
   function fullName(employee: Employee) {

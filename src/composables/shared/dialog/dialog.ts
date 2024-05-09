@@ -1,21 +1,23 @@
 import swal from 'sweetalert';
 
 export function useSwal() {
-  function alertSucess(message) {
+  function alertSucess(message: string) {
     return swal({
       title: 'Sucesso',
       text: message,
       icon: 'success',
-      // buttons: 'Aceitar',
+      buttons: 'OK',
     });
   }
 
-  function alertWarning(message) {
+  function alertSucessAction(message: string) {
     return swal({
-      title: 'Aviso',
+      title: 'Sucesso',
       text: message,
-      icon: 'warning',
-      // buttons: 'Aceitar',
+      icon: 'success',
+      buttons: ['Não', 'Sim'],
+      closeOnClickOutside: false,
+      closeOnEsc: false,
     });
   }
 
@@ -28,7 +30,16 @@ export function useSwal() {
     });
   }
 
-  function alertError(message) {
+  function alertWarning(message: string) {
+    return swal({
+      title: 'Aviso',
+      text: message,
+      icon: 'warning',
+      // buttons: 'Aceitar',
+    });
+  }
+
+  function alertError(message: string) {
     return swal({
       title: 'Erro',
       text: message,
@@ -37,7 +48,7 @@ export function useSwal() {
     });
   }
 
-  function alertInfo(message) {
+  function alertInfo(message: string) {
     return swal({
       title: 'Informação',
       text: message,
@@ -46,9 +57,9 @@ export function useSwal() {
     });
   }
 
-  function alertWarningAction(message, title) {
+  function alertWarningAction(message: string) {
     return swal({
-      title: title==null ? 'Confirmação' : title,
+      title: 'Confirmação',
       text: message,
       icon: 'warning',
       buttons: ['Não', 'Sim'],
@@ -58,7 +69,7 @@ export function useSwal() {
     });
   }
 
-  function confirmeServiceReport(){
+function confirmeServiceReport(){
     (async () => {
       const { value: formValues } = await swal.fire({
         title: 'Selecionar Servico por imprimir',
@@ -92,10 +103,11 @@ export function useSwal() {
   return {
     alertSucess,
     alertWarning,
-    alertWarningTitle,
     alertError,
     alertInfo,
     alertWarningAction,
+    alertSucessAction,
+    alertWarningTitle,
     confirmeServiceReport
   };
 }
