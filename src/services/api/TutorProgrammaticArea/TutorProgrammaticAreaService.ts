@@ -13,7 +13,7 @@ const {createTutorProgrammaticAreaFromDTO} = useTutorProgrammaticArea()
 export default {
   async getAll() {
     return await api()
-      .get('/tutorprogrammaticareas/getAll')
+      .get('/TutorProgrammaticArea/getAll')
       .then((resp) => {
         return resp;
       })
@@ -22,7 +22,6 @@ export default {
         console.log('Error', error.message);
       });
   },
-
   createNewTutorProgrammaticArea(mentor_id:any, programmaticArea_id:any){
     const {createDTOFromTutorProgrammaticArea} = useTutorProgrammaticArea()
 
@@ -40,7 +39,7 @@ export default {
   async changeLifeCycleStatus(tutorProgrammaticAreaDTO: any, selectedMentor:any) {
     let resp = null;
     resp = await api()
-    .patch(`/tutorprogrammaticareas/changeLifeCicleStatus`, tutorProgrammaticAreaDTO)
+    .patch(`/TutorProgrammaticArea/changeLifeCicleStatus`, tutorProgrammaticAreaDTO)
     .then((resp) => {
       repo.save(createTutorProgrammaticAreaFromDTO([resp.data], selectedMentor));
       return resp;
@@ -54,7 +53,7 @@ export default {
   async save(tutorProgrammaticArea: any, selectedMentor:any) {
     console.log(tutorProgrammaticArea);
     return await api()
-       .post(`/tutorprogrammaticareas/save`, tutorProgrammaticArea)
+       .post(`/TutorProgrammaticArea/save`, tutorProgrammaticArea)
       .then((resp) => {
         repo.save(createTutorProgrammaticAreaFromDTO([resp.data], selectedMentor));
         return resp;

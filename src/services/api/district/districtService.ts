@@ -31,7 +31,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto: any) => {
       const entity = createDistrictFromDTO(dto);
       repo.save(entity);
     });
@@ -44,5 +44,9 @@ export default {
   },
   getAllDistrictByProvinceId(provinceid: number) {
     return repo.query().with('province').where('province_id', provinceid).get();
+  },
+
+  getDistrictByDescription(description: string) {
+    return repo.query().where('description', description).first();
   },
 };
