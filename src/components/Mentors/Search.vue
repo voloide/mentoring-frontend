@@ -10,7 +10,6 @@
                     ref="nameRef"
                     class="col"
                     v-model="searchParams.employee.name"
-                    @update:model-value="(value) => (filter = value)"
                 >
                     <template
                     v-slot:append
@@ -30,7 +29,6 @@
                     ref="nuitRef"
                     class="col q-ml-md"
                     v-model="searchParams.employee.nuit"
-                    @update:model-value="(value) => (filter = value)"
                 >
                     <template
                     v-slot:append
@@ -50,7 +48,6 @@
                     ref="phoneRef"
                     class="col q-ml-md"
                     v-model="searchParams.employee.phoneNumber"
-                    @update:model-value="(value) => (filter = value)"
                 >
                     <template
                     v-slot:append
@@ -98,7 +95,6 @@
                     :rows="searchResults"
                     :columns="columns"
                     row-key="id"
-                    :filter="filter"
                 >
                 <template v-slot:no-data="{ icon, filter }">
                     <div
@@ -154,7 +150,6 @@
 
             <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
                 <q-fab
-                    v-model="fabRight"
                     vertical-actions-align="right"
                     color="primary"
                     glossy
@@ -219,6 +214,11 @@ const editMentor = (mentor) => {
     selectedMentor.value = mentor;
 }
 
+const clearSearchParams =()=> {
+    searchParams.value = new Mentor({
+                            employee: new Employee()
+                        })
+}
 const search = () => {
     const params = {
         userId: currUser.value.id,

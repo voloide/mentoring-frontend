@@ -2,7 +2,6 @@ import Employee from 'src/stores/model/employee/Employee';
 import useProfessionalCategory from 'src/composables/professionalCategory/professionalCategoryMethods';
 import useLocation from '../location/locationMethods';
 import usePartner from '../partner/partnerMethods';
-import locationService from 'src/services/api/location/locationService';
 
 export default function useEmployee() {
   function fullName(employee: Employee) {
@@ -67,7 +66,7 @@ export default function useEmployee() {
     const { createDTOFromLocation } = useLocation();
     const generatedLocations = [];
     locations.forEach((location) => {
-      generatedLocations.push(createDTOFromLocation(locationService.getById(location.id)));
+      generatedLocations.push(createDTOFromLocation(location));
     });
     return generatedLocations;
   }
