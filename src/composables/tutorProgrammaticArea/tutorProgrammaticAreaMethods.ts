@@ -11,7 +11,7 @@ export default function useTutorProgrammaticArea() {
     const tutorProgrammaticAreaList: TutorProgrammaticArea[] = []
 
     if (tutorProgrammaticAreaDTOS) {
-      tutorProgrammaticAreaDTOS.forEach((tutorProgrammaticAreaDTO: { id: any; uuid: any; programmaticAreaDTO: any; lifeCycleStatus: any }) => {
+      tutorProgrammaticAreaDTOS.forEach((tutorProgrammaticAreaDTO) => {
         tutorProgrammaticAreaList.push(
           new TutorProgrammaticArea({
             id: tutorProgrammaticAreaDTO.id,
@@ -35,7 +35,7 @@ export default function useTutorProgrammaticArea() {
         const tutorProgrammaticAreaDTO = {
             id: tutorProgrammaticArea.id,
             uuid: tutorProgrammaticArea.uuid,
-            tutorDTO: createDTOFromMentor(tutorProgrammaticArea.mentor),
+            // tutorDTO: createDTOFromMentor(tutorProgrammaticArea.mentor),
             programmaticAreaDTO: createDTOFromProgrammaticArea(tutorProgrammaticArea.programmaticArea),
             lifeCycleStatus: tutorProgrammaticArea.lifeCycleStatus,
           }

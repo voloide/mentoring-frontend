@@ -21,7 +21,7 @@ export default {
           });
       },
       generateAndSaveEntityFromDTO(dtoList: any) {
-        dtoList.forEach(dto => {
+        dtoList.forEach((dto: any) => {
           const province = createProvinceFromDTO(dto)
           provinceRepo.save(province);
         });
@@ -35,6 +35,13 @@ export default {
                       .query()
                       .orderBy('designation', 'asc')
                       .get();
-      }
+      },
+        getById(id: number) {
+            return provinceRepo
+                .query()
+                .where('id', id)
+                .orderBy('designation', 'asc')
+                .first();
+        }
 
 };

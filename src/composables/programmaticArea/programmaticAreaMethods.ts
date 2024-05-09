@@ -17,7 +17,6 @@ export default function useProgrammaticArea() {
     }
 
     function createDTOFromProgrammaticArea(programmaticArea: ProgrammaticArea) {
-      const program = programService.getById(programmaticArea.program_id)
       const { createDTOFromProgram } = useProgram();
         const programmaticAreaDTO = {
             id: programmaticArea.id,
@@ -25,7 +24,8 @@ export default function useProgrammaticArea() {
             code: programmaticArea.code,
             name: programmaticArea.name,
             description: programmaticArea.description,
-            programDTO: createDTOFromProgram(programService.getById(programmaticArea.program_id)),
+            // programDTO: createDTOFromProgram(programService.getById(programmaticArea.program_id)),
+            programDTO: createDTOFromProgram(programmaticArea.program),
           }
         return  programmaticAreaDTO;
     }
