@@ -567,13 +567,14 @@ const saveOrUpdate = (form) => {
           'Tem certeza que deseja guardar as alterações?'
         ).then((result) => {
           if (result) {
-    formService.saveOrUpdate(form).then((response) => {
-            searchResults.value = form.formQuestions;
-            }).catch((error) => {
-                 console.log(error);
-             });
+            console.log(form);
+      formService.saveOrUpdate(form).then((response) => {
+              searchResults.value = form.formQuestions;
+      }).catch((error) => {
+          console.log(error);
+      });
     alertSucess('Tabela de Competência registada com sucesso!');
-            }});
+    }});
 }
 
 provide('showAddOrRemoveQuestions', showAddOrRemoveQuestions);

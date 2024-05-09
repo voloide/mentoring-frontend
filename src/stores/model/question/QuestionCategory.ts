@@ -6,7 +6,7 @@ export default class QuestionCategory extends Model {
 
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       category: this.attr(''),
     };
