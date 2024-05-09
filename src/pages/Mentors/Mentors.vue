@@ -20,6 +20,7 @@
     import ManageMentoringAreas from 'src/components/Mentors/ManageMentoringAreas.vue';
     import programService from 'src/services/api/program/programService';
     import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
+    import mentorService from 'src/services/api/mentor/mentorService';
 
     const { closeLoading, showloading } = useLoading();
     const step = ref('');
@@ -60,6 +61,7 @@
         partnerService.getAll()
         programService.getAll()
         programmaticAreaService.getAll()
+        // mentorService.search('')
         closeLoading();
     }
     const close = () => {

@@ -10,7 +10,7 @@
                     accept=".xls,.xlsx"
                     counter
                     dense
-                    class="col-3 q-ml-md"
+                    class="col-3"
                     ref="fileRef"
                     :rules="[(val) => !!val || 'Por favor indicar o ficheiro.']"
                     @update:model-value="excelExport"
@@ -46,7 +46,6 @@
                   />
                 </template>
               </q-select>
-<!--                <q-space />-->
                 <q-btn
                     class="q-ml-md q-mb-xs float-right"
                     square
@@ -72,16 +71,22 @@
             </div>
             <div class=" q-mt-lg q-mb-md">
                 <div class="row items-center q-mb-md">
-                    <q-icon name="search" size="sm" />
-                    <span class="q-pl-sm text-subtitle2">Resultado da Pesquisa</span>
+                    <q-icon name="cloud_upload" size="sm" />
+                    <span class="q-pl-sm text-subtitle2">Resultado da Importação</span>
                 </div>
              <q-separator color="grey-13" size="1px" />
             </div>
+            <div class="col q-mb-sm">
+                <span><b>{{ totalImported }}</b> Mentor(es) Importado(s) com sucesso.</span>
+            </div>
+          <div class="col q-mb-xs text-red">
+            <span><b>{{ totalNotImported }}</b> Mentor(es) Nao Importado(s).</span>
+          </div>
             <div>
                 <q-table
                     class="col"
                     dense
-                    :rows="searchResults"
+                    :rows="importResults"
                     :columns="columns"
                     row-key="id"
                     :filter="filter"
@@ -97,41 +102,13 @@
                     <template #body="props">
                         <q-tr :props="props">
                             <q-td key="nuit" :props="props">
-                                {{ props.row.employee.nuit }}
+                                {{ props.row.nuit }}
                             </q-td>
                             <q-td key="name" :props="props">
-                                {{ fullName(props.row.employee) }}
+                                {{ props.row.name }}
                             </q-td>
-                            <q-td key="category" :props="props">
-                                {{ props.row.employee.professionalCategory.description }}
-                            </q-td>
-                            <q-td key="phoneNumber" :props="props">
-                                {{ props.row.employee.phoneNumber }}
-                            </q-td>
-                            <q-td key="options" :props="props">
-                            <div class="col">
-                                <q-btn
-                                flat
-                                round
-                                class="q-ml-md"
-                                color="yellow-10"
-                                icon="edit_note"
-                                @click="manageMentoringAreas(props.row)"
-                                >
-                                <q-tooltip class="bg-green-5">Gerir áreas de mentoria</q-tooltip>
-                                </q-btn>
-
-                                <q-btn
-                                flat
-                                round
-                                class="q-ml-md"
-                                color="green-8"
-                                icon="edit"
-                                @click="editMentor(props.row)"
-                                >
-                                <q-tooltip class="bg-green-5">Detalhar/Editar Mentor</q-tooltip>
-                                </q-btn>
-                            </div>
+                            <q-td key="erro" :props="props">
+                                {{ props.row.erro }}
                             </q-td>
                         </q-tr>
                         </template>
@@ -143,6 +120,7 @@
 <script setup>
 import * as XLSX from 'xlsx';
 import useEmployee from 'src/composables/employee/employeeMethods'
+import useMentor from 'src/composables/mentor/mentorMethods'
 import Mentor from 'src/stores/model/mentor/Mentor'
 import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
@@ -152,6 +130,15 @@ import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import {useSwal} from 'src/composables/shared/dialog/dialog';
 import districtService from 'src/services/api/district/districtService';
+import provinceService from 'src/services/api/province/provinceService';
+import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
+import Location from 'stores/model/location/Location';
+import partnerService from 'src/services/api/partner/partnerService';
+import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
+import employeeService from 'src/services/api/employee/employeeService';
+import TutorProgrammaticArea from 'stores/model/TutorProgrammaticArea/TutorProgrammaticArea';
+import mentorService from 'src/services/api/mentor/mentorService';
+import { v4 as uuidv4 } from 'uuid';
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 
@@ -160,11 +147,14 @@ const searchParams = ref(new Mentor({
                             employee: new Employee()
                         }));
 const { fullName } = useEmployee();
+const { createDTOFromMentor } = useMentor();
 const fileRef = ref(null);
-const searchResults = ref([]);
+const importResults = ref([]);
 const selectedMentor = ref('');
 const selectedSheet = ref('');
 const selectedSheetRef = ref(null);
+const totalImported = ref(0)
+const totalNotImported = ref(0)
 const columns = [
   {
     name: 'nuit',
@@ -176,12 +166,9 @@ const columns = [
     name: 'name',
     align: 'left',
     label: 'Nome',
-    field: (row) => fullName(row.employee),
     sortable: false,
   },
-  { name: 'category', align: 'center', label: 'Categoria Profissional', sortable: false },
-  { name: 'phoneNumber', align: 'left', label: 'Telefone', sortable: false },
-  { name: 'options', align: 'left', label: 'Opções', sortable: false },
+  { name: 'erro', align: 'left', label: 'Erro', sortable: false },
 ];
 
 const emit = defineEmits(['goToMentoringAreas']);
@@ -210,9 +197,17 @@ const cleanForm = () => {
   selectedFile.value = null;
   selectedSheet.value = null;
   sheets.value = [];
+  importResults.value = [];
+  totalImported.value = 0
+  totalNotImported.value = 0
 };
 
 const loadList = () => {
+
+  importResults.value = [];
+  totalImported.value = 0
+  totalNotImported.value = 0
+  //--
   submitLoading.value = true;
   fileRef.value.validate();
   selectedSheetRef.value.validate();
@@ -228,7 +223,6 @@ const loadList = () => {
 
     range.s.r = 0;
     worksheet['!ref'] = XLSX.utils.encode_range(range);
-    console.log(worksheet['!ref'])
     const rowsFromFile = XLSX.utils.sheet_to_json(worksheet, {
       range: range,
       raw: false,
@@ -236,39 +230,9 @@ const loadList = () => {
     });
 
     rowsFromFile.forEach(async (element) => {
-      console.log(element)
-      // pegar Distrito (JA vem com Provincia)
-      // const district = districtService.get
-      // Pegar HealthFacility
-
-
-
-
-      // showloading();
-      // let objectListed = {};
-      // patientServiceIdentifier.value = element.NID;
-      // currPatient.identifiers.push(patientServiceIdentifier);
-      // objectListed.identifier = element.NID;
-      // objectListed.name = element.Nome;
-      // objectListed.gender = element.Sexo;
-      // objectListed.age = element.Idade;
-      // objectListed.lastPickup = element['Último Levant'];
-      // objectListed.type = element.Tipo;
-      // objectListed.destinationId = selectedClinicSector.value.id;
-      // objectListed.existInIDMED = await patientService.apiSearchExist(
-      //     currPatient
-      // );
-      // objectListed.status = objectListed.existInIDMED
-      //     ? 'Encontrado'
-      //     : 'Não Encontrado';
-      // objectListed.processed = false;
-      //
-      // if (element.Tipo !== 'Activo') {
-      //   selectedList.value.push(objectListed);
-      //   if (objectListed.existInIDMED) {
-      //     loadedList.value.push(objectListed);
-      //   }
-      // }
+        // showloading();
+        // const keepGoing = true
+      startComposingMentor(element)
     });
 
     submitLoading.value = false;
@@ -277,6 +241,142 @@ const loadList = () => {
     submitLoading.value = false;
   }
 };
+
+const startComposingMentor = (rowFromExcel) => {
+  const addErrorRow = (errorMessage) => {
+    importResults.value.push({
+      nuit: rowFromExcel.NUIT,
+      name: rowFromExcel.Nome + ' ' + rowFromExcel.Apelido,
+      erro: errorMessage
+    });
+  };
+
+  const district = districtService.getDistrictByDescription(rowFromExcel.Distrito)
+  let province = null
+  let healthFacility = null
+  let location = null
+  let partner = null
+  let professionalCategory = null
+  let employee = null
+  let programmaticArea = null
+  let tutorProgrammaticArea = null
+  let mentor = null
+  if (district) {
+    province = provinceService.getById(district.province_id)
+    if (province) {
+      healthFacility = healthFacilityService.getByHealthFacility(rowFromExcel.US)
+      if(healthFacility) {
+        // NEW LOCATION
+        location = new Location({
+          id: null,
+          uuid: uuidv4(),
+          district_id: district.id,
+          district: district,
+          province_id: province.id,
+          province: province,
+          healthFacility_id: healthFacility.id,
+          healthFacility: healthFacility
+        })
+          // Pegar Parceiro (Devera sempre ter um)
+          if (rowFromExcel.Nome_da_Instituicao === '') {
+            partner = partnerService.getByName("MISAU");
+          } else {
+            partner = partnerService.getByName(rowFromExcel.Nome_da_Instituicao)
+          }
+
+          if(partner) {
+            // Pegar Categoria Profissional (ira existir sempre)
+            professionalCategory = professionalCategoryService.getByCode(rowFromExcel.Categoria_Profissional)
+
+            if (professionalCategory){
+              // criar employee
+              employee = new Employee({
+                id: null,
+                uuid: null,
+                name: rowFromExcel.Nome,
+                surname: rowFromExcel.Apelido,
+                nuit: rowFromExcel.NUIT,
+                trainingYear: rowFromExcel.Ano_de_Formacao,
+                phoneNumber: rowFromExcel.Numero_de_Telefone,
+                email: rowFromExcel.Email,
+                category_id: professionalCategory.id,
+                partner_id: partner.id,
+                professionalCategory: professionalCategory,
+                partner: partner,
+                locations: [location]
+              })
+              // verificar se nao existe alguem com mesmo nuit
+              if(!employeeService.verifyExistance(employee.nuit)) {
+                // Pegar Area Programatica
+                programmaticArea = programmaticAreaService.getByName(rowFromExcel.Area_de_Mentoria)
+
+                if(programmaticArea) {
+                  // Criar TutorProgramaticArea
+                  tutorProgrammaticArea = new TutorProgrammaticArea({
+                    id: null,
+                    uuid: uuidv4(),
+                    mentor_id: null,
+                    programmatic_area_id: programmaticArea.id,
+                    lifeCycleStatus: null,
+
+                    //relationships
+                    mentor: null,
+                    programmaticArea: programmaticArea
+                  })
+                  // Criar mentor e mandar para post
+                  mentor = new Mentor({
+                    id: null,
+                    uuid: null,
+                    employee_id: employee.id,
+                    employee: employee,
+                    tutorProgrammaticAreas: [tutorProgrammaticArea]
+                  })
+                  //
+                  const mentorDTO = createDTOFromMentor(mentor)
+                  // Salvar
+                  mentorService.save(mentorDTO)
+                    .then((resp) => {
+                      totalImported.value += 1
+                      alertSucess(
+                        'Importação Terminada.'
+                      )
+                    })
+                } else {
+                  // Nao existe essa Area programatica
+                  totalNotImported.value += 1
+                  addErrorRow('Area programatica não encontrada')
+                }
+
+              } else {
+                totalNotImported.value += 1
+                addErrorRow('Ja existe um Mentor com mesmo NUIT')
+              }
+            } else {
+              // Categoria Profissional Nao Existe
+              totalNotImported.value += 1
+              addErrorRow('Categoria Profissional não encontrada')
+            }
+          } else {
+            // esse parceiro nao existe
+            totalNotImported.value += 1
+            addErrorRow('Parceiro não encontrado')
+          }
+      } else {
+        // HealthFacility nao encontrada
+        totalNotImported.value += 1
+        addErrorRow('HealthFacility não encontrado')
+      }
+    } else {
+      // Provincia nao encontrada
+      totalNotImported.value += 1
+      addErrorRow('Provincia não encontrada')
+    }
+  } else {
+    // Distrito nao encontrado
+    totalNotImported.value += 1
+    addErrorRow('Distrito não encontrado')
+  }
+}
 
 const excelExport = (event) => {
   let input = event;

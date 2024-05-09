@@ -9,36 +9,42 @@ const { createProfessionalCategoryFromDTO } = useProfessionalCategory();
 
 export default {
 
-      async getAll() {
-        return await api()
-           .get(`/professionalCategories/getall`)
-          .then((resp) => {
-            this.generateAndSaveEntityFromDTO(resp.data);
-            return resp;
-          })
-          .catch((error) => {
-            console.log('Error', error.message);
-          });
-      },
-      generateAndSaveEntityFromDTO(dtoList: any) {
-        dtoList.forEach((dto: any) => {
-          const entity = createProfessionalCategoryFromDTO(dto)
-          repo.save(entity);
-        });
+  async getAll() {
+    return await api()
+      .get(`/professionalCategories/getall`)
+      .then((resp) => {
+        this.generateAndSaveEntityFromDTO(resp.data);
+        return resp;
+      })
+      .catch((error) => {
+        console.log('Error', error.message);
+      });
+  },
+  generateAndSaveEntityFromDTO(dtoList: any) {
+    dtoList.forEach((dto: any) => {
+      const entity = createProfessionalCategoryFromDTO(dto)
+      repo.save(entity);
+    });
 
-      },
-      deleteAllFromStorage() {
-        repo.flush();
-      },
-      piniaGetAll() {
-        return repo.query()
-                   .orderBy('description', 'asc')
-                   .get();
-      },
-      getById(id: string) {
-        return repo
-          .query()
-          .where('id', id)
-          .first();
-      },
+  },
+  deleteAllFromStorage() {
+    repo.flush();
+  },
+  piniaGetAll() {
+    return repo.query()
+      .orderBy('description', 'asc')
+      .get();
+  },
+  getById(id: string) {
+    return repo
+      .query()
+      .where('id', id)
+      .first();
+  },
+  getByCode(code: string) {
+    return repo
+      .query()
+      .where('code', code)
+      .first();
+  },
 };
