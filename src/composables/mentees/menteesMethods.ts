@@ -19,7 +19,6 @@ export default function userMentees() {
       uuid: mentees.uuid,
       employeeDTO: createDTOFromEmployee(mentees.employee),
     };
-    console.log(menteesDTO);
     return menteesDTO;
   }
 

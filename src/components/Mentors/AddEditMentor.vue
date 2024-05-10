@@ -345,7 +345,6 @@
               <q-btn
                 class="float-right q-ml-md"
                 type="submit"
-                :loading="submitLoading"
                 label="Submeter"
                 color="primary"
               />
@@ -370,6 +369,7 @@ import partnerService from 'src/services/api/partner/partnerService';
 import useMentor from 'src/composables/mentor/mentorMethods';
 import mentorService from 'src/services/api/mentor/mentorService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import { Loading, QSpinnerRings } from 'quasar';
 
 const mentor = ref(
   new Mentor({
@@ -471,23 +471,31 @@ const submitForm = () => {
     !districtRef.value.hasError &&
     !hfRef.value.hasError
   ) {
+    Loading.show({
+        spinner: QSpinnerRings,
+      })
     const target_copy = Object.assign({}, mentor.value);
     mentorService
       .save(createDTOFromMentor(new Mentor(target_copy)))
       .then((resp) => {
-        if (resp.response.data.status ===201) {
+        
+        if (resp.status ===200) {
           alertSucessAction(
             'Mentor criado com sucesso, avançar para áreas de mentória'
           ).then((result) => {
             if (result) {
               emit('goToMentoringAreas', mentorService.getById(resp.data.id));
+            } else {
+              emit('close');
             }
           });
         } else {
           alertError(resp.response.data.message);
         }
+        Loading.hide()
       })
       .catch((error) => {
+        Loading.hide()
         console.log('Error', error);
       });
   }
