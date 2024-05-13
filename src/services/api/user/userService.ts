@@ -1,12 +1,9 @@
-import api from "../apiService/apiService";
-import { useRepo } from "pinia-orm";
-import { UserDTO } from "src/services/dto/user/UserDTO";
-import { plainToClass } from "class-transformer";
-import useUser from "src/composables/user/userMethods";
-import User from "src/stores/model/user/User";
-import Employee from "src/stores/model/employee/Employee";
-import UserRole from "src/stores/model/role/UserRole";
-import ProfessionalCategory from "src/stores/model/professionalCategory/ProfessionalCategory";
+import api from '../apiService/apiService';
+import { useRepo } from 'pinia-orm';
+import { UserDTO } from 'src/services/dto/user/UserDTO';
+import { plainToClass } from 'class-transformer';
+import useUser from 'src/composables/user/userMethods';
+import User from 'src/stores/model/user/User';
 
 const userRepo = useRepo(User);
 const { createUserFromDTO } = useUser();
@@ -26,11 +23,13 @@ export default {
         return api()
       .post('/login', params)
       .then((resp) => {
-        this.convertUserFromDTO(resp.data.userInfo);
+        if (resp.status === 200) {
+          this.convertUserFromDTO(resp.data.userInfo);
+        }
         return resp;
       })
       .catch((error) => {
-          console.log('Error', error);
+          return error;
       });
 
     },
@@ -52,7 +51,27 @@ export default {
                      .withAll()
                      //.where('username', userloged)
                      .first();
-
-    }
-
+    },
+    piniaSave(user: User) {
+      return userRepo.save(user);;
+    },
+    async getAll() {
+      return await api()
+        .get('/user/getAll')
+        .then((resp) => {
+          this.convertUserFromDTO(resp.data);
+          return resp;
+        })
+        .catch((error) => {
+          console.log(error);
+          console.log('Error', error.message);
+        });
+    },
+    piniaGetAll() {
+      const res = userRepo
+      .query()
+      .withAllRecursive(2)
+      .orderBy('username', 'asc').get();
+      return res;
+    },
 };
