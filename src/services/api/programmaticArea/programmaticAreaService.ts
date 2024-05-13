@@ -42,6 +42,7 @@ export default {
   getById(id: string) {
     return repo
       .query()
+      .with('program')
       .where('id', id)
       .orderBy('description', 'asc')
       .first();

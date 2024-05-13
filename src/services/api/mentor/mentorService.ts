@@ -25,9 +25,20 @@ export default {
     return await api()
       .post(`/mentor/save`, mentor)
       .then((resp) => {
-        console.log(resp.data)
         mentorRepo.save(createMentorFromDTO(resp.data));
-        return resp.data;
+        return resp;
+      })
+      .catch((error) => {
+        console.log('Error', error);
+        return error;
+      });
+  },
+  async update(mentor: any) {
+    return await api()
+      .patch(`/mentor/update`, mentor)
+      .then((resp) => {
+        mentorRepo.save(createMentorFromDTO(resp.data));
+        return resp;
       })
       .catch((error) => {
         console.log('Error', error);
@@ -35,7 +46,6 @@ export default {
       });
   },
   generateAndSaveMentorsFromDTO(mentorList: any) {
-    console.log(mentorList);
     mentorList.forEach((mentorDTO: any) => {
       const mentor = createMentorFromDTO(mentorDTO)
       mentorRepo.save(mentor);
@@ -47,7 +57,7 @@ export default {
   getMentorList() {
     return mentorRepo
       .query()
-      .withAllRecursive(2)
+      .withAllRecursive(3)
       .orderBy('id', 'asc')
       .get();
   },

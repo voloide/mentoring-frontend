@@ -89,7 +89,6 @@
           :rows="searchResults"
           :columns="columns"
           row-key="id"
-          :filter="filter"
         >
           <template v-slot:no-data="{ icon, filter }">
             <div
@@ -195,6 +194,11 @@ onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
 });
 
+const clearSearchParams =()=> {
+    searchParams.value = new Mentees({
+                            employee: new Employee()
+                        })
+}
 const editMentees = async (mentees) => {
   selectedMentees.value = mentees;
 

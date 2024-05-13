@@ -1,8 +1,8 @@
 <template>
     <div style="height: 100%;">
-        <search v-if="isSearchStep" @create="changeStep('create')" @goToMentoringAreas="goToMentoringAreas" @import="changeStep('import')"/>
+        <search v-if="isSearchStep" @create="changeStep('create')" @edit="edit" @goToMentoringAreas="goToMentoringAreas" @import="changeStep('import')"/>
         <import-mentor v-if="isImportStep" />
-        <add-edit v-if="isCreateStep" @goToMentoringAreas="goToMentoringAreas" @close="close"/>
+        <add-edit v-if="isCreateStep || isEditStep" @goToMentoringAreas="goToMentoringAreas" @close="close"/>
         <manage-mentoring-areas v-if="isEditAreasStep" />
     </div>
 </template>
@@ -45,6 +45,9 @@
     const isEditAreasStep = computed(() => {
         return step.value === 'editAreas';
         });
+    const isEditStep = computed(() => {
+        return step.value === 'edit';
+        });
     const changeStep = (stepp) => {
         step.value = stepp;
     }
@@ -54,6 +57,10 @@
         changeStep('editAreas');
     }
 
+    const edit = (mentor) => {
+        selectedMentor.value = mentor;
+        changeStep('edit');
+    }
     const init = () => {
         districtService.getAll()
         healthFacilityService.getAll()

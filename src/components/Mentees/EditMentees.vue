@@ -345,7 +345,6 @@
               <q-btn
                 class="float-right q-ml-md"
                 type="submit"
-                :loading="submitLoading"
                 label="Submeter"
                 color="primary"
               />
@@ -371,6 +370,7 @@ import userMentees from 'src/composables/mentees/menteesMethods';
 import menteesService from 'src/services/api/mentees/menteesService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { useRouter, useRoute } from 'vue-router';
+import { Loading, QSpinnerRings } from 'quasar';
 
 const mentee = ref(
   new Mentees({
@@ -413,16 +413,17 @@ const hfRef = ref(null);
 
 const router = useRouter();
 
-onMounted(() => {
-  // const selectedMentee = inject('selectedMentee');
-});
 
 const selectedMentee = inject('selectedMentee');
 const step = inject('step');
 mentee.value = menteesService.getById(selectedMentee.value.id);
 
+
+onMounted(() => {
+  selectedMenteeLaborInfo.value = (selectedMentee.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG');
+});
+
 const provinces = computed(() => {
-  provinceService.getAll();
   return provinceService.piniaGetAll();
 });
 
@@ -439,7 +440,6 @@ const districts = computed(() => {
     mentee.value.employee.locations[0].province !== null &&
     mentee.value.employee.locations[0].province !== undefined
   ) {
-    districtService.getAll();
     return districtService.getAllDistrictByProvinceId(
       mentee.value.employee.locations[0].province.id
     );
@@ -480,17 +480,27 @@ const submitForm = () => {
     !districtRef.value.hasError &&
     !hfRef.value.hasError
   ) {
+    Loading.show({
+        spinner: QSpinnerRings,
+      })
+
     const target_copy = Object.assign({}, mentee.value);
     menteesService
       .update(createDTOFromMentees(new Mentees(target_copy)))
       .then((resp) => {
-        alertSucess('Mentorado Actualizado com sucesso,').then((result) => {
-          if (result) {
+        if (resp.status ===200 || resp.status ===201) {
+          alertSucess(
+            'Mentorando actualizado.'
+          ).then((result) => {
             cancel();
-          }
-        });
+          });
+        } else {
+          alertError(resp.message);
+        }
+        Loading.hide()
       })
       .catch((error) => {
+        Loading.hide()
         console.log('Error', error.message);
         alertError('Ocorreu um erro inesperado nesta operação.');
       });
@@ -567,7 +577,6 @@ const healthFacilities = computed(() => {
     mentee.value.employee.locations[0].district !== null &&
     mentee.value.employee.locations[0].district !== undefined
   ) {
-    healthFacilityService.getAll();
     return healthFacilityService.getAllOfDistrict(
       mentee.value.employee.locations[0].district.id
     );

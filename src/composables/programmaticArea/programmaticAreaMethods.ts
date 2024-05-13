@@ -1,6 +1,5 @@
 import ProgrammaticArea from "src/stores/model/programmaticArea/ProgrammaticArea";
 import useProgram from "src/composables/program/programMethods";
-import programService from 'src/services/api/program/programService';
 
 export default function useProgrammaticArea() {
 
@@ -24,7 +23,6 @@ export default function useProgrammaticArea() {
             code: programmaticArea.code,
             name: programmaticArea.name,
             description: programmaticArea.description,
-            // programDTO: createDTOFromProgram(programService.getById(programmaticArea.program_id)),
             programDTO: createDTOFromProgram(programmaticArea.program),
           }
         return  programmaticAreaDTO;

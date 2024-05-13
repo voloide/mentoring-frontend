@@ -337,7 +337,7 @@ const startComposingMentor = (rowFromExcel) => {
                   mentorService.save(mentorDTO)
                     .then((resp) => {
                       console.log(resp)
-                      if(resp.response.data.status !== 200){
+                      if(resp.status !== 201){
                         totalNotImported.value += 1
                         addErrorRow(resp.response.data.message)
                       } else {

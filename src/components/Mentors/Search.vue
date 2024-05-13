@@ -203,7 +203,7 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['goToMentoringAreas', 'import']);
+const emit = defineEmits(['goToMentoringAreas', 'import', 'edit']);
 const currUser = ref(new User())
 
 onMounted(() => {
@@ -212,6 +212,7 @@ onMounted(() => {
 
 const editMentor = (mentor) => {
     selectedMentor.value = mentor;
+    emit('edit', mentor);
 }
 
 const clearSearchParams =()=> {
