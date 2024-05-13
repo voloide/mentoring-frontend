@@ -29,7 +29,9 @@ export default {
     repo.flush();
   },
   piniaGetAll() {
-    return repo.query().orderBy('description', 'asc').get();
+    return repo.query().where((partener) => {
+      return partener.uuid !== '398f0ffeb8fe11edafa10242ac120002';
+    }).orderBy('description', 'asc').get();
   },
   getByName(name: string) {
     return repo

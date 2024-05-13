@@ -3,13 +3,13 @@
     <div class="q-ma-md q-pa-md page-container">
       <div class="row">
         <q-banner dense inline-actions class="text-white bg-primary col-12  q-px-md d-flex align-items-center">
-          <div class="row">
-            <div class="col-10">
+          <div class="row vertical-middle">
+            <div class="col-10 vertical-middle">
               <b>Áreas de Mentoria do Mentor {{ selectedMentor.employee.name }}</b>
             </div>
             <q-space></q-space>
             <div class="text-right col-2">
-              <q-btn class="btn-associar" size="sm" @click="adicionarNovaLinha" dense round color="secondary" icon="add"></q-btn>
+              <q-btn class="btn-associar" size="md" @click="adicionarNovaLinha" dense round color="secondary" icon="add"></q-btn>
             </div>
           </div>
         </q-banner>
@@ -21,7 +21,6 @@
             :rows="mentorProgrammaticAreas"
             :columns="columns"
             row-key="id"
-            :filter="filter"
           >
             <template v-slot:no-data="{ icon, filter }">
               <div class="full-width row flex-center text-primary q-gutter-sm text-body2">

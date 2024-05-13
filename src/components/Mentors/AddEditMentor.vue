@@ -348,6 +348,7 @@
                 label="Submeter"
                 color="primary"
               />
+              
             </div>
           </div>
         </div>
@@ -410,8 +411,21 @@ const provinceRef = ref(null);
 const districtRef = ref(null);
 const hfRef = ref(null);
 
+const selectedMentor = inject('selectedMentor');
+const step = inject('step');
+
+const isEditStep = computed(() => {
+    return step.value === 'edit';
+  });
+
+const init = () => {
+  if (isEditStep.value) {
+    mentor.value = Object.assign({}, selectedMentor.value);
+    selectedMentorLaborInfo.value = (mentor.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG');
+  }
+};
 onMounted(() => {
-  //init();
+  init();
 });
 
 const provinces = computed(() => {
@@ -475,11 +489,32 @@ const submitForm = () => {
         spinner: QSpinnerRings,
       })
     const target_copy = Object.assign({}, mentor.value);
-    mentorService
+    if (isEditStep.value) {
+      mentorService
+      .update(createDTOFromMentor(new Mentor(target_copy)))
+      .then((resp) => {
+        
+        if (resp.status ===200 || resp.status ===201) {
+          alertSucess(
+            'Mentor actualizado.'
+          ).then((result) => {
+            emit('close');
+          });
+        } else {
+          alertError(resp.message);
+        }
+        Loading.hide()
+      })
+      .catch((error) => {
+        Loading.hide()
+        console.log('Error', error);
+      });
+    } else {
+      mentorService
       .save(createDTOFromMentor(new Mentor(target_copy)))
       .then((resp) => {
         
-        if (resp.status ===200) {
+        if (resp.status ===200 || resp.status ===201) {
           alertSucessAction(
             'Mentor criado com sucesso, avançar para áreas de mentória'
           ).then((result) => {
@@ -490,7 +525,7 @@ const submitForm = () => {
             }
           });
         } else {
-          alertError(resp.response.data.message);
+          alertError(resp.message);
         }
         Loading.hide()
       })
@@ -498,6 +533,8 @@ const submitForm = () => {
         Loading.hide()
         console.log('Error', error);
       });
+    }
+    
   }
 };
 const isValidEmail = (email) => {
@@ -633,10 +670,6 @@ const filterCategories = (val, update, abort) => {
   }
 };
 
-const step = inject('step');
-const init = () => {
-  mentor.value.employee.locations.push(location);
-};
 
 const onChangeProvincia = () => {
   mentor.value.employee.locations[0].district = '';

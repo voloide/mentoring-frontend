@@ -27,6 +27,7 @@ export default {
 
       const tutor = mentorService.getById(mentor_id)
       const programmaticArea = programmaticAreaService.getById(programmaticArea_id)
+      console.log(programmaticArea);
 
       return createDTOFromTutorProgrammaticArea(new TutorProgrammaticArea({
         mentor: tutor,

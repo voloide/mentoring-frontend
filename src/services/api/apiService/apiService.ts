@@ -1,6 +1,4 @@
 import axios, { Axios, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { plainToClass, classToPlainFromExist } from 'class-transformer';
-import UsersService from 'src/services/api/user/UsersService';
 import { useSystemUtils } from 'src/composables/shared/systemUtils/systemUtils';
 import { LocalStorage } from 'quasar';
 import useNotify from 'src/composables/shared/notify/useNotify';
@@ -14,7 +12,7 @@ const instance = axios.create({
     baseURL: process.env.API_URL,
     responseType: 'json',
     validateStatus(status) {
-      return [200].includes(status)
+      return status >= 200 && status < 300;
     },
 });
 const numTries = 0;
@@ -26,13 +24,12 @@ function logout () {
   localStorage.removeItem('username');
   localStorage.removeItem('userInfo');
   localStorage.removeItem('tokenExpiration');
-  // localStorage.removeItem('tokenExpiration');
   window.location.reload();
 }
 
 // Função para iniciar o temporizador
 function fixNextTokenExpirationTime() {
-  // localStorage.setItem('tokenExpiration', String(Date.now() + 1200000)); // 20 minutos sem request
+   localStorage.setItem('tokenExpiration', String(Date.now() + 600000)); 
   // localStorage.setItem('tokenExpiration', String(Date.now() + 30000)); // 30 segundos sem request para teste
 }
 
@@ -53,12 +50,12 @@ instance.interceptors.request.use(
 
       if (tokenExpiration && currentTime < Number(tokenExpiration)) {
         // O token ainda é válido, reiniciar o temporizador
-        // fixNextTokenExpirationTime();
+         fixNextTokenExpirationTime();
       } else {
         // O token expirou, fazer o logout
-        // localStorage.setItem('tokenExpiration', 0);
-        // logout();
-        // return; // Interromper a solicitação
+         localStorage.setItem('tokenExpiration', '0');
+         logout();
+         return; // Interromper a solicitação
       }
       const authToken = localStorage.getItem('access_token');
       request.headers.Authorization = `Bearer ${authToken}`;

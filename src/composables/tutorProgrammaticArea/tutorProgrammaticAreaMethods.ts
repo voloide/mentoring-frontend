@@ -35,6 +35,7 @@ export default function useTutorProgrammaticArea() {
         const tutorProgrammaticAreaDTO = {
             id: tutorProgrammaticArea.id,
             uuid: tutorProgrammaticArea.uuid,
+            mentorId: tutorProgrammaticArea.mentor !== null ? tutorProgrammaticArea.mentor.id : null,
             // tutorDTO: createDTOFromMentor(tutorProgrammaticArea.mentor),
             programmaticAreaDTO: createDTOFromProgrammaticArea(tutorProgrammaticArea.programmaticArea),
             lifeCycleStatus: tutorProgrammaticArea.lifeCycleStatus,

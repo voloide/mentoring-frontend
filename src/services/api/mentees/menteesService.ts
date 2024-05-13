@@ -18,10 +18,11 @@ export default {
   },
 
   async update(mentees: any) {
+    console.log(mentees);
     return await api()
-      .put('/tutored/update', mentees)
+      .patch('/tutored/update', mentees)
       .then((resp) => {
-        menteesRepo.update(createMenteesFromDTO(resp.data));
+        menteesRepo.save(createMenteesFromDTO(resp.data));
         return resp;
       })
       .catch((error) => {
@@ -56,7 +57,7 @@ export default {
   getById(id: number) {
     return menteesRepo
       .query()
-      .withAllRecursive(2)
+      .withAllRecursive(3)
       .where('id', id)
       .orderBy('id', 'asc')
       .first();
