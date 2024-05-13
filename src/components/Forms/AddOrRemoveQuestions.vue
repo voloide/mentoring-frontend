@@ -257,6 +257,7 @@ import questionCategoryService from 'src/services/api/question/questionCategoryS
 import responseTypeService from 'src/services/api/question/responseTypeService';
 import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import { Loading, QSpinnerRings } from 'quasar';
 
 const showAddOrRemoveQuestions = inject('showAddOrRemoveQuestions');
 
@@ -328,6 +329,9 @@ const filterCategories = (val, update, abort) => {
 };
 
 const searchQuestions = () => {
+  Loading.show({
+        spinner: QSpinnerRings,
+      });
   const params = {
         code: searchParams.value.question.code,
         description: searchParams.value.question.question,
@@ -336,7 +340,9 @@ const searchQuestions = () => {
     Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
     questionService.search(params).then((response) => {
     composeFormQuestions(response.data);
+    Loading.hide()
     }).catch((error) => {
+      Loading.hide()
         console.log(error);
       });
 }
@@ -388,6 +394,7 @@ const columns = [
 ];
 
 const composeFormQuestions = (questions) => {
+  searchResults.value = [];
   questions.forEach((question) => {
     let myUUID = uuid();
     const fQuestion = ref(new FormQuestion({

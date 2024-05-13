@@ -35,6 +35,13 @@ export default {
                       .query()
                       .orderBy('designation', 'asc')
                       .get();
-      }
+      },
+        getById(id: number) {
+            return provinceRepo
+                .query()
+                .where('id', id)
+                .orderBy('designation', 'asc')
+                .first();
+        }
 
 };

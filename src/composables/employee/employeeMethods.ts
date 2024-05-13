@@ -33,7 +33,6 @@ export default function useEmployee() {
   function createDTOFromEmployee(employee: Employee) {
     const { createDTOFromProfessionalCategory } = useProfessionalCategory();
     const { createDTOFromPartner } = usePartner();
-    console.log(employee);
     const employeeDTO = {
       id: employee.id,
       uuid: employee.uuid,
@@ -53,6 +52,8 @@ export default function useEmployee() {
   }
 
   function createLocation(locationDTOS: any) {
+    if (locationDTOS === undefined || locationDTOS === null) return null;
+
     const { createLocationFromDTO } = useLocation();
     const generatedLocations = [];
     locationDTOS?.forEach((location) => {

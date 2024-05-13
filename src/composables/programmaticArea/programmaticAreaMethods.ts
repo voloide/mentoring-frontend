@@ -4,15 +4,15 @@ import useProgram from "src/composables/program/programMethods";
 export default function useProgrammaticArea() {
 
     function createProgrammaticAreaFromDTO(programmaticAreaDTO: any) {
-      const { createProgramFromDTO } = useProgram();
+      const {createProgramFromDTO } = useProgram();
         return  new ProgrammaticArea({
-            id: programmaticAreaDTO.id,
-            uuid: programmaticAreaDTO.uuid,
-            code: programmaticAreaDTO.code,
-            name: programmaticAreaDTO.name,
-            description: programmaticAreaDTO.description,
-            program: createProgramFromDTO(programmaticAreaDTO.program),
-          })
+          id: programmaticAreaDTO.id,
+          uuid: programmaticAreaDTO.uuid,
+          code: programmaticAreaDTO.code,
+          name: programmaticAreaDTO.name,
+          description: programmaticAreaDTO.description,
+          program: createProgramFromDTO(programmaticAreaDTO.program)
+        })
     }
 
     function createDTOFromProgrammaticArea(programmaticArea: ProgrammaticArea) {

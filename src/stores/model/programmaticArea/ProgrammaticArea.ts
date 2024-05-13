@@ -13,6 +13,7 @@ export default class ProgrammaticArea extends Model {
       name: this.attr(''),
       description: this.attr(''),
       program_id: this.attr(''),
+      
       // Relationships
       program: this.belongsTo(Program, 'program_id'),
     };

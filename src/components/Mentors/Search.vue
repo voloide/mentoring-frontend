@@ -10,7 +10,6 @@
                     ref="nameRef"
                     class="col"
                     v-model="searchParams.employee.name"
-                    @update:model-value="(value) => (filter = value)"
                 >
                     <template
                     v-slot:append
@@ -30,7 +29,6 @@
                     ref="nuitRef"
                     class="col q-ml-md"
                     v-model="searchParams.employee.nuit"
-                    @update:model-value="(value) => (filter = value)"
                 >
                     <template
                     v-slot:append
@@ -50,7 +48,6 @@
                     ref="phoneRef"
                     class="col q-ml-md"
                     v-model="searchParams.employee.phoneNumber"
-                    @update:model-value="(value) => (filter = value)"
                 >
                     <template
                     v-slot:append
@@ -98,7 +95,6 @@
                     :rows="searchResults"
                     :columns="columns"
                     row-key="id"
-                    :filter="filter"
                 >
                 <template v-slot:no-data="{ icon, filter }">
                     <div
@@ -107,7 +103,7 @@
                         <span> Sem resultados para visualizar </span>
                         <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
                     </div>
-                    </template>
+                </template>
                     <template #body="props">
                         <q-tr :props="props">
                             <q-td key="nuit" :props="props">
@@ -154,7 +150,6 @@
 
             <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
                 <q-fab
-                    v-model="fabRight"
                     vertical-actions-align="right"
                     color="primary"
                     glossy
@@ -176,6 +171,9 @@ import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
 import { onMounted, ref, toRaw, inject } from 'vue'
 import UsersService from 'src/services/api/user/userService'
+import programService from 'src/services/api/program/programService';
+import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
+import TutorProgrammaticAreaService from 'src/services/api/TutorProgrammaticArea/TutorProgrammaticAreaService'
 import { provide } from 'vue'
 
 
@@ -205,7 +203,7 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['goToMentoringAreas']);
+const emit = defineEmits(['goToMentoringAreas', 'import', 'edit']);
 const currUser = ref(new User())
 
 onMounted(() => {
@@ -214,6 +212,13 @@ onMounted(() => {
 
 const editMentor = (mentor) => {
     selectedMentor.value = mentor;
+    emit('edit', mentor);
+}
+
+const clearSearchParams =()=> {
+    searchParams.value = new Mentor({
+                            employee: new Employee()
+                        })
 }
 const search = () => {
     const params = {
@@ -224,11 +229,8 @@ const search = () => {
     }
     Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
 
-    console.log(params);
     mentorService.search(params).then((response) => {
-        console.log(response);
         searchResults.value = mentorService.getMentorList();
-        console.log(searchResults.value);
     }).catch((error) => {
         console.log(error);
       });
@@ -237,6 +239,5 @@ const search = () => {
 const manageMentoringAreas = (mentor) => {
     emit('goToMentoringAreas', mentor);
 }
-
 
 </script>

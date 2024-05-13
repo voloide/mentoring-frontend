@@ -11,7 +11,7 @@ export default {
 
     async getByDistrict(districtId: any) {
         return await api()
-           .get(`/healthFacilities/getAllOfDistrict/${districtId}`)
+           .get(`/healthfacility/getAllOfDistrict/${districtId}`)
           .then((resp) => {
             this.generateAndSaveEntityFromDTO(resp.data);
             return resp;
@@ -22,7 +22,7 @@ export default {
       },
       async getAll() {
         return await api()
-           .get(`/healthFacilities/getall`)
+           .get(`/healthfacility/getall`)
           .then((resp) => {
             this.generateAndSaveEntityFromDTO(resp.data);
             return resp;
@@ -33,7 +33,7 @@ export default {
       },
       async getByProvince(provinceId: any) {
         return await api()
-           .get(`/healthFacilities/getAllOfProvince/${provinceId}`)
+           .get(`/healthfacility/getAllOfProvince/${provinceId}`)
           .then((resp) => {
             this.generateAndSaveEntityFromDTO(resp.data);
             return resp;
@@ -48,24 +48,31 @@ export default {
           healthFacilityRepo.save(entity);
         });
 
-      },
-      deleteAllFromStorage() {
-        healthFacilityRepo.flush();
-      },
-      piniaGetAll() {
-        return healthFacilityRepo
-                                .query()
+  },
+  deleteAllFromStorage() {
+    healthFacilityRepo.flush();
+  },
+  piniaGetAll() {
+    return healthFacilityRepo
+      .query()
                                 .withAllRecursive(2)
-                                .orderBy('healthFacility', 'asc')
-                                .get();
-                },
-      getAllOfDistrict(districtId: number) {
-        return healthFacilityRepo
-                                .query()
-                                .with('district')
-                                .where('districtId', districtId)
-                                .get();
-      },
+      .orderBy('healthFacility', 'asc')
+      .get();
+  },
+  getAllOfDistrict(districtId: number) {
+    return healthFacilityRepo
+      .query()
+      .with('district')
+      .where('districtId', districtId)
+      .get();
+  },
+  getByHealthFacility(healthFacility: string) {
+    return healthFacilityRepo
+      .query()
+      .with('district')
+      .where('healthFacility', healthFacility)
+      .first();
+  },
       async saveHealthFacility(healthFacility: any) {
         return await api()
           .post('/healthFacilities/save', healthFacility)

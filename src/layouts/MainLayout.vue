@@ -157,9 +157,9 @@
       <q-banner
         dense
         inline-actions
-        class="text-white bg-primary q-mx-md q-px-md"
+        class="text-white bg-primary q-mx-md q-px-md text-center"
       >
-        You have lost connection to the internet. This app is offline.
+        Mentoria
         <template v-slot:action>
           <q-img src="~assets/mentoring.png" />
         </template>
@@ -170,24 +170,44 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeMount} from 'vue';
 import UsersService from 'src/services/api/user/userService';
-import { Loading, QSpinnerGears } from 'quasar';
+import { Loading, QSpinnerRings } from 'quasar';
 import { useRouter } from 'vue-router';
 import useEmployee from 'src/composables/employee/employeeMethods';
+import useUser from "src/composables/user/userMethods";
 
 const leftDrawerOpen = ref(false);
 const link = ref('home');
 const router = useRouter();
 const { fullName } = useEmployee();
+const { createUserFromDTO } = useUser();
 
 const currUser = computed(() => {
   return UsersService.getLogedUser();
 });
 
+onBeforeMount(() => {
+      initUserInfo();
+    });
+
+
+const initUserInfo =()=> {
+  const currentTimestamp = Date.now();
+  const tokenExpiration = localStorage.getItem('tokenExpiration');
+
+  if (tokenExpiration > currentTimestamp) {
+    const userInfo = localStorage.getItem('userInfo');
+    const user = createUserFromDTO(JSON.parse(userInfo));
+    UsersService.piniaSave(user);
+  } else {
+    UsersService.logout();
+  }
+};
+
 const logout = () => {
   Loading.show({
-    spinner: QSpinnerGears,
+    spinner: QSpinnerRings,
   });
   UsersService.logout();
   Loading.hide();

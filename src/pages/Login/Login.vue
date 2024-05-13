@@ -94,7 +94,8 @@
     import { ref } from 'vue'
     import UsersService from 'src/services/api/user/userService'
     import { useRouter } from 'vue-router';
-    import { Loading, QSpinnerGears } from 'quasar';
+    import { Loading, QSpinnerRings } from 'quasar';
+    import { useSwal } from 'src/composables/shared/dialog/dialog';
 
     const username = ref('');
     const password = ref('');
@@ -102,10 +103,11 @@
     const passwordRef = ref(null);
     const submitting = ref(false);
     const router = useRouter();
+    const { alertError } = useSwal();
 
     const authUser = async () => {
       Loading.show({
-        spinner: QSpinnerGears,
+        spinner: QSpinnerRings,
       })
         const encodedStringBtoA = btoa(
             String(username.value).concat(':').concat(password.value)
@@ -130,24 +132,14 @@
                       localStorage.setItem('tokenExpiration', String(Date.now() + 600000));
 
                       router.push({ path: '/' });
+                  } else {
+                    alertError(response.response.data.message);
                   }
                   Loading.hide()
                 })
                 .catch((error) => {
                   Loading.hide()
-                  console.log(error);
                   submitting.value = false;
-                  if (error.request.response != null) {
-                      const arrayErrors = JSON.parse(error.request.response);
-                      if (arrayErrors.total == null) {
-                      listErrors.push(arrayErrors.message);
-                      } else {
-                      arrayErrors._embedded.errors.forEach((element) => {
-                          listErrors.push(element.message);
-                      });
-                      }
-                      console.log(listErrors);
-                  }
                 });
         }
     }

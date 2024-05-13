@@ -1,4 +1,5 @@
 import { Model } from 'pinia-orm';
+import ProgrammaticArea from '../programmaticArea/ProgrammaticArea';
 
 export default class Program extends Model {
   static entity = 'programs';
@@ -9,7 +10,9 @@ export default class Program extends Model {
       id: this.number(() => 0),
       uuid: this.attr(''),
       name: this.attr(''),
-      description: this.attr(''),
+      description: this.attr(''), 
+          
+      programmaticAreas: this.hasMany(ProgrammaticArea, 'program_id'),
     };
   }
   static piniaOptions = {

@@ -27,7 +27,7 @@ const transformTest = () => {
     confirmPassword: "secretpass"
   };
   const userDTO = plainToClass(UserDTO, userPinia, { excludeExtraneousValues: true });
-  console.log(userDTO);
+  
 
   const userDTO1 = new UserDTO({
     firstName: 'John',
@@ -37,7 +37,7 @@ const transformTest = () => {
     password: "secretpass"
   });
 
-  console.log(userDTO1);
+ 
   const u = new User({
     id: 10,
     uuid: 'dasdasdasdasdasd',
@@ -46,6 +46,5 @@ const transformTest = () => {
     email: userDTO.email
   })
 
-  console.log(u);
 }
 </script>

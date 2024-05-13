@@ -8,22 +8,22 @@ const { createProfessionalCategoryFromDTO } = useProfessionalCategory();
 
 export default {
 
-      async getAll() {
-        return await api()
-           .get('/professionalCategories/getall')
-          .then((resp) => {
-            this.generateAndSaveEntityFromDTO(resp.data);
-            return resp;
-          })
-          .catch((error) => {
-            console.log('Error', error.message);
-          });
-      },
-      generateAndSaveEntityFromDTO(dtoList: any) {
-        dtoList.forEach((dto: any) => {
-          const entity = createProfessionalCategoryFromDTO(dto)
-          repo.save(entity);
-        });
+  async getAll() {
+    return await api()
+      .get(`/professionalCategories/getall`)
+      .then((resp) => {
+        this.generateAndSaveEntityFromDTO(resp.data);
+        return resp;
+      })
+      .catch((error) => {
+        console.log('Error', error.message);
+      });
+  },
+  generateAndSaveEntityFromDTO(dtoList: any) {
+    dtoList.forEach((dto: any) => {
+      const entity = createProfessionalCategoryFromDTO(dto)
+      repo.save(entity);
+    });
 
       },
       deleteAllFromStorage() {
@@ -45,5 +45,4 @@ export default {
             console.log('Error', error.message);
           });
       },
-
 };
