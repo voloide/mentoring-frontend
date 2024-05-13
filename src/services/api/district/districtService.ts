@@ -31,7 +31,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto: any) => {
       const entity = createDistrictFromDTO(dto);
       repo.save(entity);
     });

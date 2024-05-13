@@ -66,5 +66,15 @@ export default {
                                 .where('districtId', districtId)
                                 .get();
       },
-
+      async saveHealthFacility(healthFacility: any) {
+        return await api()
+          .post('/healthFacilities/save', healthFacility)
+          .then((resp) => {
+            healthFacilityRepo.save(createHealthFacilityFromDTO(resp.data));
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+      },
 };

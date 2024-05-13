@@ -52,4 +52,15 @@ export default {
       .orderBy('question', 'asc')
       .first();
   },
+  async saveQuestion(question: any) {
+        return await api()
+          .post('/questions/save', question)
+          .then((resp) => {
+            repo.save(createQuestionFromDTO(resp.data));
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+  },
 };

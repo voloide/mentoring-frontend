@@ -21,7 +21,7 @@ export default {
           });
       },
       generateAndSaveEntityFromDTO(dtoList: any) {
-        dtoList.forEach(dto => {
+        dtoList.forEach((dto: any) => {
           const province = createProvinceFromDTO(dto)
           provinceRepo.save(province);
         });

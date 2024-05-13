@@ -1,6 +1,65 @@
 <template>
   <div class="q-pt-sm" style="height: 100%">
     <div class="q-ma-md q-pa-md page-container">
+      <div v-if="openForm" class="row">
+                <q-input
+                    outlined
+                    label="Nome"
+                    dense
+                    ref="nameRef"
+                    class="col"
+                    v-model="data.name"
+                >
+                    <template
+                    v-slot:append
+                    >
+                    <q-icon
+                        name="close"
+                        @click="data.name = ''"
+                        class="cursor-pointer"
+                    />
+                    </template>
+                </q-input>
+
+                <q-input
+                    outlined
+                    label="Descrição"
+                    dense
+                    ref="descriptionRef"
+                    class="col q-ml-md"
+                    v-model="data.description"
+                >
+                    <template
+                    v-slot:append
+                    >
+                    <q-icon
+                        name="close"
+                        @click="data.description = ''"
+                        class="cursor-pointer"
+                    />
+                    </template>
+                </q-input>
+
+                <q-space />
+                <q-btn
+                    @click="submitForm"
+                    class="q-ml-md q-mb-xs float-right"
+                    square
+                    color="primary"
+                    icon="save"
+                >
+                    <q-tooltip class="bg-green-5">Salvar</q-tooltip>
+                </q-btn>
+                <q-btn
+                    @click="closeForm"
+                    class="q-ml-md q-mb-xs float-right"
+                    square
+                    color="amber"
+                    icon="close"
+                >
+                    <q-tooltip class="bg-amber-5">Fechar</q-tooltip>
+                </q-btn>
+            </div>
       <div>
         <q-table
           class="col"
@@ -60,16 +119,9 @@
           <q-fab-action
             label-position="left"
             color="primary"
-            @click="$emit('create')"
+            @click="openForm = true"
             icon="edit_square"
             label="Criar"
-          />
-          <q-fab-action
-            label-position="left"
-            color="secondary"
-            @click="$emit('import')"
-            icon="cloud_upload"
-            label="Importar"
           />
         </q-fab>
       </q-page-sticky>
@@ -78,16 +130,20 @@
 </template>
 
 <script setup>
-import useEmployee from 'src/composables/employee/employeeMethods';
 import PartnerService from 'src/services/api/partner/partnerService';
 import User from 'src/stores/model/user/User';
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/userService';
+import partnerService from 'src/services/api/partner/partnerService';
 
-const { fullName } = useEmployee();
-const step = inject('step');
+
 const searchResults = ref([]);
 const selectedPartner = ref('');
+const data = ref({
+  name:'',
+  description:''
+})
+const openForm = ref(false);
 const columns = [
   {
     name: 'name',
@@ -104,7 +160,6 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['goToPartneringAreas']);
 const currUser = ref(new User());
 
 onMounted(() => {
@@ -114,7 +169,21 @@ onMounted(() => {
   // console.log('----piniaGetAll-----', PartnerService.piniaGetAll());
 });
 
-const editPartner = (Partner) => {
-  selectedPartner.value = Partner;
+const submitForm = () => {
+  const partner ={
+    name: data.value.name,
+    description: data.value.description
+  }
+  partnerService.savePartner(partner).then(closeForm)
+}
+
+const closeForm = () =>{
+  openForm.value = false;
+  data.value.description ='';
+  data.value.name =''
+}
+
+const editPartner = (partner) => {
+  selectedPartner.value = partner;
 };
 </script>

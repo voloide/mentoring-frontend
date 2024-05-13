@@ -38,4 +38,15 @@ export default {
       .orderBy('description', 'asc')
       .first();
   },
+  async savePartner(partner: any) {
+    return await api()
+      .post('/partner', partner)
+      .then((resp) => {
+        repo.save(createPartnerFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.log('Error', error.message);
+      });
+  },
 };

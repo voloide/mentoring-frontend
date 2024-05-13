@@ -30,5 +30,16 @@ export default {
   piniaGetAll() {
     const programs = repo.query().orderBy('name', 'asc').get();
     return programs;
-  }
+  },
+  async saveProgram(program: any) {
+    return await api()
+      .post('/programs/save', program)
+      .then((resp) => {
+        repo.save(createProgramFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.log('Error', error.message);
+      });
+  },
 };

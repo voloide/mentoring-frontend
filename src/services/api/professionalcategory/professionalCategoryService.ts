@@ -1,6 +1,5 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import { plainToClass } from 'class-transformer';
 import ProfessionalCategory from 'src/stores/model/professionalCategory/ProfessionalCategory';
 import useProfessionalCategory from 'src/composables/professionalCategory/professionalCategoryMethods';
 
@@ -34,6 +33,17 @@ export default {
         return repo.query()
                    .orderBy('description', 'asc')
                    .get();
-      }
+      },
+      async saveProfessionalCategory(professionalCategory: any) {
+        return await api()
+          .post('/professionalCategories/save', professionalCategory)
+          .then((resp) => {
+            repo.save(createProfessionalCategoryFromDTO(resp.data));
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+      },
 
 };

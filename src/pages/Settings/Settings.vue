@@ -42,13 +42,13 @@
 
 <script setup>
 import { ref } from 'vue';
-import Programs from 'src/components/Programs/Search.vue';
-import Questions from 'src/components/Questions/Search.vue';
-import ProgrammaticAreas from 'src/components/ProgrammaticAreas/Search.vue';
-import ProfessionalCategories from 'src/components/ProfessionalCategories/Search.vue';
-import HealthFacilities from 'src/components/HealthFacilities/Search.vue';
-import Partners from 'src/components/Partners/Search.vue';
-import Users from 'src/components/Users/Search.vue';
+import Programs from 'src/components/Programs/Programs.vue';
+import Questions from 'src/components/Questions/Questions.vue';
+import ProgrammaticAreas from 'src/components/ProgrammaticAreas/ProgrammaticAreas.vue';
+import ProfessionalCategories from 'src/components/ProfessionalCategories/ProfessionalCategories.vue';
+import HealthFacilities from 'src/components/HealthFacilities/HealthFacilities.vue';
+import Partners from 'src/components/Partners/Partners.vue';
+import Users from 'src/components/Users/Users.vue';
 import { useLoading } from 'src/composables/shared/loading/loading';
 import programService from 'src/services/api/program/programService';
 import programmaticAreasService from 'src/services/api/programmaticArea/programmaticAreaService';

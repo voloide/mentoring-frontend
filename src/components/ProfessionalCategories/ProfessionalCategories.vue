@@ -1,6 +1,65 @@
 <template>
   <div class="q-pt-sm" style="height: 100%">
     <div class="q-ma-md q-pa-md page-container">
+      <div v-if="openForm" class="row">
+                <q-input
+                    outlined
+                    label="Code"
+                    dense
+                    ref="codeRef"
+                    class="col"
+                    v-model="data.code"
+                >
+                    <template
+                    v-slot:append
+                    >
+                    <q-icon
+                        name="close"
+                        @click="data.code = ''"
+                        class="cursor-pointer"
+                    />
+                    </template>
+                </q-input>
+
+                <q-input
+                    outlined
+                    label="Descrição"
+                    dense
+                    ref="descriptionRef"
+                    class="col q-ml-md"
+                    v-model="data.description"
+                >
+                    <template
+                    v-slot:append
+                    >
+                    <q-icon
+                        name="close"
+                        @click="data.description = ''"
+                        class="cursor-pointer"
+                    />
+                    </template>
+                </q-input>
+
+                <q-space />
+                <q-btn
+                    @click="submitForm"
+                    class="q-ml-md q-mb-xs float-right"
+                    square
+                    color="primary"
+                    icon="save"
+                >
+                    <q-tooltip class="bg-green-5">Salvar</q-tooltip>
+                </q-btn>
+                <q-btn
+                    @click="closeForm"
+                    class="q-ml-md q-mb-xs float-right"
+                    square
+                    color="amber"
+                    icon="close"
+                >
+                    <q-tooltip class="bg-amber-5">Fechar</q-tooltip>
+                </q-btn>
+      </div>
       <div>
         <q-table
           class="col"
@@ -60,16 +119,9 @@
           <q-fab-action
             label-position="left"
             color="primary"
-            @click="$emit('create')"
+            @click="openForm = true"
             icon="edit_square"
             label="Criar"
-          />
-          <q-fab-action
-            label-position="left"
-            color="secondary"
-            @click="$emit('import')"
-            icon="cloud_upload"
-            label="Importar"
           />
         </q-fab>
       </q-page-sticky>
@@ -78,16 +130,19 @@
 </template>
 
 <script setup>
-import useEmployee from 'src/composables/employee/employeeMethods';
 import ProfessionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 import User from 'src/stores/model/user/User';
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/userService';
+import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 
-const { fullName } = useEmployee();
-const step = inject('step');
 const searchResults = ref([]);
 const selectedProfessionalCategory = ref('');
+const openForm = ref(false);
+const data = ref({
+  code:'',
+  description:''
+})
 const columns = [
   {
     name: 'code',
@@ -104,7 +159,6 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['goToProfessionalCategoryingAreas']);
 const currUser = ref(new User());
 
 onMounted(() => {
@@ -113,6 +167,20 @@ onMounted(() => {
   // console.log("----searchResults----",searchResults.value)
   // console.log('----piniaGetAll-----', ProfessionalCategoryService.piniaGetAll());
 });
+
+const submitForm = () => {
+  const professionalCategory ={
+    code: data.value.code,
+    description: data.value.description
+  }
+  professionalCategoryService.saveProfessionalCategory(professionalCategory).then(closeForm)
+}
+
+const closeForm = () =>{
+  openForm.value = false;
+  data.value.code ='';
+  data.value.description=''
+}
 
 const editProfessionalCategory = (ProfessionalCategory) => {
   selectedProfessionalCategory.value = ProfessionalCategory;
