@@ -176,29 +176,28 @@
           glossy
           icon="add"
           direction="left"
-        >
-          <q-fab-action
-            label-position="left"
-            color="primary"
-            @click="openForm = true"
-            icon="edit_square"
-            label="Criar"
-          />
-        </q-fab>
+          @click="openForm = true"
+        />
       </q-page-sticky>
     </div>
   </div>
+  <q-dialog persistent v-model="openForm">
+      <UserForm
+        @close="openForm = false"
+      />
+  </q-dialog>
 </template>
 
 <script setup>
 import useEmployee from 'src/composables/employee/employeeMethods';
 import userService from 'src/services/api/user/userService';
 import User from 'src/stores/model/user/User';
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref, inject, provide } from 'vue';
 import UsersService from 'src/services/api/user/userService';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
 import provinceService from 'src/services/api/province/provinceService';
 import { computed } from 'vue';
+import UserForm from './UserForm.vue';
 
 const { fullName } = useEmployee();
 const step = inject('step');
@@ -280,4 +279,6 @@ const closeForm = () => {
 const editUser = (user) => {
   selectedUser.value = user;
 };
+
+provide('openForm', openForm);
 </script>
