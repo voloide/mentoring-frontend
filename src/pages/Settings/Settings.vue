@@ -2,41 +2,63 @@
   <div>
     <ul>
       <li>
-        <a @click="selectOption('programs')" :class="{ selected: selectedOption === 'programs' }">Programas</a>
+        <a
+          @click="changeStep('programs')"
+          :class="{ selected: step === 'programs' }"
+          >Programas</a
+        >
       </li>
       <li>
-        <a @click="selectOption('programmaticArea')" :class="{ selected: selectedOption === 'programmaticArea' }">Áreas
-          de Mentoria</a>
+        <a
+          @click="changeStep('programmaticArea')"
+          :class="{ selected: step === 'programmaticArea' }"
+          >Áreas de Mentoria</a
+        >
       </li>
       <li>
-        <a @click="selectOption('professionalCategory')"
-          :class="{ selected: selectedOption === 'professionalCategory' }">Categorias Profissionais</a>
+        <a
+          @click="changeStep('professionalCategory')"
+          :class="{ selected: step === 'professionalCategory' }"
+          >Categorias Profissionais</a
+        >
       </li>
       <li>
-        <a @click="selectOption('question')" :class="{ selected: selectedOption === 'question' }">Questões</a>
+        <a
+          @click="changeStep('question')"
+          :class="{ selected: step === 'question' }"
+          >Questões</a
+        >
       </li>
       <li>
-        <a @click="selectOption('healthFacility')" :class="{ selected: selectedOption === 'healthFacility' }">Unidades
-          Sanitárias</a>
+        <a
+          @click="changeStep('healthFacility')"
+          :class="{ selected: step === 'healthFacility' }"
+          >Unidades Sanitárias</a
+        >
       </li>
       <li>
-        <a @click="selectOption('partner')" :class="{ selected: selectedOption === 'partner' }">Instituições</a>
+        <a
+          @click="changeStep('partner')"
+          :class="{ selected: step === 'partner' }"
+          >Instituições</a
+        >
       </li>
       <li>
-        <a @click="selectOption('user')" :class="{ selected: selectedOption === 'user' }">Utilizadoras</a>
+        <a @click="changeStep('user')" :class="{ selected: step === 'user' }"
+          >Utilizadoras</a
+        >
       </li>
     </ul>
   </div>
   <div style="height: 100%">
-    <programs v-if="isProgramsStep" @create="selectOption('edit')" @goToMenteesEdit="goToMenteesEdit" />
-    <questions v-if="isQuestionStep" @goToMenteesEdit="goToMenteesEdit" @close="cancel" />
-    <programmatic-areas v-if="isProgrammaticAreaStep" @create="selectOption('edit')"
-      @goToMenteesEdit="goToMenteesEdit" />
-    <professional-categories v-if="isProfessionalCategoryStep" @create="selectOption('edit')"
-      @goToMenteesEdit="goToMenteesEdit" />
-    <health-facilities v-if="isHealthFacilityStep" @create="selectOption('edit')" @goToMenteesEdit="goToMenteesEdit" />
-    <partners v-if="isPartnerStep" @create="selectOption('edit')" @goToMenteesEdit="goToMenteesEdit" />
-    <users v-if="isUserStep" @create="selectOption('edit')" @goToMenteesEdit="goToMenteesEdit" />
+    <programs v-if="isProgramsStep" />
+    <questions v-if="isQuestionStep" />
+    <programmatic-areas v-if="isProgrammaticAreaStep" />
+    <professional-categories v-if="isProfessionalCategoryStep" />
+    <health-facilities v-if="isHealthFacilityStep" />
+    <partners v-if="isPartnerStep" />
+    <users v-if="isUserStep" @create="changeStep('userForm')" />
+    <user-form v-if="isUserFormStep" @cancel="changeStep('user')" />
   </div>
 </template>
 
@@ -49,6 +71,7 @@ import ProfessionalCategories from 'src/components/ProfessionalCategories/Profes
 import HealthFacilities from 'src/components/HealthFacilities/HealthFacilities.vue';
 import Partners from 'src/components/Partners/Partners.vue';
 import Users from 'src/components/Users/Users.vue';
+import UserForm from 'src/components/Users/UserForm.vue';
 import { useLoading } from 'src/composables/shared/loading/loading';
 import programService from 'src/services/api/program/programService';
 import programmaticAreasService from 'src/services/api/programmaticArea/programmaticAreaService';
@@ -63,7 +86,7 @@ import { onMounted } from 'vue';
 import { provide } from 'vue';
 
 const { closeLoading, showloading } = useLoading();
-const selectedOption = ref(null);
+const step = ref(null);
 
 onMounted(() => {
   showloading();
@@ -72,7 +95,7 @@ onMounted(() => {
 
 const init = () => {
   programService.getAll().then((res) => {
-    selectOption('programs');
+    changeStep('programs');
   });
   programmaticAreasService.getAll();
   professionalCategoryService.getAll();
@@ -84,32 +107,36 @@ const init = () => {
   closeLoading();
 };
 
-const selectOption = (step) => {
-  selectedOption.value = step;
+const changeStep = (value) => {
+  step.value = value;
 };
 
 const isProgramsStep = computed(() => {
-  return selectedOption.value === 'programs';
+  return step.value === 'programs';
 });
 const isProgrammaticAreaStep = computed(() => {
-  return selectedOption.value === 'programmaticArea';
+  return step.value === 'programmaticArea';
 });
 const isHealthFacilityStep = computed(() => {
-  return selectedOption.value === 'healthFacility';
+  return step.value === 'healthFacility';
 });
 const isProfessionalCategoryStep = computed(() => {
-  return selectedOption.value === 'professionalCategory';
+  return step.value === 'professionalCategory';
 });
 const isQuestionStep = computed(() => {
-  return selectedOption.value === 'question';
+  return step.value === 'question';
 });
 const isPartnerStep = computed(() => {
-  return selectedOption.value === 'partner';
+  return step.value === 'partner';
 });
 const isUserStep = computed(() => {
-  return selectedOption.value === 'user';
+  return step.value === 'user';
 });
-provide('selectedOption', selectedOption);
+const isUserFormStep = computed(() => {
+  return step.value === 'userForm';
+});
+
+provide('step', step);
 </script>
 
 <style>
