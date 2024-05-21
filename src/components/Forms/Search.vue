@@ -191,7 +191,7 @@ import Form from 'src/stores/model/form/Form';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
 import User from 'src/stores/model/user/User';
-import UsersService from 'src/services/api/user/userService';
+import UsersService from 'src/services/api/user/UsersService';
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';

@@ -165,7 +165,7 @@ import useEmployee from 'src/composables/employee/employeeMethods';
 import questionService from 'src/services/api/question/questionService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref, inject } from 'vue';
-import UsersService from 'src/services/api/user/userService';
+import UsersService from 'src/services/api/user/UsersService';
 import questionCategoryService from 'src/services/api/question/questionCategoryService';
 import { computed } from 'vue';
 

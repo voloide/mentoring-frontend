@@ -173,7 +173,7 @@ import useEmployee from 'src/composables/employee/employeeMethods';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref, inject } from 'vue';
-import UsersService from 'src/services/api/user/userService';
+import UsersService from 'src/services/api/user/UsersService';
 import districtService from 'src/services/api/district/districtService';
 import { computed } from 'vue';
 import provinceService from 'src/services/api/province/provinceService';

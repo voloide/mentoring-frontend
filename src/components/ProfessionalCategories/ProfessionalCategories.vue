@@ -133,7 +133,7 @@
 import ProfessionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
-import UsersService from 'src/services/api/user/userService';
+import UsersService from 'src/services/api/user/UsersService';
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 
 const searchResults = ref([]);

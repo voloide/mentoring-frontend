@@ -185,7 +185,7 @@
 import ProgrammaticAreasService from 'src/services/api/programmaticArea/programmaticAreaService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
-import UsersService from 'src/services/api/user/userService';
+import UsersService from 'src/services/api/user/UsersService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import programService from 'src/services/api/program/programService';
 import { computed } from 'vue';

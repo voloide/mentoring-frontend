@@ -140,7 +140,7 @@ import Mentees from 'src/stores/model/mentees/Mentees';
 import Employee from 'src/stores/model/employee/Employee';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref, toRaw, inject } from 'vue';
-import UsersService from 'src/services/api/user/userService';
+import UsersService from 'src/services/api/user/UsersService';
 import { provide } from 'vue';
 import { useRouter } from 'vue-router';
 

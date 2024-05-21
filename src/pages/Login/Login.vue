@@ -92,7 +92,7 @@
 </template>
 <script setup>
     import { ref } from 'vue'
-    import UsersService from 'src/services/api/user/userService'
+    import UsersService from 'src/services/api/user/UsersService'
     import { useRouter } from 'vue-router';
     import { Loading, QSpinnerRings } from 'quasar';
     import { useSwal } from 'src/composables/shared/dialog/dialog';

@@ -133,7 +133,7 @@
 import programService from 'src/services/api/program/programService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
-import UsersService from 'src/services/api/user/userService';
+import UsersService from 'src/services/api/user/UsersService';
 
 const searchResults = ref([]);
 const selectedProgram = ref('');

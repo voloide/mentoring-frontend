@@ -170,7 +170,7 @@ import Mentor from 'src/stores/model/mentor/Mentor'
 import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
 import { onMounted, ref, toRaw, inject } from 'vue'
-import UsersService from 'src/services/api/user/userService'
+import UsersService from 'src/services/api/user/UsersService'
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import TutorProgrammaticAreaService from 'src/services/api/TutorProgrammaticArea/TutorProgrammaticAreaService'

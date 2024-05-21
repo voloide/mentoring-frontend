@@ -210,7 +210,7 @@
 <script setup>
 import { inject, ref, computed } from 'vue';
 import roleService from 'src/services/api/role/roleService';
-import userService from 'src/services/api/user/userService';
+import userService from 'src/services/api/user/UsersService';
 
 const openForm = inject('openForm');
 

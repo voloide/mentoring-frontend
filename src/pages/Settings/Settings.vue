@@ -57,7 +57,7 @@ import questionService from 'src/services/api/question/questionService';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
 import partnerService from 'src/services/api/partner/partnerService';
 import roleService from 'src/services/api/role/roleService';
-import userService from 'src/services/api/user/userService';
+import userService from 'src/services/api/user/UsersService';
 import { computed } from 'vue';
 import { onMounted } from 'vue';
 import { provide } from 'vue';

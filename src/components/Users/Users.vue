@@ -190,10 +190,9 @@
 
 <script setup>
 import useEmployee from 'src/composables/employee/employeeMethods';
-import userService from 'src/services/api/user/userService';
+import userService from 'src/services/api/user/UsersService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref, inject, provide } from 'vue';
-import UsersService from 'src/services/api/user/userService';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
 import provinceService from 'src/services/api/province/provinceService';
 import { computed } from 'vue';
@@ -242,7 +241,7 @@ const emit = defineEmits(['goToUseringAreas']);
 const currUser = ref(new User());
 
 onMounted(() => {
-  currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
+  currUser.value = JSON.parse(JSON.stringify(userService.getLogedUser()));
   searchResults.value = userService.piniaGetAll();
   // console.log("----searchResults----",searchResults.value)
   // console.log('----piniaGetAll-----', userService.piniaGetAll());
