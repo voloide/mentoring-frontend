@@ -210,17 +210,25 @@
 <script setup>
 import { inject, ref, computed } from 'vue';
 import roleService from 'src/services/api/role/roleService';
+import userService from 'src/services/api/user/userService';
 
 const openForm = inject('openForm');
 
 const data = ref({
-  name: '',
-  surname: '',
   username: '',
-  nuit: '',
   role: '',
   password: '',
   confirmarPassword: '',
+  employeeDTO:{
+    name: '',
+    surname: '',
+    nuit: '',
+    phoneNumber:'',
+    email:'',
+    trainingYear:'',
+    professionalCategoryDTO: {},
+    partnerDTO:{}
+  }
 });
 
 const roles = computed(() => {
@@ -229,6 +237,7 @@ const roles = computed(() => {
 
 const addUser = () => {
   openForm.value = false;
+  userService.saveProgram(data)
 };
 </script>
 <style lang="scss">

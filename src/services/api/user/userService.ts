@@ -74,4 +74,15 @@ export default {
       .orderBy('username', 'asc').get();
       return res;
     },
+    async saveUser(user: any) {
+      return await api()
+        .post('/users/save', user)
+        .then((resp) => {
+          userRepo.save(createUserFromDTO(resp.data));
+          return resp;
+        })
+        .catch((error) => {
+          console.log('Error', error.message);
+        });
+    },
 };
