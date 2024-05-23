@@ -338,13 +338,12 @@ import { useSwal } from 'src/composables/shared/dialog/dialog';
 
 import AddOrRemoveQuestions from './AddOrRemoveQuestions.vue';
 
-const form = reactive(ref(
-  new Form({
-    programmaticArea: new ProgrammaticArea({
-          program: new Program(),
-    }),
-  })
-));
+const form = ref(
+  new Form()
+);
+
+form.value.programmaticArea = new ProgrammaticArea();
+form.value.programmaticArea.program = new Program();
 
 const step = inject('step');
 const filterRedProgrammaticAreas = ref([]);
@@ -417,6 +416,7 @@ const columns = [
 // Selected Form - edition step
 const selectedForm = inject('selectedForm');
 const isNewForm = inject('isNewForm');
+
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
@@ -569,11 +569,21 @@ const saveOrUpdate = (form) => {
           if (result) {
             console.log(form);
       formService.saveOrUpdate(form).then((response) => {
-              searchResults.value = form.formQuestions;
+        if (response.status === 201) {
+          alertSucess('Tabela de Competências registada com sucesso!').then((result) => {
+            if (result) {
+              emit('close');
+            }
+          });
+          searchResults.value = form.formQuestions;
+        } else {
+          alertError('Não foi possivel gravar por ocorrência de um erro.')
+        }
+              
       }).catch((error) => {
           console.log(error);
       });
-    alertSucess('Tabela de Competência registada com sucesso!');
+    
     }});
 }
 
