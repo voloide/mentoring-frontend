@@ -23,7 +23,7 @@ export default function useProgrammaticArea() {
             code: programmaticArea.code,
             name: programmaticArea.name,
             description: programmaticArea.description,
-            programDTO: createDTOFromProgram(programmaticArea.program),
+            program: createDTOFromProgram(programmaticArea.program),
           }
         return  programmaticAreaDTO;
     }

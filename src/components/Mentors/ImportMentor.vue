@@ -114,6 +114,16 @@
                         </template>
                 </q-table>
             </div>
+
+        <div class="row q-pt-md">
+          <q-space />
+              <q-btn
+                label="Fechar"
+                class="float-right"
+                color="red"
+                @click="close"
+              />
+        </div>
         </div>
     </div>
 </template>
@@ -171,7 +181,7 @@ const columns = [
   { name: 'erro', align: 'left', label: 'Erro', sortable: false },
 ];
 
-const emit = defineEmits(['goToMentoringAreas']);
+const emit = defineEmits(['goToMentoringAreas', 'close']);
 const currUser = ref(new User())
 const submitSend = ref(false);
 const file = ref(null);
@@ -379,6 +389,10 @@ const startComposingMentor = (rowFromExcel) => {
     addErrorRow('Distrito não encontrado')
   }
 }
+
+const close = () => {
+  emit('close');
+};
 
 const excelExport = (event) => {
   let input = event;

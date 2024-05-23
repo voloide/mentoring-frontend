@@ -126,7 +126,6 @@
                     :rows="searchResults"
                     :columns="columns"
                     row-key="id"
-                    :filter="filter"
                 >
                 <template v-slot:no-data="{ icon, filter }">
                     <div
