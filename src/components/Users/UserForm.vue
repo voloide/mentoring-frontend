@@ -144,6 +144,100 @@
 
             <div class="q-mt-lg">
               <div class="row items-center q-mb-md">
+                <q-icon name="lock_outline" size="sm" />
+                <span class="q-pl-sm text-subtitle2"
+                  >Credenciais</span
+                >
+              </div>
+              <q-separator color="grey-13" size="1px" />
+            </div>
+            <div class="row q-my-sm">
+
+              <q-input
+                outlined
+                label="Nome do Utilizador"
+                dense
+                ref="usernameRef"
+                :rules="[(val) => !!val || 'Por favor indicar o nome']"
+                lazy-rules
+                class="col"
+                v-model="user.username"
+                @update:model-value="(value) => (filter = value)"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    name="close"
+                    @click="user.username = ''"
+                    class="cursor-pointer"
+                  />
+                </template>
+              </q-input>
+
+              <q-select
+                class="col q-ml-md"
+                use-input
+                hide-selected
+                fill-input
+                input-debounce="0"
+                dense
+                outlined
+                ref="roleRef"
+                lazy-rules
+                :rules="[
+                  (val) => !!val || 'Por favor indicar o Vínculo Laboral',
+                ]"
+                v-model="user.role"
+                :options="roles"
+                option-value="id"
+                label="Perfil de Acesso"
+              />
+
+              <q-checkbox   class="col"  label="Deve redefinir password no próximo login" />
+            </div>
+
+            <div class="row q-my-sm">
+              <q-input
+                outlined
+                label="Password"
+                dense
+                ref="passwordRef"
+                :rules="[(val) => !!val || 'Por favor indicar a password']"
+                lazy-rules
+                class="col"
+                v-model="user.password"
+                @update:model-value="(value) => (filter = value)"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    name="close"
+                    @click="user.password = ''"
+                    class="cursor-pointer"
+                  />
+                </template>
+              </q-input>
+              <q-input
+                outlined
+                label="Confirma a Password"
+                dense
+                :rules="[(val) => !!val || 'Por favor confirma a password']"
+                lazy-rules
+                ref="confirmPasswordRef"
+                class="col q-ml-md"
+                v-model="user.confirmPassword"
+                @update:model-value="(value) => (filter = value)"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    name="close"
+                    @click="user.confirmPassword = ''"
+                    class="cursor-pointer"
+                  />
+                </template>
+              </q-input>
+            </div>
+
+            <div class="q-mt-lg">
+              <div class="row items-center q-mb-md">
                 <q-icon name="engineering" size="sm" />
                 <span class="q-pl-sm text-subtitle2">Informação Laboral</span>
               </div>
@@ -348,6 +442,7 @@
                 type="submit"
                 label="Submeter"
                 color="primary"
+                @click="submitForm()"
               />
 
             </div>
@@ -372,11 +467,12 @@ import useUser from 'src/composables/user/userMethods';
 import userService from 'src/services/api/user/UsersService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { Loading, QSpinnerRings } from 'quasar';
+import roleService from 'src/services/api/role/roleService';
 
 const user = ref(
   new User({
     employee: new Employee({
-      locations: [
+      locationDTOSet: [
         {
           location: new Location(),
         },
@@ -411,13 +507,18 @@ const partnerRef = ref(null);
 const provinceRef = ref(null);
 const districtRef = ref(null);
 const hfRef = ref(null);
+// const right = ref('');
 
 const selectedUser = inject('selectedUser');
 const step = inject('step');
 
 const isEditStep = computed(() => {
     return step.value === 'edit';
-  });
+});
+
+const roles = computed(() => {
+  return roleService.piniaGetAll();
+});
 
 const init = () => {
   if (isEditStep.value) {
@@ -461,6 +562,7 @@ const partners = computed(() => {
 const myForm = ref(null);
 
 const submitForm = () => {
+  console.log("---submit---", user.value)
   nameRef.value.validate();
   surnameRef.value.validate();
   nuitRef.value.validate();
@@ -675,9 +777,6 @@ const filterCategories = (val, update, abort) => {
 const onChangeProvincia = () => {
   user.value.employee.locations[0].district = '';
   user.value.employee.locations[0].district = '';
-};
-const cancel = () => {
-  emit('close');
 };
 
 const onChangeVinculo = (selected) => {
