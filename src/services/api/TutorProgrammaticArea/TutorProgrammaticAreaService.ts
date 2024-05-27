@@ -27,7 +27,6 @@ export default {
 
       const tutor = mentorService.getById(mentor_id)
       const programmaticArea = programmaticAreaService.getById(programmaticArea_id)
-      console.log(programmaticArea);
 
       return createDTOFromTutorProgrammaticArea(new TutorProgrammaticArea({
         mentor: tutor,
@@ -49,7 +48,7 @@ export default {
       console.log('Error', error.message);
     });
     return resp;
-},
+  },
 
   async save(tutorProgrammaticArea: any, selectedMentor:any) {
     console.log(tutorProgrammaticArea);

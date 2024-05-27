@@ -26,6 +26,10 @@ const routes: RouteRecordRaw[] = [
         path: '/tables',
         component: () => import('pages/Forms/Forms.vue'),
       },
+      {
+        path: '/resources',
+        component: () => import('pages/resources/Resources.vue'),
+      },
     ],
   },
   {
