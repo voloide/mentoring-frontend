@@ -171,12 +171,10 @@ import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
 import { onMounted, ref, toRaw, inject } from 'vue'
 import UsersService from 'src/services/api/user/UsersService'
-import programService from 'src/services/api/program/programService';
-import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
-import TutorProgrammaticAreaService from 'src/services/api/TutorProgrammaticArea/TutorProgrammaticAreaService'
-import { provide } from 'vue'
+import useMentor from "src/composables/mentor/mentorMethods"
 
 
+const { createMentorFromDTO } = useMentor();
 const searchParams = ref(new Mentor({
                             employee: new Employee()
                         }));
@@ -230,7 +228,10 @@ const search = () => {
     Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
 
     mentorService.search(params).then((response) => {
-        searchResults.value = mentorService.getMentorList();
+        searchResults.value = [];
+        response.data.forEach((dto) => {
+            searchResults.value.push(createMentorFromDTO(dto));
+        })
     }).catch((error) => {
         console.log(error);
       });
