@@ -19,7 +19,7 @@
                 v-model:selected="selectedNode"
             >
               <template #default-header="props">
-                <div @click="newResource(props.node)">
+                <div @click="resourceRequest(props.node)">
                   {{props.node.label}}
                 </div>
               </template>
@@ -92,6 +92,8 @@
             outlined
             ref="fileNameRef"
             v-model="fileName"
+            lazy-rules
+            :rules="[(val) => val.length >= 4  || 'O nome que o ficheiro irá assumir deve ter no mínimo 4 caracteres.']"
             label="Nome"
             disabled
           />
@@ -104,6 +106,7 @@
             dense
             class="col"
             ref="fileRef"
+            lazy-rules
             :rules="[(val) => !!val || 'Por favor indicar o ficheiro.']"
             @update:model-value="excelExport"
             :disable="submitSend"
@@ -124,16 +127,17 @@
 
       <q-card-actions align="right">
         <q-btn dense label="Cancelar" color="red" v-close-popup></q-btn>
-        <q-btn dense class="q-mr-sm" type="submit" color="primary" label="Gravar" @click="gravar(actualNode)" v-close-popup></q-btn>
+        <q-btn dense class="q-mr-sm" type="submit" color="primary" label="Gravar" @click="gravar(actualNode)" :disable="isSaveDisabled" v-close-popup></q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import resourceService from 'src/services/api/resource/resourceService';
 import useResource from 'src/composables/resource/resourceMethods';
+import moment from 'moment';
 
 const search = ref(null)
 const filter = ref('')
@@ -160,107 +164,12 @@ const fileDescription = ref(null)
 const fileName = ref(null)
 const fileSelected = ref(false)
 
+const fileNameRef = ref(null)
+const fileRef = ref(null)
+
+const timestamp = ref(null)
+
 const nodes = ref([])
-
-// const nodes = ref([
-//   {
-//     label: 'HIV',
-//     clickable: 0,
-//     children: [
-//       {
-//         label: 'Directrizes e Guiões Nacionais',
-//         clickable: 0,
-//         children: [
-//           {
-//             label: 'ATS e Prevenção',
-//             clickable: 0,
-//             children: [
-//               {
-//                 label: 'Adicionar Recurso',
-//                 clickable: 1,
-//                 icon: 'add',
-//                 program: 'HIV',
-//                 category: 'Directrizes e Guiões Nacionais',
-//                 subCategory: 'ATS e Prevenção',
-//                 type: 'resource'
-//               }
-//             ]
-//           },
-//           {
-//             label: 'Cuidados e Tratamento',
-//             children: [
-//               {
-//                 label: 'Adicionar Recurso',
-//                 icon: 'add',
-//                 clickable: 1,
-//                 program: 'HIV',
-//                 category: 'Directrizes e Guiões Nacionais',
-//                 subCategory: 'Cuidados e Tratamento',
-//                 type: 'resource'
-//               }
-//             ]
-//           },
-//           {
-//             label: 'Adicionar Sub Categoria',
-//             clickable: 1,
-//             icon: 'add',
-//             program: 'HIV',
-//             category: 'Directrizes e Guiões Nacionais',
-//             type: 'subCateg'
-//           }
-//         ]
-//       },
-//       {
-//         label: 'Adicionar Categoria',
-//         clickable: 1,
-//         icon: 'add',
-//         program: 'HIV',
-//         type: 'categ'
-//       }
-//     ]
-//   },
-//   {
-//     label: 'TB',
-//     clickable: 0,
-//     children: [
-//       {
-//         label: 'Directrizes e Guiões Nacionais',
-//         clickable: 0,
-//         children: [
-//           {
-//             label: 'ATS e Prevenção',
-//             children: [
-//               {
-//                 label: 'Adicionar',
-//                 icon: 'add',
-//                 program: 'HIV',
-//                 category: 'SubCateg',
-//                 subCategory: 'SubCateg1',
-//                 clickable: 1
-//               }
-//             ]
-//           },
-//           {
-//             label: 'Cuidados e Tratamento',
-//             children: [
-//               {
-//                 label: 'Adicionar',
-//                 icon: 'add'
-//               }
-//             ]
-//           }
-//         ]
-//       }
-//     ]
-//   },
-//   {
-//     label: 'Adicionar Programa',
-//     icon: 'add',
-//     clickable: 1,
-//     type: 'program'
-//   }
-// ]);
-
 const resetAddingViewForm = () => {
   addingProgram.value = false
   addingCateg.value = false
@@ -270,10 +179,14 @@ const resetAddingViewForm = () => {
     fileSelected.value = false
 }
 
-const newResource = (node) => {
+const isSaveDisabled = computed(() => {
+    return !fileName.value || fileName.value.length < 4 || !fileInput.value;
+})
+
+const resourceRequest = (node) => {
   actualNode.value = node
   resetAddingViewForm()
-  if(node.clickable === 1) {
+  if(node.clickable === 1) { // Algo sera adicionado [Program/Categoria/Subcategoria/Recurso]
     if(node.type === 'resource') { // Vamos adicionar recurso
       categoryLabel.value = 'Sub Categoria'
       popUpTitle.value = 'Adicionar Recurso de EA'
@@ -294,6 +207,12 @@ const newResource = (node) => {
       addingProgram.value = true
     }
     showAddResource.value = true // Abrir PopUp
+  } else if(node.clickable === 2) { // Um recurso sera carregado no backend e baixado no front
+    // console.log(node)
+    // const resp = resourceService.loadFile(node.name)
+    // if(resp.status === 200){
+    //   // saveFileLocally(resp.data)
+    // }
   }
 };
 
@@ -302,14 +221,16 @@ const resetFilter = () => {
   filterRef.value.focus()
 }
 
-// const saveFileLocally = (file) => {
-//   const url = URL.createObjectURL(file);
-//   const a = document.createElement('a');
-//   a.href = url;
-//   a.download = file.name;
-//   a.click();
-//   URL.revokeObjectURL(url);
-// };
+const saveFileLocally = (file) => {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = file.name;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const newFile = ref(null)
 
 const gravar = async (node) => {
 
@@ -320,11 +241,15 @@ const gravar = async (node) => {
       if (categoryNode) {
         const subCategoryNode = categoryNode.children.find(item => item.label === node.subCategory);
         if (subCategoryNode) {
+          const now = moment();
+          timestamp.value = now.format('YYYYMMDDHHmmss');
+          let newFileName = `${fileName.value}_${timestamp.value}.${fileInput.value.name.split('.').pop()}`;
+          newFile.value = new File([fileInput.value], newFileName)
           subCategoryNode.children.unshift({
-            label: fileInput.value.name,
+            label: newFileName,
             clickable: 2,
             description: fileDescription.value,
-            name: fileName.value,
+            name: newFileName,
           });
             fileSelected.value = true
         }
@@ -385,70 +310,47 @@ const gravar = async (node) => {
       ]
     });
   }
-
   doPatch(nodes);
 };
 
-
-// const doPatch = (nodes) => {
-//     const {createDTOFromResource} = useResource()
-//     resourceObj.value.resource = JSON.stringify(nodes.value)
-//     resourceService.updateResourceTree(createDTOFromResource(resourceObj.value)).then((res) => {
-//         console.log(res)
-//     })
-// }
-
-// const doPatch = (nodes) => {
-//   const { createDTOFromResource } = useResource();
-//   resourceObj.value.resource = JSON.stringify(nodes.value);
-//
-//     let resource = createDTOFromResource(resourceObj.value, null);
-//     if(fileSelected.value) {
-//         let formData = new FormData();
-//         formData.append('file', fileInput.value);
-//         resource = createDTOFromResource(resourceObj.value, formData);
-//     }
-//
-//   resourceService.updateResourceTree(resource).then((res) => {
-//     console.log(res);
-//   });
-// };
-
 const doPatch = (nodes) => {
     const { createDTOFromResource } = useResource();
-    resourceObj.value.resource = JSON.stringify(nodes.value);
 
+    resourceObj.value.resource = JSON.stringify(nodes.value);
     let resource = createDTOFromResource(resourceObj.value);
-    let formData = new FormData();
 
     if (fileSelected.value) {
-      formData.append('id', resource.id);
-      formData.append('uuid', resource.uuid);
-      formData.append('resource', resource.resource);
-      formData.append('file', fileInput.value);
-    } else {
-      formData.append('id', resource.id);
-      formData.append('uuid', resource.uuid);
-      formData.append('resource', resource.resource);
-      formData.append('file', null);
-    }
+      fileNameRef.value.validate();
+      fileRef.value.validate();
 
-    resourceService.updateResourceTree(formData).then((res) => {
-        console.log(res);
-    });
+        if (
+            !fileNameRef.value.hasError &&
+            !fileRef.value.hasError
+        ) {
+            // Requisito do nome do file: Renomear o fileInput com 'fileName+data e hora'
+            const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+            const newFileName = `${fileName.value}_${timestamp}.${fileInput.value.name.split('.').pop()}`;
+
+            let formData = new FormData();
+            formData.append('id', resource.id);
+            formData.append('uuid', resource.uuid);
+            formData.append('resource', resource.resource);
+            // formData.append('file', fileInput.value);
+            formData.append('file', newFile.value);
+            resourceService.updateResourceTree(formData).then((res) => {
+                console.log(res);
+            });
+        }
+    } else {
+        resourceService.updateResourceTreeWithoutFile(resource).then((res) => {
+            console.log(res);
+        });
+    }
 };
 
 
 onMounted(() => {
-  //   const resource = new Resource({
-  //       resource: JSON.stringify(nodes.value)
-  //   })
-  // resourceService.save(resource).then((res) => {
-  //   console.log(res)
-  // })
-
   resourceService.getAll().then((res) => {
-    // console.log(JSON.parse(res.data[0].resource))
     resourceObj.value = resourceService.piniaGetAll()[0]
     nodes.value = JSON.parse(resourceObj.value.resource)
   })

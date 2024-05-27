@@ -44,6 +44,46 @@ export default {
       });
     return resp;
   },
+  async  updateResourceTreeWithoutFile(resourceDTO: any) {
+      console.log(resourceDTO)
+      let resp = null;
+      resp = await api()
+          .patch(`/resources/updateresourcetreewithoutfile`, resourceDTO)
+          .then((resp) => {
+              repo.save(createResourceFromDTO(resp.data));
+              return resp;
+          })
+          .catch((error) => {
+              console.log('Error', error.message);
+          });
+      return resp;
+  },
+    saveFileLocally (file: any) {
+        const url = URL.createObjectURL(file);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+    },
+    async loadFile(fileName: any) {
+        let resp = null;
+            resp = await api().get(`/resources/load`, {
+                params: {
+                    fileName: fileName
+                }
+            })
+            .then((resp) => {
+                if(resp.status === 200){
+                    this.saveFileLocally(resp.data)
+                }
+                return resp;
+            })
+            .catch((error) => {
+                console.log('Error', error.message);
+            });
+        return resp;
+    },
   async uploadResource(resource: any) {
     let resp = null;
     resp = await api()
