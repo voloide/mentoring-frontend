@@ -79,9 +79,11 @@
           <q-item
             clickable
             v-ripple
-            :active="link === 'ea'"
-            @click="link = 'ea'"
+            :active="link === 'earesources'"
+            @click="link = 'earesources'"
             active-class="my-menu-link"
+            to="/resources"
+            exact
           >
             <q-item-section avatar>
               <q-icon name="library_books" />

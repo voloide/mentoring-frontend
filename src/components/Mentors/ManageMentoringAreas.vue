@@ -54,7 +54,7 @@
                     <q-select
                       v-model="props.row.programmaticArea.id"
                       :options="getFilteredAreas(props.row.programmaticArea.program_id)"
-                      label="Área Programática"
+                      label="Área de Mentoria"
                       dense
                       outlined
                       emit-value
@@ -112,6 +112,15 @@
             </template>
           </q-table>
         </div>
+        <div class="row q-py-md">
+          <q-space />
+              <q-btn
+                label="Fechar"
+                class="float-right"
+                color="red"
+                @click="close"
+              />
+        </div>
       </div>
     </div>
   </div>
@@ -132,6 +141,8 @@ const { alertError, alertSucess, alertWarningAction } = useSwal();
 
 const { createDTOFromTutorProgrammaticArea } = useTutorProgrammaticArea()
 
+const emit = defineEmits(['close']);
+
 const selectedMentor = inject('selectedMentor');
 const currUser = ref(new User())
 const mentorProgrammaticAreas = ref([]);
@@ -145,7 +156,7 @@ const columns = [
   {
     name: 'description',
     align: 'left',
-    label: 'Área Programática',
+    label: 'Área de Mentoria',
     sortable: false,
   },
   {
@@ -260,6 +271,10 @@ const confirmFormLifeCycleChange = (tutorProgrammaticArea) => {
         }
     });
 }
+
+const close = () => {
+  emit('close');
+};
 
 onMounted(() => {
   programs.value = programService.getProgramList()

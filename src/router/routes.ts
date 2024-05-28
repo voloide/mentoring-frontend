@@ -27,6 +27,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/Forms/Forms.vue'),
       },
       {
+        path: '/resources',
+        component: () => import('pages/resources/Resources.vue'),
+      },
+      {
         path: '/settings',
         component: () => import('pages/Settings/Settings.vue'),
       },

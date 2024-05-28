@@ -1,9 +1,9 @@
 <template>
     <div style="height: 100%;">
         <search v-if="isSearchStep" @create="changeStep('create')" @edit="edit" @goToMentoringAreas="goToMentoringAreas" @import="changeStep('import')"/>
-        <import-mentor v-if="isImportStep" />
+        <import-mentor v-if="isImportStep" @close="close" />
         <add-edit v-if="isCreateStep || isEditStep" @goToMentoringAreas="goToMentoringAreas" @close="close"/>
-        <manage-mentoring-areas v-if="isEditAreasStep" />
+        <manage-mentoring-areas v-if="isEditAreasStep" @close="close"/>
     </div>
 </template>
 <script setup>
