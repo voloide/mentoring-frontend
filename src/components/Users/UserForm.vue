@@ -145,14 +145,11 @@
             <div class="q-mt-lg">
               <div class="row items-center q-mb-md">
                 <q-icon name="lock_outline" size="sm" />
-                <span class="q-pl-sm text-subtitle2"
-                  >Credenciais</span
-                >
+                <span class="q-pl-sm text-subtitle2">Credenciais</span>
               </div>
               <q-separator color="grey-13" size="1px" />
             </div>
             <div class="row q-my-sm">
-
               <q-input
                 outlined
                 label="Nome do Utilizador"
@@ -189,16 +186,21 @@
                 v-model="user.role"
                 :options="roles"
                 option-value="id"
+                option-label="code"
                 label="Perfil de Acesso"
               />
 
-              <q-checkbox   class="col"  label="Deve redefinir password no próximo login" />
+              <q-checkbox
+                class="col"
+                label="Deve redefinir password no próximo login"
+              />
             </div>
 
             <div class="row q-my-sm">
               <q-input
                 outlined
                 label="Password"
+                type="password"
                 dense
                 ref="passwordRef"
                 :rules="[(val) => !!val || 'Por favor indicar a password']"
@@ -218,6 +220,7 @@
               <q-input
                 outlined
                 label="Confirma a Password"
+                type="password"
                 dense
                 :rules="[(val) => !!val || 'Por favor confirma a password']"
                 lazy-rules
@@ -444,7 +447,6 @@
                 color="primary"
                 @click="submitForm()"
               />
-
             </div>
           </div>
         </div>
@@ -472,7 +474,7 @@ import roleService from 'src/services/api/role/roleService';
 const user = ref(
   new User({
     employee: new Employee({
-      locationDTOSet: [
+      locations: [
         {
           location: new Location(),
         },
@@ -507,13 +509,16 @@ const partnerRef = ref(null);
 const provinceRef = ref(null);
 const districtRef = ref(null);
 const hfRef = ref(null);
+const usernameRef = ref(null);
+const passwordRef = ref(null);
+const confirmPasswordRef = ref(null);
 // const right = ref('');
 
 const selectedUser = inject('selectedUser');
 const step = inject('step');
 
 const isEditStep = computed(() => {
-    return step.value === 'edit';
+  return step.value === 'edit';
 });
 
 const roles = computed(() => {
@@ -523,7 +528,8 @@ const roles = computed(() => {
 const init = () => {
   if (isEditStep.value) {
     user.value = Object.assign({}, selectedUser.value);
-    selectedUserLaborInfo.value = (user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG');
+    selectedUserLaborInfo.value =
+      user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
   }
 };
 onMounted(() => {
@@ -562,7 +568,10 @@ const partners = computed(() => {
 const myForm = ref(null);
 
 const submitForm = () => {
-  console.log("---submit---", user.value)
+  // if (passwordRef.value != confirmPasswordRef.value) {
+  //   alertError('As senhas inseridas não coincidem, corrija as senhas!');
+  //   return;
+  // }
   nameRef.value.validate();
   surnameRef.value.validate();
   nuitRef.value.validate();
@@ -575,11 +584,17 @@ const submitForm = () => {
   provinceRef.value.validate();
   districtRef.value.validate();
   hfRef.value.validate();
+  usernameRef.value.validate();
+  passwordRef.value.validate();
+  confirmPasswordRef.value.validate();
 
   if (
     !nameRef.value.hasError &&
     !surnameRef.value.hasError &&
     !phoneNumberRef.value.hasError &&
+    !passwordRef.value.hasError &&
+    !confirmPasswordRef.value.hasError &&
+    !usernameRef.value.hasError &&
     !emailRef.value.hasError &&
     !categoryRef.value.hasError &&
     !trainingYearRef.value.hasError &&
@@ -589,55 +604,40 @@ const submitForm = () => {
     !hfRef.value.hasError
   ) {
     Loading.show({
-        spinner: QSpinnerRings,
-      })
+      spinner: QSpinnerRings,
+    });
     const target_copy = Object.assign({}, user.value);
     if (isEditStep.value) {
       userService
-      .update(createDTOFromUser(new User(target_copy)))
-      .then((resp) => {
-
-        if (resp.status ===200 || resp.status ===201) {
-          alertSucess(
-            'User actualizado.'
-          ).then((result) => {
-            emit('close');
-          });
-        } else {
-          alertError(resp.message);
-        }
-        Loading.hide()
-      })
-      .catch((error) => {
-        Loading.hide()
-        console.log('Error', error);
-      });
-    } else {
-      userService
-      .save(createDTOFromUser(new User(target_copy)))
-      .then((resp) => {
-
-        if (resp.status ===200 || resp.status ===201) {
-          alertSucessAction(
-            'User criado com sucesso, avançar para áreas de mentória'
-          ).then((result) => {
-            if (result) {
-              emit('goToUseringAreas', userService.getById(resp.data.id));
-            } else {
+        .update(createDTOFromUser(new User(target_copy)))
+        .then((resp) => {
+          if (resp.status === 200 || resp.status === 201) {
+            alertSucess('User actualizado.').then((result) => {
               emit('close');
-            }
-          });
-        } else {
-          alertError(resp.message);
-        }
-        Loading.hide()
-      })
-      .catch((error) => {
-        Loading.hide()
+            });
+          } else {
+            alertError(resp?.message);
+          }
+          Loading.hide();
+        })
+        .catch((error) => {
+          Loading.hide();
+          console.log('Error', error);
+        });
+    } else {
+      try {
+        const userDTO = createDTOFromUser(new User(target_copy));
+        userService.saveUser(userDTO);
+        alertSucessAction(
+          'User criado com sucesso, avançar para áreas de mentória'
+        );
+        Loading.hide();
+        emit('cancel')
+      } catch (error) {
         console.log('Error', error);
-      });
+        alertError(resp?.message);
+      }
     }
-
   }
 };
 const isValidEmail = (email) => {
@@ -772,7 +772,6 @@ const filterCategories = (val, update, abort) => {
     });
   }
 };
-
 
 const onChangeProvincia = () => {
   user.value.employee.locations[0].district = '';

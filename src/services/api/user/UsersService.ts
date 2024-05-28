@@ -76,7 +76,7 @@ export default {
     },
     async saveUser(user: any) {
       return await api()
-        .post('/users/save', user)
+        .post('/user/save', user)
         .then((resp) => {
           userRepo.save(createUserFromDTO(resp.data));
           return resp;

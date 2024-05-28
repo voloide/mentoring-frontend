@@ -19,7 +19,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto: any) => {
+    dtoList?.forEach((dto: any) => {
       const entity = createRoleFromDTO(dto);
       repo.save(entity);
     });
