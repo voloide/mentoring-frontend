@@ -75,7 +75,15 @@ export default {
             })
             .then((resp) => {
                 if(resp.status === 200){
-                    this.saveFileLocally(resp.data)
+                    const url = window.URL.createObjectURL(new File([resp.data], fileName));
+
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', fileName);
+                    document.body.appendChild(link);
+                    link.click();
+
+                    link.remove();
                 }
                 return resp;
             })
@@ -84,20 +92,7 @@ export default {
             });
         return resp;
     },
-  async uploadResource(resource: any) {
-    let resp = null;
-    resp = await api()
-        .post(`/resources/uploadResource`, resource)
-        .then((resp) => {
-          repo.save(createResourceFromDTO(resp.data));
-          return resp;
-        })
-        .catch((error) => {
-          console.log('Error', error.message);
-        });
-    return resp;
-  },
-  getResourceList() {
+    getResourceList() {
     return repo
       .query()
       .withAllRecursive(2)

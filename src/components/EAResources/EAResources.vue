@@ -168,6 +168,7 @@ const fileNameRef = ref(null)
 const fileRef = ref(null)
 
 const timestamp = ref(null)
+const fileBeingUploaded = ref(false)
 
 const nodes = ref([])
 const resetAddingViewForm = () => {
@@ -176,18 +177,23 @@ const resetAddingViewForm = () => {
   addingSubCateg.value = false
   addingResource.value = false
   fileInput.value = null
-    fileSelected.value = false
+  fileSelected.value = false
 }
 
 const isSaveDisabled = computed(() => {
+  if (fileBeingUploaded.value) {
     return !fileName.value || fileName.value.length < 4 || !fileInput.value;
+  }
+  return false
 })
 
 const resourceRequest = (node) => {
+  fileBeingUploaded.value = false
   actualNode.value = node
   resetAddingViewForm()
   if(node.clickable === 1) { // Algo sera adicionado [Program/Categoria/Subcategoria/Recurso]
     if(node.type === 'resource') { // Vamos adicionar recurso
+      fileBeingUploaded.value = true
       categoryLabel.value = 'Sub Categoria'
       popUpTitle.value = 'Adicionar Recurso de EA'
       addingResource.value = true
@@ -208,11 +214,9 @@ const resourceRequest = (node) => {
     }
     showAddResource.value = true // Abrir PopUp
   } else if(node.clickable === 2) { // Um recurso sera carregado no backend e baixado no front
-    // console.log(node)
-    // const resp = resourceService.loadFile(node.name)
-    // if(resp.status === 200){
-    //   // saveFileLocally(resp.data)
-    // }
+    resourceService.loadFile(node.name).then((resp) => {
+      console.log(resp.status)
+    })
   }
 };
 
@@ -221,20 +225,12 @@ const resetFilter = () => {
   filterRef.value.focus()
 }
 
-const saveFileLocally = (file) => {
-  const url = URL.createObjectURL(file);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = file.name;
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
 const newFile = ref(null)
 
 const gravar = async (node) => {
 
-  if (node.type === 'resource') { // Adicionar recurso
+  if (node.type === 'resource') {
+    // Adicionar recurso
     const programNode = nodes.value.find(item => item.label === node.program);
     if (programNode) {
       const categoryNode = programNode.children.find(item => item.label === node.category);
