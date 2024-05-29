@@ -365,22 +365,31 @@ const doPatch = (nodes) => {
             formData.append('resource', resource.resource);
             formData.append('file', newFile.value);
             resourceService.updateResourceTree(formData).then((res) => {
-                console.log(res);
+              if(res)
+                if(res.status === 200 || res.status === 201) {
+                  loadResources()
+              }
             });
         }
     } else {
         resourceService.updateResourceTreeWithoutFile(resource).then((res) => {
-            console.log(res);
+          if(res)
+            if(res.status === 200 || res.status === 201) {
+              loadResources()
+            }
         });
     }
 };
 
-
-onMounted(() => {
+const loadResources = () => {
   resourceService.getAll().then((res) => {
     resourceObj.value = resourceService.piniaGetAll()[0]
     nodes.value = JSON.parse(resourceObj.value.resource)
   })
+}
+
+onMounted(() => {
+  loadResources()
 })
 
 </script>

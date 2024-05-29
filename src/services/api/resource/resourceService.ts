@@ -32,7 +32,6 @@ export default {
       });
   },
   async updateResourceTree(resourceDTO: any) {
-    console.log(resourceDTO)
     let resp = null;
     resp = await api()
       .patch(`/resources/updateresourcetree`, resourceDTO)
@@ -46,7 +45,6 @@ export default {
     return resp;
   },
   async  updateResourceTreeWithoutFile(resourceDTO: any) {
-      console.log(resourceDTO)
       let resp = null;
       resp = await api()
           .patch(`/resources/updateresourcetreewithoutfile`, resourceDTO)
