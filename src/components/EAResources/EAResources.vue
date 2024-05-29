@@ -169,6 +169,9 @@ const fileRef = ref(null)
 
 const timestamp = ref(null)
 const fileBeingUploaded = ref(false)
+const subCategBeingRegistered = ref(false)
+const categBeingRegistered = ref(false)
+const programBeingRegistered = ref(false)
 
 const nodes = ref([])
 const resetAddingViewForm = () => {
@@ -184,11 +187,23 @@ const isSaveDisabled = computed(() => {
   if (fileBeingUploaded.value) {
     return !fileName.value || fileName.value.length < 4 || !fileInput.value;
   }
+  if (subCategBeingRegistered.value) {
+    return !subCategoryInput.value || subCategoryInput.value.length < 2;
+  }
+  if (categBeingRegistered.value) {
+    return !categoryInput.value || categoryInput.value.length < 2;
+  }
+  if (programBeingRegistered.value) {
+    return !programInput.value || programInput.value.length < 2;
+  }
   return false
 })
 
 const resourceRequest = (node) => {
   fileBeingUploaded.value = false
+  subCategBeingRegistered.value  = false
+  categBeingRegistered.value  = false
+  programBeingRegistered.value  = false
   actualNode.value = node
   resetAddingViewForm()
   if(node.clickable === 1) { // Algo sera adicionado [Program/Categoria/Subcategoria/Recurso]
@@ -199,16 +214,19 @@ const resourceRequest = (node) => {
       addingResource.value = true
       nodeCategory.value = node.program + ' -> ' + node.category +  ' -> ' + node.subCategory
     } else if(node.type === 'subCateg') {  // Vamos adicionar Sub Categoria
+      subCategBeingRegistered.value = true
       categoryLabel.value = 'Categoria'
       popUpTitle.value = 'Adicionar Sub Categoria'
       addingSubCateg.value = true
       nodeCategory.value = node.program + ' -> ' + node.category
     } else if(node.type === 'categ') { // Vamos adicionar Categoria
+      categBeingRegistered.value = true
       categoryLabel.value = 'Programa'
       popUpTitle.value = 'Adicionar Categoria'
       addingCateg.value = true
       nodeCategory.value = node.program
     } else if(node.type === 'program') { // Vamos adicionar Programa
+      programBeingRegistered.value = true
       popUpTitle.value = 'Adicionar Programa'
       addingProgram.value = true
     }
