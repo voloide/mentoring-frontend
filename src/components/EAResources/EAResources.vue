@@ -101,7 +101,9 @@
             v-if="addingResource"
             v-model="fileInput"
             outlined
-            label="Selecione o Ficheiro"
+            label="Selecione o Ficheiro. Max (2MB)"
+            max-file-size="2000048"
+            @rejected="onRejected"
             counter
             dense
             class="col"
@@ -138,6 +140,9 @@ import { ref, onMounted, computed } from 'vue';
 import resourceService from 'src/services/api/resource/resourceService';
 import useResource from 'src/composables/resource/resourceMethods';
 import moment from 'moment';
+import {useSwal} from 'src/composables/shared/dialog/dialog';
+
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 
 const search = ref(null)
 const filter = ref('')
@@ -199,6 +204,10 @@ const isSaveDisabled = computed(() => {
   return false
 })
 
+const onRejected = (rejectedEntries) => {
+  alertError('Ficheiro "'+rejectedEntries[0].file.name+'", com tamanho '+rejectedEntries[0].file.size+'Bytes não suportado.')
+}
+
 const resourceRequest = (node) => {
   fileBeingUploaded.value = false
   subCategBeingRegistered.value  = false
@@ -232,8 +241,14 @@ const resourceRequest = (node) => {
     }
     showAddResource.value = true // Abrir PopUp
   } else if(node.clickable === 2) { // Um recurso sera carregado no backend e baixado no front
-    resourceService.loadFile(node.name).then((resp) => {
-      console.log(resp.status)
+    resourceService.loadFile(node.name).then((respStatus) => {
+      if(respStatus === 200 || respStatus === 201){
+        alertSucess('Ficheiro descarregado. Verifique no seu directorio de downloads.')
+      } else if(respStatus === 404) {
+        alertError('O ficheiro que deseja baixar nao foi encontrado.')
+      } else {
+        alertError('Ocorreu um erro inesperado.')
+      }
     })
   }
 };
@@ -341,7 +356,6 @@ const doPatch = (nodes) => {
             !fileNameRef.value.hasError &&
             !fileRef.value.hasError
         ) {
-            // Requisito do nome do file: Renomear o fileInput com 'fileName+data e hora'
             const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
             const newFileName = `${fileName.value}_${timestamp}.${fileInput.value.name.split('.').pop()}`;
 
@@ -349,7 +363,6 @@ const doPatch = (nodes) => {
             formData.append('id', resource.id);
             formData.append('uuid', resource.uuid);
             formData.append('resource', resource.resource);
-            // formData.append('file', fileInput.value);
             formData.append('file', newFile.value);
             resourceService.updateResourceTree(formData).then((res) => {
                 console.log(res);
