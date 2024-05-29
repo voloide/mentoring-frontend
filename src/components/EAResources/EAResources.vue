@@ -19,8 +19,38 @@
                 v-model:selected="selectedNode"
             >
               <template #default-header="props">
-                <div @click="resourceRequest(props.node)">
-                  {{props.node.label}}
+                <div>
+                  <q-btn
+                      v-if="['resource', 'subCateg', 'categ', 'program'].includes(props.node.type)"
+                      @click="resourceRequest(props.node)"
+                      :class="{
+                      'text-orange': ['resource', 'subCateg', 'categ', 'program'].includes(props.node.type)
+                    }"
+                      dense
+                      size="sm"
+                  >
+                    {{ props.node.label }}
+                  </q-btn>
+                  <div v-else class="row">
+                  <span
+                      @click="resourceRequest(props.node)"
+                      :class="{'text-blue': props.node.clickable === 2,
+                      'q-mt-sm': true}"
+                  >
+                    {{ props.node.label }}
+                  </span>
+<!--                  <q-btn-->
+<!--                      v-if="props.node.clickable === 2"-->
+<!--                      flat-->
+<!--                      round-->
+<!--                      class="q-ml-md col"-->
+<!--                      color="red-8"-->
+<!--                      icon="cancel"-->
+<!--                      @click="removeResource(props.node)"-->
+<!--                  >-->
+<!--                    <q-tooltip class="bg-red-5">Remoer Recurso</q-tooltip>-->
+<!--                  </q-btn>-->
+                  </div>
                 </div>
               </template>
             </q-tree>
