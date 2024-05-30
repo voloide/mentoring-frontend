@@ -1,5 +1,5 @@
 import useAuthorityRole from 'src/composables/authorityRole/authorityRoleMethods'
-import Role from "src/stores/model/role/Role";
+import Role from 'src/stores/model/role/Role';
 
 export default function useRole() {
 
@@ -17,8 +17,8 @@ export default function useRole() {
 
     function createRoleAuthorities(roleAuthorityDTOS: any) {
         const { createRoleAuthorityFromDTO } = useAuthorityRole();
-        const generatedRoleAuths = []
-        roleAuthorityDTOS.forEach(roleAuth => {
+        const generatedRoleAuths:any = []
+        roleAuthorityDTOS.forEach((roleAuth:any) => {
             generatedRoleAuths.push(createRoleAuthorityFromDTO(roleAuth));
         });
         return generatedRoleAuths;

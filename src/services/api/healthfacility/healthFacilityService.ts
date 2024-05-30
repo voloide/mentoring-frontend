@@ -9,44 +9,44 @@ const { createHealthFacilityFromDTO } = useHealthFacility();
 
 export default {
 
-  async getByDistrict(districtId: any) {
-    return await api()
-      .get(`/healthFacilities/getAllOfDistrict/${districtId}`)
-      .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
-        return resp;
-      })
-      .catch((error) => {
-        console.log('Error', error.message);
-      });
-  },
-  async getAll() {
-    return await api()
-      .get(`/healthFacilities/getall`)
-      .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
-        return resp;
-      })
-      .catch((error) => {
-        console.log('Error', error.message);
-      });
-  },
-  async getByProvince(provinceId: any) {
-    return await api()
-      .get(`/healthFacilities/getAllOfProvince/${provinceId}`)
-      .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
-        return resp;
-      })
-      .catch((error) => {
-        console.log('Error', error.message);
-      });
-  },
-  generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto: any) => {
-      const entity = createHealthFacilityFromDTO(dto)
-      healthFacilityRepo.save(entity);
-    });
+    async getByDistrict(districtId: any) {
+        return await api()
+           .get(`/healthFacilities/getAllOfDistrict/${districtId}`)
+          .then((resp) => {
+            this.generateAndSaveEntityFromDTO(resp.data);
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+      },
+      async getAll() {
+        return await api()
+           .get(`/healthFacilities/getall`)
+          .then((resp) => {
+            this.generateAndSaveEntityFromDTO(resp.data);
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+      },
+      async getByProvince(provinceId: any) {
+        return await api()
+           .get(`/healthFacilities/getAllOfProvince/${provinceId}`)
+          .then((resp) => {
+            this.generateAndSaveEntityFromDTO(resp.data);
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+      },
+      generateAndSaveEntityFromDTO(dtoList: any) {
+        dtoList.forEach((dto: any) => {
+          const entity = createHealthFacilityFromDTO(dto)
+          healthFacilityRepo.save(entity);
+        });
 
   },
   deleteAllFromStorage() {
@@ -55,6 +55,7 @@ export default {
   piniaGetAll() {
     return healthFacilityRepo
       .query()
+                                .withAllRecursive(2)
       .orderBy('healthFacility', 'asc')
       .get();
   },
@@ -72,5 +73,15 @@ export default {
       .where('healthFacility', healthFacility)
       .first();
   },
-
+      async saveHealthFacility(healthFacility: any) {
+        return await api()
+          .post('/healthFacilities/save', healthFacility)
+          .then((resp) => {
+            healthFacilityRepo.save(createHealthFacilityFromDTO(resp.data));
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+      },
 };

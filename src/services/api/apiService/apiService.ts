@@ -29,7 +29,7 @@ function logout () {
 
 // Função para iniciar o temporizador
 function fixNextTokenExpirationTime() {
-   localStorage.setItem('tokenExpiration', String(Date.now() + 600000)); 
+   localStorage.setItem('tokenExpiration', String(Date.now() + 600000));
   // localStorage.setItem('tokenExpiration', String(Date.now() + 30000)); // 30 segundos sem request para teste
 }
 
@@ -41,7 +41,7 @@ instance.interceptors.request.use(
       Accept: 'application/json',
     };
     if (
-      request.url === '/province' 
+      request.url === '/province'
     ) {
       delete request.headers.Authorization;
     } else if (userloged != null && userloged != 'null') {

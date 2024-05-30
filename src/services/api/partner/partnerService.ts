@@ -20,7 +20,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto: any) => {
       const entity = createPartnerFromDTO(dto);
       repo.save(entity);
     });
@@ -47,5 +47,16 @@ export default {
       .where('id', id)
       .orderBy('description', 'asc')
       .first();
+  },
+  async savePartner(partner: any) {
+    return await api()
+      .post('/partner', partner)
+      .then((resp) => {
+        repo.save(createPartnerFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.log('Error', error.message);
+      });
   },
 };

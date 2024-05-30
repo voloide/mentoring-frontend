@@ -289,3 +289,4 @@ onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });
 </script>
+
