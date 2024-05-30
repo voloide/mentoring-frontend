@@ -118,18 +118,11 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn
-                      flat
-                      round
-                      class="q-ml-md"
-                      color="green-8"
-                      icon="edit"
-                      @click="editQuestion(props.row)"
-                    >
-                      <q-tooltip class="bg-green-5"
-                        >Detalhar/Editar Question</q-tooltip
-                      >
-                    </q-btn></span
+                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editQuestion(props.row)">
+                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
+                    </q-btn>
+                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteQuestion(props.row.id)"></q-btn>
+                    </span
                   >
                 </div>
               </q-td>
@@ -168,7 +161,9 @@ import { onMounted, ref, inject } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import questionCategoryService from 'src/services/api/question/questionCategoryService';
 import { computed } from 'vue';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 const { fullName } = useEmployee();
 const step = inject('step');
 const searchResults = ref([]);
@@ -237,13 +232,37 @@ const editQuestion = (question) => {
   selectedQuestion.value = question;
 };
 
+const deleteQuestion = (question) => {
+  alertWarningAction(
+    'Tem certeza que deseja apagar o questiona?'
+  ).then((result) => {
+    if (result) {
+      questionService.deleteQuestion(question).then((response) => {
+        if (response.status === 200 || esponse.status === 201) {
+          alertSucess('Question apagado com sucesso!').then((result) => {
+            if (result) {
+              emit('close');
+            }
+          });
+        } else {
+          alertError('Não foi possivel apagar o questiona.')
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    } else {
+      console.log("OK. the Item Has not removed")
+    }
+  });
+}
+
 const addNewRow = () => {
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;
     const newRow = {
       id: null,
-      program: {
+      question: {
         code:null,
         question: null,
         questionCategory: null,

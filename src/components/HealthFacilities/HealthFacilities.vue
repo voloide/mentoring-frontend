@@ -129,18 +129,10 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn
-                      flat
-                      round
-                      class="q-ml-md"
-                      color="green-8"
-                      icon="edit"
-                      @click="editHealthFacility(props.row)"
-                    >
-                      <q-tooltip class="bg-green-5"
-                        >Detalhar/Editar HealthFacility</q-tooltip
-                      >
+                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editHealthFacility(props.row)">
+                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
                     </q-btn>
+                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteHealthFacility(props.row.id)"></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -180,7 +172,9 @@ import UsersService from 'src/services/api/user/UsersService';
 import districtService from 'src/services/api/district/districtService';
 import { computed } from 'vue';
 import provinceService from 'src/services/api/province/provinceService';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 const { fullName } = useEmployee();
 const step = inject('step');
 const searchResults = ref([]);
@@ -253,6 +247,30 @@ const closeForm = () => {
 const editHealthFacility = (healthFacility) => {
   selectedHealthFacility.value = healthFacility;
 };
+
+const deleteHealthFacility = (healthFacility) => {
+  alertWarningAction(
+    'Tem certeza que deseja apagar a unidade sanitaria?'
+  ).then((result) => {
+    if (result) {
+      healthFacilityService.deleteHealthFacility(healthFacility).then((response) => {
+        if (response.status === 200 || esponse.status === 201) {
+          alertSucess('Unidade sanitaria apagada com sucesso!').then((result) => {
+            if (result) {
+              emit('close');
+            }
+          });
+        } else {
+          alertError('Não foi possivel apagar a unidade sanitaria.')
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    } else {
+      console.log("OK. the Item Has not removed")
+    }
+  });
+}
 
 const addNewRow = () => {
   openForm.value = true;

@@ -141,18 +141,10 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn
-                      flat
-                      round
-                      class="q-ml-md"
-                      color="green-8"
-                      icon="edit"
-                      @click="editPogrammaticArea(props.row)"
-                    >
-                      <q-tooltip class="bg-green-5"
-                        >Detalhar/Editar Pogram</q-tooltip
-                      >
+                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editPogrammaticArea(props.row)">
+                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
                     </q-btn>
+                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteProgrammaticArea(props.row.id)"></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -191,7 +183,9 @@ import UsersService from 'src/services/api/user/UsersService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import programService from 'src/services/api/program/programService';
 import { computed } from 'vue';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
 const selectedPogrammaticArea = ref('');
 const newRowAdded = ref(false);
@@ -265,6 +259,30 @@ const closeForm = () => {
 const editPogrammaticArea = (Pogram) => {
   selectedPogrammaticArea.value = Pogram;
 };
+
+const deleteProgrammaticArea = (ProgrammaticArea) => {
+  alertWarningAction(
+    'Tem certeza que deseja apagar o ProgrammaticAreaa?'
+  ).then((result) => {
+    if (result) {
+      programmaticAreaService.deleteProgrammaticArea(ProgrammaticArea).then((response) => {
+        if (response.status === 200 || esponse.status === 201) {
+          alertSucess('ProgrammaticArea apagado com sucesso!').then((result) => {
+            if (result) {
+              emit('close');
+            }
+          });
+        } else {
+          alertError('Não foi possivel apagar o ProgrammaticAreaa.')
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    } else {
+      console.log("OK. the Item Has not removed")
+    }
+  });
+}
 
 const addNewRow = () => {
   openForm.value = true;

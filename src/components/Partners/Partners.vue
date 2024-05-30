@@ -90,18 +90,10 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn
-                      flat
-                      round
-                      class="q-ml-md"
-                      color="green-8"
-                      icon="edit"
-                      @click="editPartner(props.row)"
-                    >
-                      <q-tooltip class="bg-green-5"
-                        >Detalhar/Editar Partner</q-tooltip
-                      >
+                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editPartner(props.row)">
+                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
                     </q-btn>
+                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deletePartner(props.row.id)"></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -138,7 +130,9 @@ import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import partnerService from 'src/services/api/partner/partnerService';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
 const selectedPartner = ref('');
 const newRowAdded = ref(false);
@@ -190,6 +184,30 @@ const closeForm = () => {
 const editPartner = (partner) => {
   selectedPartner.value = partner;
 };
+
+const deletePartner = (partner) => {
+  alertWarningAction(
+    'Tem certeza que deseja apagar o partnera?'
+  ).then((result) => {
+    if (result) {
+      partnerService.deletePartner(partner).then((response) => {
+        if (response.status === 200 || esponse.status === 201) {
+          alertSucess('Parceiro apagado com sucesso!').then((result) => {
+            if (result) {
+              emit('close');
+            }
+          });
+        } else {
+          alertError('Não foi possivel apagar o Parceiro.')
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    } else {
+      console.log("OK. the Item Has not removed")
+    }
+  });
+}
 
 const addNewRow = () => {
   openForm.value = true;

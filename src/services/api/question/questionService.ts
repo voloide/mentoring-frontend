@@ -70,4 +70,15 @@ export default {
             console.log('Error', error.message);
           });
   },
+  async deleteQuestion(questionId:number) {
+    try {
+      const resp = await api().patch(`/questions/${questionId}`);
+      repo.save(createQuestionFromDTO(resp.data));
+      return resp;
+    } catch (error:any) {
+        console.log('Error', error.message);
+        // You might want to re-throw the error or handle it differently here
+        throw error;
+    }
+  },
 };

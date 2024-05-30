@@ -61,4 +61,15 @@ export default {
         console.log('Error', error.message);
       });
   },
+  async deleteProgrammaticArea(programmaticareaId:number) {
+    try {
+      const resp = await api().patch(`/programs/${programmaticareaId}`);
+      repo.save(createProgrammaticAreaFromDTO(resp.data));
+      return resp;
+    } catch (error:any) {
+        console.log('Error', error.message);
+        // You might want to re-throw the error or handle it differently here
+        throw error;
+    }
+  },
 };
