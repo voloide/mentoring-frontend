@@ -19,8 +19,38 @@
                 v-model:selected="selectedNode"
             >
               <template #default-header="props">
-                <div @click="resourceRequest(props.node)">
-                  {{props.node.label}}
+                <div>
+                  <q-btn
+                      v-if="['resource', 'subCateg', 'categ', 'program'].includes(props.node.type)"
+                      @click="resourceRequest(props.node)"
+                      :class="{
+                      'text-orange': ['resource', 'subCateg', 'categ', 'program'].includes(props.node.type)
+                    }"
+                      dense
+                      size="sm"
+                  >
+                    {{ props.node.label }}
+                  </q-btn>
+                  <div v-else class="row">
+                  <span
+                      @click="resourceRequest(props.node)"
+                      :class="{'text-blue': props.node.clickable === 2,
+                      'q-mt-sm': true}"
+                  >
+                    {{ props.node.label }}
+                  </span>
+<!--                  <q-btn-->
+<!--                      v-if="props.node.clickable === 2"-->
+<!--                      flat-->
+<!--                      round-->
+<!--                      class="q-ml-md col"-->
+<!--                      color="red-8"-->
+<!--                      icon="cancel"-->
+<!--                      @click="removeResource(props.node)"-->
+<!--                  >-->
+<!--                    <q-tooltip class="bg-red-5">Remoer Recurso</q-tooltip>-->
+<!--                  </q-btn>-->
+                  </div>
                 </div>
               </template>
             </q-tree>
@@ -101,7 +131,9 @@
             v-if="addingResource"
             v-model="fileInput"
             outlined
-            label="Selecione o Ficheiro"
+            label="Selecione o Ficheiro. Max (2MB)"
+            max-file-size="2000048"
+            @rejected="onRejected"
             counter
             dense
             class="col"
@@ -138,6 +170,9 @@ import { ref, onMounted, computed } from 'vue';
 import resourceService from 'src/services/api/resource/resourceService';
 import useResource from 'src/composables/resource/resourceMethods';
 import moment from 'moment';
+import {useSwal} from 'src/composables/shared/dialog/dialog';
+
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 
 const search = ref(null)
 const filter = ref('')
@@ -169,6 +204,9 @@ const fileRef = ref(null)
 
 const timestamp = ref(null)
 const fileBeingUploaded = ref(false)
+const subCategBeingRegistered = ref(false)
+const categBeingRegistered = ref(false)
+const programBeingRegistered = ref(false)
 
 const nodes = ref([])
 const resetAddingViewForm = () => {
@@ -184,11 +222,27 @@ const isSaveDisabled = computed(() => {
   if (fileBeingUploaded.value) {
     return !fileName.value || fileName.value.length < 4 || !fileInput.value;
   }
+  if (subCategBeingRegistered.value) {
+    return !subCategoryInput.value || subCategoryInput.value.length < 2;
+  }
+  if (categBeingRegistered.value) {
+    return !categoryInput.value || categoryInput.value.length < 2;
+  }
+  if (programBeingRegistered.value) {
+    return !programInput.value || programInput.value.length < 2;
+  }
   return false
 })
 
+const onRejected = (rejectedEntries) => {
+  alertError('Ficheiro "'+rejectedEntries[0].file.name+'", com tamanho '+rejectedEntries[0].file.size+'Bytes não suportado.')
+}
+
 const resourceRequest = (node) => {
   fileBeingUploaded.value = false
+  subCategBeingRegistered.value  = false
+  categBeingRegistered.value  = false
+  programBeingRegistered.value  = false
   actualNode.value = node
   resetAddingViewForm()
   if(node.clickable === 1) { // Algo sera adicionado [Program/Categoria/Subcategoria/Recurso]
@@ -199,23 +253,32 @@ const resourceRequest = (node) => {
       addingResource.value = true
       nodeCategory.value = node.program + ' -> ' + node.category +  ' -> ' + node.subCategory
     } else if(node.type === 'subCateg') {  // Vamos adicionar Sub Categoria
+      subCategBeingRegistered.value = true
       categoryLabel.value = 'Categoria'
       popUpTitle.value = 'Adicionar Sub Categoria'
       addingSubCateg.value = true
       nodeCategory.value = node.program + ' -> ' + node.category
     } else if(node.type === 'categ') { // Vamos adicionar Categoria
+      categBeingRegistered.value = true
       categoryLabel.value = 'Programa'
       popUpTitle.value = 'Adicionar Categoria'
       addingCateg.value = true
       nodeCategory.value = node.program
     } else if(node.type === 'program') { // Vamos adicionar Programa
+      programBeingRegistered.value = true
       popUpTitle.value = 'Adicionar Programa'
       addingProgram.value = true
     }
     showAddResource.value = true // Abrir PopUp
   } else if(node.clickable === 2) { // Um recurso sera carregado no backend e baixado no front
-    resourceService.loadFile(node.name).then((resp) => {
-      console.log(resp.status)
+    resourceService.loadFile(node.name).then((respStatus) => {
+      if(respStatus === 200 || respStatus === 201){
+        alertSucess('Ficheiro descarregado. Verifique no seu directorio de downloads.')
+      } else if(respStatus === 404) {
+        alertError('O ficheiro que deseja baixar nao foi encontrado.')
+      } else {
+        alertError('Ocorreu um erro inesperado.')
+      }
     })
   }
 };
@@ -323,7 +386,6 @@ const doPatch = (nodes) => {
             !fileNameRef.value.hasError &&
             !fileRef.value.hasError
         ) {
-            // Requisito do nome do file: Renomear o fileInput com 'fileName+data e hora'
             const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
             const newFileName = `${fileName.value}_${timestamp}.${fileInput.value.name.split('.').pop()}`;
 
@@ -331,25 +393,33 @@ const doPatch = (nodes) => {
             formData.append('id', resource.id);
             formData.append('uuid', resource.uuid);
             formData.append('resource', resource.resource);
-            // formData.append('file', fileInput.value);
             formData.append('file', newFile.value);
             resourceService.updateResourceTree(formData).then((res) => {
-                console.log(res);
+              if(res)
+                if(res.status === 200 || res.status === 201) {
+                  loadResources()
+              }
             });
         }
     } else {
         resourceService.updateResourceTreeWithoutFile(resource).then((res) => {
-            console.log(res);
+          if(res)
+            if(res.status === 200 || res.status === 201) {
+              loadResources()
+            }
         });
     }
 };
 
-
-onMounted(() => {
+const loadResources = () => {
   resourceService.getAll().then((res) => {
     resourceObj.value = resourceService.piniaGetAll()[0]
     nodes.value = JSON.parse(resourceObj.value.resource)
   })
+}
+
+onMounted(() => {
+  loadResources()
 })
 
 </script>

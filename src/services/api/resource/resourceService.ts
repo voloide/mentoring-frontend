@@ -2,6 +2,7 @@ import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
 import Resource from 'src/stores/model/resource/Resource';
 import useResource from 'src/composables/resource/resourceMethods';
+import {handleError} from 'vue';
 
 const repo = useRepo(Resource);
 const { createResourceFromDTO } = useResource();
@@ -31,7 +32,6 @@ export default {
       });
   },
   async updateResourceTree(resourceDTO: any) {
-    console.log(resourceDTO)
     let resp = null;
     resp = await api()
       .patch(`/resources/updateresourcetree`, resourceDTO)
@@ -45,7 +45,6 @@ export default {
     return resp;
   },
   async  updateResourceTreeWithoutFile(resourceDTO: any) {
-      console.log(resourceDTO)
       let resp = null;
       resp = await api()
           .patch(`/resources/updateresourcetreewithoutfile`, resourceDTO)
@@ -66,32 +65,32 @@ export default {
         a.click();
         URL.revokeObjectURL(url);
     },
-    async loadFile(fileName: any) {
-        let resp = null;
-            resp = await api().get(`/resources/load`, {
-                params: {
-                    fileName: fileName
-                }
-            })
-            .then((resp) => {
-                if(resp.status === 200){
-                    const url = window.URL.createObjectURL(new File([resp.data], fileName));
 
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', fileName);
-                    document.body.appendChild(link);
-                    link.click();
-
-                    link.remove();
-                }
-                return resp;
+    async loadFile(fileName: string) {
+            let responseStatus = null
+            const resp = await api().get('/resources/load', {
+                responseType: 'blob',
+                params: { fileName }
             })
-            .catch((error) => {
-                console.log('Error', error.message);
-            });
-        return resp;
+                .then((resp) => {
+                    responseStatus = resp.status
+                    if (resp.status === 200) {
+                        const url = window.URL.createObjectURL(resp.data);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', fileName);
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                    }
+                    return resp;
+                })
+                .catch((error) => {
+                    responseStatus = error.response.status
+                });
+            return responseStatus;
     },
+
     getResourceList() {
     return repo
       .query()
