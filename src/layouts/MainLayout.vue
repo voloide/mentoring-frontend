@@ -13,6 +13,8 @@
           </div>
         </div>
       </div>
+
+      <q-separator spaced color="white" />
       <div class="row q-mt-md">
         <q-list padding class="text-white col">
           <q-item
