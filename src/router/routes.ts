@@ -30,6 +30,10 @@ const routes: RouteRecordRaw[] = [
         path: '/resources',
         component: () => import('pages/resources/Resources.vue'),
       },
+      {
+        path: '/rondas',
+        component: () => import('pages/rondas/Rondas.vue'),
+      }
     ],
   },
   {

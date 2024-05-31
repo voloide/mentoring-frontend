@@ -93,11 +93,13 @@
           </q-item>
 
           <q-item
-            clickable
-            v-ripple
-            :active="link === 'rondas'"
-            @click="link = 'rondas'"
-            active-class="my-menu-link"
+              clickable
+              v-ripple
+              :active="link === 'rondas'"
+              @click="link = 'rondas'"
+              active-class="my-menu-link"
+              to="/rondas"
+              exact
           >
             <q-item-section avatar>
               <q-icon name="playlist_add_check_circle" />
