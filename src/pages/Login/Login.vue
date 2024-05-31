@@ -1,6 +1,6 @@
 <template>
     <div class="row q-pa-sm text-center justify-center">
-        
+
         <div>
             <div style="margin-top: 100px;">
                 <div
@@ -20,7 +20,7 @@
                 </div>
             </div>
             <q-card style="width: 650px; max-width: 90vw; margin-top: 50px;">
-                
+
                 <q-card-section class="login" style="padding: 20px;" align="center">
                     <q-form
                         class="q-gutter-md"
@@ -30,14 +30,14 @@
                         LOGIN
                     </div>
                     <div class="row q-mb-sm" style="width: 350px;">
-                    <q-input 
-                        outlined 
+                    <q-input
+                        outlined
                         class="col"
                         bg-color="white"
                         ref="usernameRef"
                         v-model="username"
                         color="red-9" label-color="light-blue-10"
-                        label="Utilizador" 
+                        label="Utilizador"
                         :rules="[
                           (val) =>
                             val.length >= 3 ||
@@ -50,15 +50,15 @@
                     </q-input>
                     </div>
                     <div class="row q-mb-sm row q-mt-lg" style="width: 350px;">
-                    <q-input 
+                    <q-input
                         class="col"
-                        outlined 
+                        outlined
                         bg-color="white"
                         color="red-9" label-color="light-blue-10"
-                        v-model="password" 
+                        v-model="password"
                         ref="passwordRef"
-                        type="password" 
-                        label="Password" 
+                        type="password"
+                        label="Password"
                         :rules="[
                           (val) =>
                             val.length >= 4 ||
@@ -122,6 +122,7 @@
                 password: password.value,
             })
                 .then((response) => {
+
                   submitting.value = false;
                   if (response !== undefined && response.status === 200) {
                       localStorage.setItem('access_token', response.data.access_token);
@@ -129,7 +130,7 @@
                       localStorage.setItem('username', response.data.username);
                       localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo));
                       localStorage.setItem('tokenExpiration', String(Date.now() + 600000));
-                      
+
                       router.push({ path: '/' });
                   } else {
                     alertError(response.response.data.message);

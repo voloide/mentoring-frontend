@@ -18,8 +18,19 @@ export default {
         console.log('Error', error.message);
       });
   },
+  async getAll() {
+    return await api()
+       .get('/questions/all')
+      .then((resp) => {
+        this.generateAndSaveEntityFromDTO(resp.data);
+        return resp;
+      })
+      .catch((error) => {
+        console.log('Error', error.message);
+      });
+  },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto: any) => {
       const entity = createQuestionFromDTO(dto);
       repo.save(entity);
     });
@@ -35,7 +46,11 @@ export default {
     repo.flush();
   },
   piniaGetAll() {
-    return repo.query().orderBy('description', 'asc').get();
+    const res = repo
+    .query()
+    .withAllRecursive(2)
+    .orderBy('description', 'asc').get();
+    return res;
   },
   getByName(question: string) {
     return repo
@@ -43,5 +58,16 @@ export default {
       .where('question', question)
       .orderBy('question', 'asc')
       .first();
-  }
+  },
+  async saveQuestion(question: any) {
+        return await api()
+          .post('/questions/save', question)
+          .then((resp) => {
+            repo.save(createQuestionFromDTO(resp.data));
+            return resp;
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+          });
+  },
 };

@@ -92,7 +92,7 @@
                 </q-input>
                 <q-space />
                 <q-btn
-                   
+
                     @click="search"
                     class="q-ml-md q-mb-xs float-right"
                     square
@@ -102,7 +102,7 @@
                     <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
                 </q-btn>
                 <q-btn
-                    
+
                     @click="clearSearchParams"
                     class="q-ml-md q-mb-xs float-right"
                     square

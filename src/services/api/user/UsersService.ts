@@ -1,12 +1,9 @@
-import api from "../apiService/apiService";
-import { useRepo } from "pinia-orm";
-import { UserDTO } from "src/services/dto/user/UserDTO";
-import { plainToClass } from "class-transformer";
-import useUser from "src/composables/user/userMethods";
-import User from "src/stores/model/user/User";
-import Employee from "src/stores/model/employee/Employee";
-import UserRole from "src/stores/model/role/UserRole";
-import ProfessionalCategory from "src/stores/model/professionalCategory/ProfessionalCategory";
+import api from '../apiService/apiService';
+import { useRepo } from 'pinia-orm';
+import { UserDTO } from 'src/services/dto/user/UserDTO';
+import { plainToClass } from 'class-transformer';
+import useUser from 'src/composables/user/userMethods';
+import User from 'src/stores/model/user/User';
 
 const userRepo = useRepo(User);
 const { createUserFromDTO } = useUser();
@@ -16,7 +13,7 @@ export default {
     async post(obj: string) {
         try {
             const resp = await api().post('user', plainToClass(UserDTO, obj, { excludeExtraneousValues: true }));
-            
+
         } catch (error: any) {
             console.error(error);
         }
@@ -54,10 +51,38 @@ export default {
                      .withAll()
                      //.where('username', userloged)
                      .first();
-                  
     },
     piniaSave(user: User) {
       return userRepo.save(user);;
-    }
-
+    },
+    async getAll() {
+      return await api()
+        .get('/user/getAll')
+        .then((resp) => {
+          this.convertUserFromDTO(resp.data);
+          return resp;
+        })
+        .catch((error) => {
+          console.log(error);
+          console.log('Error', error.message);
+        });
+    },
+    piniaGetAll() {
+      const res = userRepo
+      .query()
+      .withAllRecursive(2)
+      .orderBy('username', 'asc').get();
+      return res;
+    },
+    async saveUser(user: any) {
+      return await api()
+        .post('/user/save', user)
+        .then((resp) => {
+          userRepo.save(createUserFromDTO(resp.data));
+          return resp;
+        })
+        .catch((error) => {
+          console.log('Error', error.message);
+        });
+    },
 };
