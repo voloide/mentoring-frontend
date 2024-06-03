@@ -59,14 +59,14 @@ export default {
       .orderBy('healthFacility', 'asc')
       .get();
   },
-  getAllOfDistrict(districtId: number) {
+  getAllOfDistrict(districtId: any) {
     return healthFacilityRepo
       .query()
       .with('district')
       .where('districtId', districtId)
       .get();
   },
-  getByHealthFacility(healthFacility: string) {
+  getByHealthFacility(healthFacility: any) {
     return healthFacilityRepo
       .query()
       .with('district')
@@ -83,5 +83,16 @@ export default {
           .catch((error) => {
             console.log('Error', error.message);
           });
+      },
+      async deleteHealthFacility(healthFacilityId:number) {
+        try {
+          const resp = await api().patch(`/healthFacilities/${healthFacilityId}`);
+          healthFacilityRepo.save(createHealthFacilityFromDTO(resp.data));
+          return resp;
+        } catch (error:any) {
+            console.log('Error', error.message);
+            // You might want to re-throw the error or handle it differently here
+            throw error;
+        }
       },
 };

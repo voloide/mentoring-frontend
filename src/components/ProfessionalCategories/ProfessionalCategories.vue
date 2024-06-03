@@ -91,18 +91,10 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn
-                      flat
-                      round
-                      class="q-ml-md"
-                      color="green-8"
-                      icon="edit"
-                      @click="editProfessionalCategory(props.row)"
-                    >
-                      <q-tooltip class="bg-green-5"
-                        >Detalhar/Editar ProfessionalCategory</q-tooltip
-                      >
+                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editProfessionalCategory(props.row)">
+                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
                     </q-btn>
+                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteProfessionalCategory(props.row.id)"></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -139,7 +131,9 @@ import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
 const selectedProfessionalCategory = ref('');
 const openForm = ref(false);
@@ -193,6 +187,30 @@ const closeForm = () => {
 const editProfessionalCategory = (ProfessionalCategory) => {
   selectedProfessionalCategory.value = ProfessionalCategory;
 };
+
+const deleteProfessionalCategory = (ProfessionalCategory) => {
+  alertWarningAction(
+    'Tem certeza que deseja apagar a categoria profissional?'
+  ).then((result) => {
+    if (result) {
+      professionalCategoryService.deleteProfessionalCategory(ProfessionalCategory).then((response) => {
+        if (response.status === 200 || esponse.status === 201) {
+          alertSucess('categoria profissional apagada com sucesso!').then((result) => {
+            if (result) {
+              emit('close');
+            }
+          });
+        } else {
+          alertError('Não foi possivel apagar a categoria profissional.')
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    } else {
+      console.log("OK. the Item Has not removed")
+    }
+  });
+}
 
 const addNewRow = () => {
   openForm.value = true;

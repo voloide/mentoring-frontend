@@ -36,18 +36,10 @@
               </q-td>
               <q-td key="options" :props="props">
                 <div class="col">
-                  <q-btn
-                    flat
-                    round
-                    class="q-ml-md"
-                    color="green-8"
-                    icon="edit"
-                    @click="editUser(props.row)"
-                  >
-                    <q-tooltip class="bg-green-5"
-                      >Detalhar/Editar User</q-tooltip
-                    >
-                  </q-btn>
+                  <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editUser(props.row)">
+                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
+                    </q-btn>
+                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteUser(props.row.id)"></q-btn>
                 </div>
               </q-td>
             </q-tr>
@@ -84,7 +76,9 @@ import healthFacilityService from 'src/services/api/healthfacility/healthFacilit
 import provinceService from 'src/services/api/province/provinceService';
 import { computed } from 'vue';
 import UserForm from './UserForm.vue';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
+const { alertError, alertSucess, alertWarningAction } = useSwal();
 const { fullName } = useEmployee();
 const step = inject('step');
 const searchResults = ref([]);
@@ -165,6 +159,30 @@ const closeForm = () => {
 const editUser = (user) => {
   selectedUser.value = user;
 };
+
+const deleteUser = (user) => {
+  alertWarningAction(
+    'Tem certeza que deseja apagar o user?'
+  ).then((result) => {
+    if (result) {
+      userService.deleteUser(user).then((response) => {
+        if (response.status === 200 || esponse.status === 201) {
+          alertSucess('User apagado com sucesso!').then((result) => {
+            if (result) {
+              emit('close');
+            }
+          });
+        } else {
+          alertError('Não foi possivel apagar o usera.')
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    } else {
+      console.log("OK. the Item Has not removed")
+    }
+  });
+}
 
 provide('openForm', openForm);
 </script>

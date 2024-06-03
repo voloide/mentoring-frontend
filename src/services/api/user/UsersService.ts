@@ -85,4 +85,15 @@ export default {
           console.log('Error', error.message);
         });
     },
+    async deleteUser(userId:number) {
+      try {
+        const resp = await api().patch(`/user/${userId}`);
+        userRepo.save(createUserFromDTO(resp.data));
+        return resp;
+      } catch (error:any) {
+          console.log('Error', error.message);
+          // You might want to re-throw the error or handle it differently here
+          throw error;
+      }
+    },
 };

@@ -59,4 +59,15 @@ export default {
         console.log('Error', error.message);
       });
   },
+  async deletePartner(partnerId:number) {
+    try {
+      const resp = await api().patch(`/partner/${partnerId}`);
+      repo.save(createPartnerFromDTO(resp.data));
+      return resp;
+    } catch (error:any) {
+        console.log('Error', error.message);
+        // You might want to re-throw the error or handle it differently here
+        throw error;
+    }
+  },
 };

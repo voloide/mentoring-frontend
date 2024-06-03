@@ -2,9 +2,11 @@ import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
 import ProfessionalCategory from 'src/stores/model/professionalCategory/ProfessionalCategory';
 import useProfessionalCategory from 'src/composables/professionalCategory/professionalCategoryMethods';
+import usePartner from 'src/composables/partner/partnerMethods';
 
 const repo = useRepo(ProfessionalCategory);
 const { createProfessionalCategoryFromDTO } = useProfessionalCategory();
+const { createPartnerFromDTO } = usePartner();
 
 export default {
 
@@ -44,5 +46,16 @@ export default {
           .catch((error) => {
             console.log('Error', error.message);
           });
+      },
+      async deleteProfessionalCategory(professionalCategoryId:number) {
+        try {
+          const resp = await api().patch(`/professionalCategories/${professionalCategoryId}`);
+          repo.save(createProfessionalCategoryFromDTO(resp.data));
+          return resp;
+        } catch (error:any) {
+            console.log('Error', error.message);
+            // You might want to re-throw the error or handle it differently here
+            throw error;
+        }
       },
 };
