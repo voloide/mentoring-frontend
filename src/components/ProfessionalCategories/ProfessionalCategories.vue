@@ -152,7 +152,7 @@ const columns = [
   {
     name: 'code',
     align: 'left',
-    label: 'code',
+    label: 'Código',
     sortable: false,
   },
   {
