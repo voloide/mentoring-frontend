@@ -200,13 +200,13 @@ const columns = [
   {
     name: 'code',
     align: 'left',
-    label: 'Code',
+    label: 'Código',
     sortable: false,
   },
   {
     name: 'name',
     align: 'left',
-    label: 'Name',
+    label: 'Nome',
     sortable: false,
   },
   {

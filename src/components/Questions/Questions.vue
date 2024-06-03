@@ -24,7 +24,7 @@
                 <span v-if="props.row.id === null">
                   <q-input
                     outlined
-                    label="Code"
+                    label="Código"
                     dense
                     ref="codeRef"
                     class="col"
@@ -45,7 +45,7 @@
                 <span v-if="props.row.id === null">
                   <q-input
                     outlined
-                    label="Questão"
+                    label="Competência"
                     dense
                     ref="questionRef"
                     class="col q-ml-md"
@@ -119,10 +119,11 @@
                   </span>
                   <span v-else>
                     <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editQuestion(props.row)">
-                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
+                      <q-tooltip class="bg-green-5">Detalhar/Editar Competência</q-tooltip>
                     </q-btn>
                     <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteQuestion(props.row.id)"></q-btn>
                     </span
+
                   >
                 </div>
               </q-td>
@@ -179,13 +180,13 @@ const columns = [
   {
     name: 'code',
     align: 'left',
-    label: 'code',
+    label: 'Código',
     sortable: false,
   },
   {
     name: 'question',
     align: 'left',
-    label: 'Questão',
+    label: 'Competência',
     sortable: false,
   },
   {
