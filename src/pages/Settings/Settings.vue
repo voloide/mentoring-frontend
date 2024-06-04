@@ -57,8 +57,9 @@
     <professional-categories v-if="isProfessionalCategoryStep" />
     <health-facilities v-if="isHealthFacilityStep" />
     <partners v-if="isPartnerStep" />
-    <users v-if="isUserStep" @create="changeStep('userForm')" />
+    <users v-if="isUserStep" @create="changeStep('userForm')" @resetPassword="changeStep('passwordReset')"/>
     <user-form v-if="isUserFormStep" @cancel="changeStep('user')" />
+    <password-reset v-if="isPasswordResetStep" @cancel="changeStep('user')" />
   </div>
 </template>
 
@@ -72,6 +73,7 @@ import HealthFacilities from 'src/components/HealthFacilities/HealthFacilities.v
 import Partners from 'src/components/Partners/Partners.vue';
 import Users from 'src/components/Users/Users.vue';
 import UserForm from 'src/components/Users/UserForm.vue';
+import PasswordReset from 'src/components/Users/PasswordReset.vue';
 import { useLoading } from 'src/composables/shared/loading/loading';
 import programService from 'src/services/api/program/programService';
 import programmaticAreasService from 'src/services/api/programmaticArea/programmaticAreaService';
@@ -108,6 +110,7 @@ const init = () => {
 };
 
 const changeStep = (value) => {
+  console.log("--------changing step----------", value)
   step.value = value;
 };
 
@@ -135,7 +138,9 @@ const isUserStep = computed(() => {
 const isUserFormStep = computed(() => {
   return step.value === 'userForm';
 });
-
+const isPasswordResetStep = computed(()=>{
+  return step.value === 'passwordReset';
+})
 provide('step', step);
 </script>
 

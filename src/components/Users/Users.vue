@@ -140,6 +140,7 @@ const editUser = (user) => {
 
 const resetPassword = (user) =>{
   selectedUser.value = user;
+  emit('resetPassword');
 }
 
 const activateUser = (user) =>{
@@ -171,4 +172,5 @@ const deleteUser = (user) => {
 }
 
 provide('openForm', openForm);
+provide('selectedUser', selectedUser);
 </script>
