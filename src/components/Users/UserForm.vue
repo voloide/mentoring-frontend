@@ -189,54 +189,6 @@
                 option-label="code"
                 label="Perfil de Acesso"
               />
-
-              <q-checkbox
-                class="col"
-                label="Deve redefinir password no próximo login"
-              />
-            </div>
-
-            <div class="row q-my-sm">
-              <q-input
-                outlined
-                label="Password"
-                type="password"
-                dense
-                ref="passwordRef"
-                :rules="[(val) => !!val || 'Por favor indicar a password']"
-                lazy-rules
-                class="col"
-                v-model="user.password"
-                @update:model-value="(value) => (filter = value)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    name="close"
-                    @click="user.password = ''"
-                    class="cursor-pointer"
-                  />
-                </template>
-              </q-input>
-              <q-input
-                outlined
-                label="Confirma a Password"
-                type="password"
-                dense
-                :rules="[(val) => !!val || 'Por favor confirma a password']"
-                lazy-rules
-                ref="confirmPasswordRef"
-                class="col q-ml-md"
-                v-model="user.confirmPassword"
-                @update:model-value="(value) => (filter = value)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    name="close"
-                    @click="user.confirmPassword = ''"
-                    class="cursor-pointer"
-                  />
-                </template>
-              </q-input>
             </div>
 
             <div class="q-mt-lg">
@@ -622,7 +574,7 @@ const submitForm = () => {
         })
         .catch((error) => {
           Loading.hide();
-          console.log('Error', error);
+          console.error('Error', error);
         });
     } else {
       try {
@@ -632,9 +584,9 @@ const submitForm = () => {
           'User criado com sucesso, avançar para áreas de mentória'
         );
         Loading.hide();
-        emit('cancel')
+        emit('cancel');
       } catch (error) {
-        console.log('Error', error);
+        console.error('Error', error);
         alertError(resp?.message);
       }
     }
