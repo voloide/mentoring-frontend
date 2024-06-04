@@ -61,7 +61,7 @@ export default {
     return await api()
       .get('/user/getAll')
       .then((resp) => {
-        this.convertUserFromDTO(resp.data);
+        this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
       })
       .catch((error) => {
@@ -98,5 +98,11 @@ export default {
       // You might want to re-throw the error or handle it differently here
       throw error;
     }
+  },
+  generateAndSaveEntityFromDTO(dtoList: any) {
+    dtoList.forEach((dto: any) => {
+      const entity = createUserFromDTO(dto);
+      userRepo.save(entity);
+    });
   },
 };

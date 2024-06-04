@@ -36,10 +36,21 @@
               </q-td>
               <q-td key="options" :props="props">
                 <div class="col">
-                  <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editUser(props.row)">
+                  <q-btn flat round class="q-ml-md" color="grey-7" icon="lock" @click="resetPassword(props.row.id)">
+                    <q-tooltip class="bg-grey-7">Redefinição de senha</q-tooltip>
+                  </q-btn>
+                  <q-btn v-if="props.row.lifeCycleStatus=='INACTIVE'||props.row.lifeCycleStatus=='DELETED'" round class="q-ml-md" color="red-5" @click="activateUser(props.row.id)">
+                    <q-tooltip class="grey-8">Inactivo</q-tooltip>
+                  </q-btn>
+                  <q-btn v-if="props.row.lifeCycleStatus=='ACTIVE'" round class="q-ml-md" color="green-5"  @click="activateUser(props.row.id)" >
+                    <q-tooltip class="bg-green-5">Activo</q-tooltip>
+                  </q-btn>
+                  <q-btn flat round class="q-ml-md" color="yellow-8" icon="edit" @click="editUser(props.row)">
                       <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
                     </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteUser(props.row.id)"></q-btn>
+                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteUser(props.row.id)">
+                      <q-tooltip class="bg-red-5">Exluir</q-tooltip>
+                    </q-btn>
                 </div>
               </q-td>
             </q-tr>
@@ -71,16 +82,11 @@
 import useEmployee from 'src/composables/employee/employeeMethods';
 import userService from 'src/services/api/user/UsersService';
 import User from 'src/stores/model/user/User';
-import { onMounted, ref, inject, provide } from 'vue';
-import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
-import provinceService from 'src/services/api/province/provinceService';
-import { computed } from 'vue';
+import { onMounted, ref, provide } from 'vue';
 import UserForm from './UserForm.vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
-const { fullName } = useEmployee();
-const step = inject('step');
 const searchResults = ref([]);
 const selectedUser = ref('');
 const data = ref({
@@ -124,41 +130,21 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(userService.getLogedUser()));
   searchResults.value = userService.piniaGetAll();
-  // console.log("----searchResults----",searchResults.value)
-  // console.log('----piniaGetAll-----', userService.piniaGetAll());
+
 });
 
-const provinces =computed(()=>{
-  return provinceService.piniaGetAll()
-})
-
-const healthFacilities = computed(() => {
-  const healthFacilities = healthFacilityService.piniaGetAll();
-  healthFacilities.filter((item) => item.district.provinceDTO?.id == data.value.province?.id);
-  return data.value.province ? healthFacilities : '';
-});
-
-const submitForm = () => {
-  const user = {
-    name: data.value.name,
-    nuit: data.value.nuit,
-    employeeDTO: data.value.employee,
-    province: data.value.province
-  };
-  healthFacilityService.saveHealthFacility(user).then(closeForm);
-};
-
-const closeForm = () => {
-  openForm.value = false;
-  data.value.name = '';
-  data.value.nuit = '';
-  data.value.employee = '';
-  data.value.province = '';
-};
 
 const editUser = (user) => {
   selectedUser.value = user;
 };
+
+const resetPassword = (user) =>{
+  selectedUser.value = user;
+}
+
+const activateUser = (user) =>{
+  selectedUser.value = user;
+}
 
 const deleteUser = (user) => {
   alertWarningAction(
@@ -176,10 +162,10 @@ const deleteUser = (user) => {
           alertError('Não foi possivel apagar o usera.')
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     } else {
-      console.log("OK. the Item Has not removed")
+      console.info("OK. the Item Has not removed")
     }
   });
 }

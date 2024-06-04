@@ -16,6 +16,7 @@ export default class User extends Model {
       // relationships
       employee: this.belongsTo(Employee, 'employee_id'),
       userRoles: this.hasMany(UserRole, 'user_id'),
+      lifeCycleStatus:  this.attr(''),
     };
   }
   static piniaOptions = {

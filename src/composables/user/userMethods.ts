@@ -13,14 +13,15 @@ export default function useUser() {
       salt: userDTO.salt,
       username: userDTO.username,
       employee: createEmployeeFromDTO(userDTO.employeeDTO),
-      userRoles: createUserRoles(userDTO.userRoleDTOS),
+      userRoles: userDTO.userRoleDTOS ? createUserRoles(userDTO.userRoleDTOS) : [],
+      lifeCycleStatus: userDTO.lifeCycleStatus
     });
   }
 
   function createUserRoles(userRoleDTOS: any) {
     const { createUserRoleFromDTO } = useUserRole();
     const generated: any = [];
-    userRoleDTOS.forEach((userRole: any) => {
+    userRoleDTOS?.forEach((userRole: any) => {
       generated.push(createUserRoleFromDTO(userRole));
     });
     return generated;
