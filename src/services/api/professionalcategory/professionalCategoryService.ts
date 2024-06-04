@@ -9,53 +9,51 @@ const { createProfessionalCategoryFromDTO } = useProfessionalCategory();
 const { createPartnerFromDTO } = usePartner();
 
 export default {
-
   async getAll() {
     return await api()
-      .get(`/professionalCategories/getall`)
+      .get('/professionalCategories/getall')
       .then((resp) => {
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto: any) => {
-      const entity = createProfessionalCategoryFromDTO(dto)
+      const entity = createProfessionalCategoryFromDTO(dto);
       repo.save(entity);
     });
-
-      },
-      deleteAllFromStorage() {
-        repo.flush();
-      },
-      piniaGetAll() {
-        return repo.query()
-                   .orderBy('description', 'asc')
-                   .get();
-      },
-      async saveProfessionalCategory(professionalCategory: any) {
-        return await api()
-          .post('/professionalCategories/save', professionalCategory)
-          .then((resp) => {
-            repo.save(createProfessionalCategoryFromDTO(resp.data));
-            return resp;
-          })
-          .catch((error) => {
-            console.log('Error', error.message);
-          });
-      },
-      async deleteProfessionalCategory(professionalCategoryId:number) {
-        try {
-          const resp = await api().patch(`/professionalCategories/${professionalCategoryId}`);
-          repo.save(createProfessionalCategoryFromDTO(resp.data));
-          return resp;
-        } catch (error:any) {
-            console.log('Error', error.message);
-            // You might want to re-throw the error or handle it differently here
-            throw error;
-        }
-      },
+  },
+  deleteAllFromStorage() {
+    repo.flush();
+  },
+  piniaGetAll() {
+    return repo.query().orderBy('description', 'asc').get();
+  },
+  async saveProfessionalCategory(professionalCategory: any) {
+    return await api()
+      .post('/professionalCategories/save', professionalCategory)
+      .then((resp) => {
+        repo.save(createProfessionalCategoryFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
+  async deleteProfessionalCategory(professionalCategoryId: number) {
+    try {
+      const resp = await api().patch(
+        `/professionalCategories/${professionalCategoryId}`
+      );
+      repo.save(createProfessionalCategoryFromDTO(resp.data));
+      return resp;
+    } catch (error: any) {
+      console.error('Error', error.message);
+      // You might want to re-throw the error or handle it differently here
+      throw error;
+    }
+  },
 };

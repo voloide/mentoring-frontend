@@ -15,18 +15,18 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   async getAll() {
     return await api()
-       .get('/questions/all')
+      .get('/questions/all')
       .then((resp) => {
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
@@ -47,9 +47,10 @@ export default {
   },
   piniaGetAll() {
     const res = repo
-    .query()
-    .withAllRecursive(2)
-    .orderBy('description', 'asc').get();
+      .query()
+      .withAllRecursive(2)
+      .orderBy('description', 'asc')
+      .get();
     return res;
   },
   getByName(question: string) {
@@ -60,25 +61,25 @@ export default {
       .first();
   },
   async saveQuestion(question: any) {
-        return await api()
-          .post('/questions/save', question)
-          .then((resp) => {
-            repo.save(createQuestionFromDTO(resp.data));
-            return resp;
-          })
-          .catch((error) => {
-            console.log('Error', error.message);
-          });
+    return await api()
+      .post('/questions/save', question)
+      .then((resp) => {
+        repo.save(createQuestionFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
   },
-  async deleteQuestion(questionId:number) {
+  async deleteQuestion(questionId: number) {
     try {
       const resp = await api().patch(`/questions/${questionId}`);
       repo.save(createQuestionFromDTO(resp.data));
       return resp;
-    } catch (error:any) {
-        console.log('Error', error.message);
-        // You might want to re-throw the error or handle it differently here
-        throw error;
+    } catch (error: any) {
+      console.error('Error', error.message);
+      // You might want to re-throw the error or handle it differently here
+      throw error;
     }
   },
 };

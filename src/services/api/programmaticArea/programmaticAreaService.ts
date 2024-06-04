@@ -15,14 +15,13 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log(error);
-        console.log('Error', error.message);
+        console.error(error);
+        console.error('Error', error.message);
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto: any) => {
       const entity = createProgrammaticAreaFromDTO(dto);
-      // console.log(entity)
       repo.save(entity);
     });
   },
@@ -58,18 +57,18 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
-  async deleteProgrammaticArea(programmaticareaId:number) {
+  async deleteProgrammaticArea(programmaticareaId: number) {
     try {
       const resp = await api().patch(`/programs/${programmaticareaId}`);
       repo.save(createProgrammaticAreaFromDTO(resp.data));
       return resp;
-    } catch (error:any) {
-        console.log('Error', error.message);
-        // You might want to re-throw the error or handle it differently here
-        throw error;
+    } catch (error: any) {
+      console.error('Error', error.message);
+      // You might want to re-throw the error or handle it differently here
+      throw error;
     }
   },
 };

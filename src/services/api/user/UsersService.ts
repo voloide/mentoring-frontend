@@ -9,18 +9,18 @@ const userRepo = useRepo(User);
 const { createUserFromDTO } = useUser();
 
 export default {
-
-    async post(obj: string) {
-        try {
-            const resp = await api().post('user', plainToClass(UserDTO, obj, { excludeExtraneousValues: true }));
-
-        } catch (error: any) {
-            console.error(error);
-        }
-
-    },
-    async login(params: any) {
-        return api()
+  async post(obj: string) {
+    try {
+      const resp = await api().post(
+        'user',
+        plainToClass(UserDTO, obj, { excludeExtraneousValues: true })
+      );
+    } catch (error: any) {
+      console.error(error);
+    }
+  },
+  async login(params: any) {
+    return api()
       .post('/login', params)
       .then((resp) => {
         if (resp.status === 200) {
@@ -29,71 +29,74 @@ export default {
         return resp;
       })
       .catch((error) => {
-          return error;
+        return error;
       });
-
-    },
-    logout () {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('tokenExpiration');
-    },
-    convertUserFromDTO(userDTO: any) {
-      const user = createUserFromDTO(userDTO);
-      userRepo.save(user);
-    },
-    getLogedUser() {
-      const userloged = JSON.stringify(localStorage.getItem('username'))
-      // console.log(userloged);
-      return userRepo.query()
-                     .withAll()
-                     //.where('username', userloged)
-                     .first();
-    },
-    piniaSave(user: User) {
-      return userRepo.save(user);;
-    },
-    async getAll() {
-      return await api()
-        .get('/user/getAll')
-        .then((resp) => {
-          this.convertUserFromDTO(resp.data);
-          return resp;
-        })
-        .catch((error) => {
-          console.log(error);
-          console.log('Error', error.message);
-        });
-    },
-    piniaGetAll() {
-      const res = userRepo
+  },
+  logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userInfo');
+    localStorage.removeItem('tokenExpiration');
+  },
+  convertUserFromDTO(userDTO: any) {
+    const user = createUserFromDTO(userDTO);
+    userRepo.save(user);
+  },
+  getLogedUser() {
+    const userloged = JSON.stringify(localStorage.getItem('username'));
+    // console.log(userloged);
+    return (
+      userRepo
+        .query()
+        .withAll()
+        //.where('username', userloged)
+        .first()
+    );
+  },
+  piniaSave(user: User) {
+    return userRepo.save(user);
+  },
+  async getAll() {
+    return await api()
+      .get('/user/getAll')
+      .then((resp) => {
+        this.convertUserFromDTO(resp.data);
+        return resp;
+      })
+      .catch((error) => {
+        console.error(error);
+        console.error('Error', error.message);
+      });
+  },
+  piniaGetAll() {
+    const res = userRepo
       .query()
       .withAllRecursive(2)
-      .orderBy('username', 'asc').get();
-      return res;
-    },
-    async saveUser(user: any) {
-      return await api()
-        .post('/user/save', user)
-        .then((resp) => {
-          userRepo.save(createUserFromDTO(resp.data));
-          return resp;
-        })
-        .catch((error) => {
-          console.log('Error', error.message);
-        });
-    },
-    async deleteUser(userId:number) {
-      try {
-        const resp = await api().patch(`/user/${userId}`);
+      .orderBy('username', 'asc')
+      .get();
+    return res;
+  },
+  async saveUser(user: any) {
+    return await api()
+      .post('/user/save', user)
+      .then((resp) => {
         userRepo.save(createUserFromDTO(resp.data));
         return resp;
-      } catch (error:any) {
-          console.log('Error', error.message);
-          // You might want to re-throw the error or handle it differently here
-          throw error;
-      }
-    },
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
+  async deleteUser(userId: number) {
+    try {
+      const resp = await api().patch(`/user/${userId}`);
+      userRepo.save(createUserFromDTO(resp.data));
+      return resp;
+    } catch (error: any) {
+      console.error('Error', error.message);
+      // You might want to re-throw the error or handle it differently here
+      throw error;
+    }
+  },
 };

@@ -203,8 +203,6 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   searchResults.value = questionService.piniaGetAll();
-  // console.log("----searchResults----",searchResults.value)
-  // console.log('----piniaGetAll-----', questionService.piniaGetAll());
 });
 
 const questionCategories = computed(() => {
@@ -248,10 +246,10 @@ const deleteQuestion = (question) => {
           alertError('Não foi possivel apagar o questiona.')
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     } else {
-      console.log("OK. the Item Has not removed")
+      console.info("OK. the Item Has not removed")
     }
   });
 }

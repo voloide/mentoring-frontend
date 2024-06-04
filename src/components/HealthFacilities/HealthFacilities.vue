@@ -214,8 +214,6 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   searchResults.value = healthFacilityService.piniaGetAll();
-  console.log(searchResults.value);
-  // console.log('----piniaGetAll-----', healthFacilityService.piniaGetAll());
 });
 
 const provinces = computed(() => {
@@ -264,10 +262,10 @@ const deleteHealthFacility = (healthFacility) => {
           alertError('Não foi possivel apagar a unidade sanitaria.')
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     } else {
-      console.log("OK. the Item Has not removed")
+      console.info("OK. the Item Has not removed")
     }
   });
 }

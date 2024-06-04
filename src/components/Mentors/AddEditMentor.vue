@@ -348,7 +348,6 @@
                 label="Submeter"
                 color="primary"
               />
-              
             </div>
           </div>
         </div>
@@ -415,13 +414,14 @@ const selectedMentor = inject('selectedMentor');
 const step = inject('step');
 
 const isEditStep = computed(() => {
-    return step.value === 'edit';
-  });
+  return step.value === 'edit';
+});
 
 const init = () => {
   if (isEditStep.value) {
     mentor.value = Object.assign({}, selectedMentor.value);
-    selectedMentorLaborInfo.value = (mentor.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG');
+    selectedMentorLaborInfo.value =
+      mentor.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
   }
 };
 onMounted(() => {
@@ -486,55 +486,50 @@ const submitForm = () => {
     !hfRef.value.hasError
   ) {
     Loading.show({
-        spinner: QSpinnerRings,
-      })
+      spinner: QSpinnerRings,
+    });
     const target_copy = Object.assign({}, mentor.value);
     if (isEditStep.value) {
       mentorService
-      .update(createDTOFromMentor(new Mentor(target_copy)))
-      .then((resp) => {
-        
-        if (resp.status ===200 || resp.status ===201) {
-          alertSucess(
-            'Mentor actualizado.'
-          ).then((result) => {
-            emit('close');
-          });
-        } else {
-          alertError(resp.message);
-        }
-        Loading.hide()
-      })
-      .catch((error) => {
-        Loading.hide()
-        console.log('Error', error);
-      });
+        .update(createDTOFromMentor(new Mentor(target_copy)))
+        .then((resp) => {
+          if (resp.status === 200 || resp.status === 201) {
+            alertSucess('Mentor actualizado.').then((result) => {
+              emit('close');
+            });
+          } else {
+            alertError(resp.message);
+          }
+          Loading.hide();
+        })
+        .catch((error) => {
+          Loading.hide();
+          console.error('Error', error);
+        });
     } else {
       mentorService
-      .save(createDTOFromMentor(new Mentor(target_copy)))
-      .then((resp) => {
-        
-        if (resp.status ===200 || resp.status ===201) {
-          alertSucessAction(
-            'Mentor criado com sucesso, avançar para áreas de mentória'
-          ).then((result) => {
-            if (result) {
-              emit('goToMentoringAreas', mentorService.getById(resp.data.id));
-            } else {
-              emit('close');
-            }
-          });
-        } else {
-          alertError(resp.message);
-        }
-        Loading.hide()
-      })
-      .catch((error) => {
-        Loading.hide()
-        console.log('Error', error);
-      });
+        .save(createDTOFromMentor(new Mentor(target_copy)))
+        .then((resp) => {
+          if (resp.status === 200 || resp.status === 201) {
+            alertSucessAction(
+              'Mentor criado com sucesso, avançar para áreas de mentória'
+            ).then((result) => {
+              if (result) {
+                emit('goToMentoringAreas', mentorService.getById(resp.data.id));
+              } else {
+                emit('close');
+              }
+            });
+          } else {
+            alertError(resp.message);
+          }
+          Loading.hide();
+        })
+        .catch((error) => {
+          Loading.hide();
+          console.error('Error', error);
+        });
     }
-    
   }
 };
 const isValidEmail = (email) => {
@@ -669,7 +664,6 @@ const filterCategories = (val, update, abort) => {
     });
   }
 };
-
 
 const onChangeProvincia = () => {
   mentor.value.employee.locations[0].district = '';

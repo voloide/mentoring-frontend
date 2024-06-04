@@ -15,17 +15,13 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   getProgramList() {
-    return repo
-              .query()
-              .withAllRecursive(2)
-              .orderBy('id', 'asc')
-              .get();
+    return repo.query().withAllRecursive(2).orderBy('id', 'asc').get();
   },
-  getById(id:any) {
+  getById(id: any) {
     return repo
       .query()
       .withAllRecursive(2)
@@ -54,18 +50,18 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
-  async deleteProgram(programId:number) {
+  async deleteProgram(programId: number) {
     try {
       const resp = await api().patch(`/programs/${programId}`);
       repo.save(createProgramFromDTO(resp.data));
       return resp;
-    } catch (error:any) {
-        console.log('Error', error.message);
-        // You might want to re-throw the error or handle it differently here
-        throw error;
+    } catch (error: any) {
+      console.error('Error', error.message);
+      // You might want to re-throw the error or handle it differently here
+      throw error;
     }
   },
 };

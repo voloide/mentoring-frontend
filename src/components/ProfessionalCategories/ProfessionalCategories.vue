@@ -163,8 +163,6 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   searchResults.value = ProfessionalCategoryService.piniaGetAll();
-  // console.log("----searchResults----",searchResults.value)
-  // console.log('----piniaGetAll-----', ProfessionalCategoryService.piniaGetAll());
 });
 
 const submitForm = () => {
@@ -204,10 +202,10 @@ const deleteProfessionalCategory = (ProfessionalCategory) => {
           alertError('Não foi possivel apagar a categoria profissional.')
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     } else {
-      console.log("OK. the Item Has not removed")
+      console.info("OK. the Item Has not removed")
     }
   });
 }

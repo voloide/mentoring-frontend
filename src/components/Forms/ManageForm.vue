@@ -523,7 +523,7 @@ const searchFormQuestions = (form) => {
       form.formQuestions.push(fQ);
     });
     }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
 };
 
@@ -543,7 +543,7 @@ const removeFormQuestions = (formQuestion) => {
   formQuestionService.remove(params, formQuestion).then((resp) => {
         alertSucess('Competência removida com sucesso!');
   }).catch((error) => {
-        console.log(error);
+        console.error(error);
         alertError(
           'Ocorreu um erro ao remover esta competência!'
         );
@@ -567,7 +567,6 @@ const saveOrUpdate = (form) => {
           'Tem certeza que deseja guardar as alterações?'
         ).then((result) => {
           if (result) {
-            console.log(form);
       formService.saveOrUpdate(form).then((response) => {
         if (response.status === 201) {
           alertSucess('Tabela de Competências registada com sucesso!').then((result) => {
@@ -579,11 +578,11 @@ const saveOrUpdate = (form) => {
         } else {
           alertError('Não foi possivel gravar por ocorrência de um erro.')
         }
-              
+
       }).catch((error) => {
-          console.log(error);
+          console.error(error);
       });
-    
+
     }});
 }
 

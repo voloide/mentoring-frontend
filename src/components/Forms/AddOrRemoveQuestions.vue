@@ -37,7 +37,7 @@
                           />
                           </template>
                       </q-input>
-      
+
                       <q-input
                           outlined
                           label="Código da Ficha"
@@ -77,7 +77,7 @@
                           />
                           </template>
                       </q-input>
-                      
+
                    <q-select
                       class="col q-ml-md"
                       use-input
@@ -102,10 +102,10 @@
                         </q-item>
                       </template>
                     </q-select>
-                    
+
                       <q-space />
                       <q-btn
-                         
+
                           @click="searchQuestions()"
                           class="q-ml-md q-mb-xs float-right"
                           square
@@ -115,7 +115,7 @@
                           <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
                       </q-btn>
                       <q-btn
-                          
+
                           @click="clearSearchParams"
                           class="q-ml-md q-mb-xs float-right"
                           square
@@ -124,8 +124,8 @@
                       >
                           <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
                       </q-btn>
-                </div> 
-                
+                </div>
+
                 <div class="q-mx-md">
                 <q-table
                   class="col"
@@ -141,7 +141,7 @@
                         <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
                     </div>
                   </template>
-                  
+
                   <template #header="props">
                     <q-tr class="text-left bg-grey-3" :props="props">
                       <q-th style="width: 70px">{{ columns[0].label }}</q-th>
@@ -152,26 +152,26 @@
                       <q-th style="width: 190px">{{ columns[5].label }}</q-th>
                       <q-th style="width: 70px">{{ columns[6].label }}</q-th>
                     </q-tr>
-                  </template>  
+                  </template>
                   <template #body="props">
                     <q-tr :props="props">
                       <q-td key="code" :props="props"> {{ props.row.question.code }}</q-td>
                       <q-td key="questionCategory" :props="props">{{ props.row.question.questionCategory.category }}</q-td>
                       <q-td key="question" :props="props">{{ props.row.question.question }}</q-td>
                       <q-td key="sequence" :props="props">
-                        <q-input 
+                        <q-input
                           ref="recodeCodeRef"
                           class="vertical-middle"
                           dense
                           outlined
                           :disable="!props.row.selected"
-                          v-model="props.row.sequence" 
+                          v-model="props.row.sequence"
                           :rules="[
                               (val) =>
                                 !!val || 'Por favor indicar a Sequência/codigo na Ficha',
                             ]"
                           lazy-rules
-                          type="number" 
+                          type="number"
                           :min="1">
                         </q-input>
                       </q-td>
@@ -184,7 +184,7 @@
                           dense
                           outlined
                           ref="evaluationTypeRef"
-                          v-model="props.row.evaluationType" 
+                          v-model="props.row.evaluationType"
                           :rules="[
                             (val) =>
                               !!val || 'Por favor indicar o Tipo de Avaliação',
@@ -204,7 +204,7 @@
                           outlined
                           :disable="!props.row.selected"
                           ref="responseTypeRef"
-                          v-model="props.row.responseType" 
+                          v-model="props.row.responseType"
                           :rules="[
                             (val) =>
                               !!val || 'Por favor indicar o Tipo de Resposta',
@@ -221,10 +221,10 @@
                         </div>
                     </q-td>
                     </q-tr>
-                  </template>  
+                  </template>
                   </q-table>
               </div>
-              
+
            <div class="row q-ma-md">
                 <q-space />
                 <q-btn
@@ -343,7 +343,7 @@ const searchQuestions = () => {
     Loading.hide()
     }).catch((error) => {
       Loading.hide()
-        console.log(error);
+        console.error(error);
       });
 }
 

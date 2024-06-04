@@ -15,7 +15,7 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
@@ -36,5 +36,5 @@ export default {
       .where('description', description)
       .orderBy('description', 'asc')
       .first();
-  }
+  },
 };

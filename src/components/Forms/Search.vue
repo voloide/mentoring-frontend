@@ -326,7 +326,7 @@ const changeLifeCycle =(form)=> {
     } else {
       form.lifeCycleStatus = 'ACTIVE'
     }
-    console.log('Error', error.message);
+    console.error('Error', error.message);
     alertError('Ocorreu um erro inesperado nesta operação.');
   });
 };
@@ -350,7 +350,7 @@ const search = () => {
     formService.search(params).then((response) => {
         searchResults.value = formService.getFormList();
     }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
 };
 

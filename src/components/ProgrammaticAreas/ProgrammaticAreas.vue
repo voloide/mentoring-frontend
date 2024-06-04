@@ -229,8 +229,6 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   searchResults.value = ProgrammaticAreasService.piniaGetAll();
-  // console.log("----searchResults----",searchResults.value)
-  // console.log('----piniaGetAll-----', PogramService.piniaGetAll());
 });
 
 const programs = computed(() => {
@@ -276,10 +274,10 @@ const deleteProgrammaticArea = (ProgrammaticArea) => {
           alertError('Não foi possivel apagar o ProgrammaticAreaa.')
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     } else {
-      console.log("OK. the Item Has not removed")
+      console.info("OK. the Item Has not removed")
     }
   });
 }

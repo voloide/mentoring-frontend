@@ -16,7 +16,7 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
@@ -29,9 +29,13 @@ export default {
     repo.flush();
   },
   piniaGetAll() {
-    return repo.query().where((partener) => {
-      return partener.uuid !== '398f0ffeb8fe11edafa10242ac120002';
-    }).orderBy('description', 'asc').get();
+    return repo
+      .query()
+      .where((partener) => {
+        return partener.uuid !== '398f0ffeb8fe11edafa10242ac120002';
+      })
+      .orderBy('description', 'asc')
+      .get();
   },
   getByName(name: string) {
     return repo
@@ -42,11 +46,7 @@ export default {
   },
 
   getById(id: string) {
-    return repo
-      .query()
-      .where('id', id)
-      .orderBy('description', 'asc')
-      .first();
+    return repo.query().where('id', id).orderBy('description', 'asc').first();
   },
   async savePartner(partner: any) {
     return await api()
@@ -56,18 +56,18 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
-  async deletePartner(partnerId:number) {
+  async deletePartner(partnerId: number) {
     try {
       const resp = await api().patch(`/partner/${partnerId}`);
       repo.save(createPartnerFromDTO(resp.data));
       return resp;
-    } catch (error:any) {
-        console.log('Error', error.message);
-        // You might want to re-throw the error or handle it differently here
-        throw error;
+    } catch (error: any) {
+      console.error('Error', error.message);
+      // You might want to re-throw the error or handle it differently here
+      throw error;
     }
   },
 };
