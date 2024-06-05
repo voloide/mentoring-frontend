@@ -105,4 +105,16 @@ export default {
       userRepo.save(entity);
     });
   },
+  async resetPassword(user: any) {
+    console.log('----url data------', user);
+    return await api()
+      .patch('/user/password-reset', user)
+      .then((resp) => {
+        userRepo.save(createUserFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
 };

@@ -13,8 +13,10 @@ export default function useUser() {
       salt: userDTO.salt,
       username: userDTO.username,
       employee: createEmployeeFromDTO(userDTO.employeeDTO),
-      userRoles: userDTO.userRoleDTOS ? createUserRoles(userDTO.userRoleDTOS) : [],
-      lifeCycleStatus: userDTO.lifeCycleStatus
+      userRoles: userDTO.userRoleDTOS
+        ? createUserRoles(userDTO.userRoleDTOS)
+        : [],
+      lifeCycleStatus: userDTO.lifeCycleStatus,
     });
   }
 
@@ -28,8 +30,10 @@ export default function useUser() {
   }
 
   function createDTOFromUser(user: any) {
+    console.log('--------user-------', user);
     const { createDTOFromEmployee } = useEmployee();
     const userDTO = {
+      id: user.id,
       username: user.username,
       password: user.password,
       employeeDTO: createDTOFromEmployee(user.employee),

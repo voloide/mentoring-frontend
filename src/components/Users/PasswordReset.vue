@@ -22,6 +22,7 @@
             <div class="row q-my-sm">
               <q-input
                 outlined
+                disable=""
                 label="Nome"
                 dense
                 ref="nameRef"
@@ -41,6 +42,7 @@
               </q-input>
               <q-input
                 outlined
+                disable=""
                 label="Apelido"
                 dense
                 :rules="[(val) => !!val || 'Por favor indicar o apelido']"
@@ -197,27 +199,23 @@ const submitForm = () => {
   //   alertError('As senhas inseridas não coincidem, corrija as senhas!');
   //   return;
   // }
-  nameRef.value.validate();
-  surnameRef.value.validate();
   passwordRef.value.validate();
   confirmPasswordRef.value.validate();
 
   if (
-    !nameRef.value.hasError &&
-    !surnameRef.value.hasError &&
     !passwordRef.value.hasError &&
     !confirmPasswordRef.value.hasError
   ) {
-    Loading.show({
-      spinner: QSpinnerRings,
-    });
+    // Loading.show({
+    //   spinner: QSpinnerRings,
+    // });
     const target_copy = Object.assign({}, user.value);
 
     userService
-      .update(createDTOFromUser(new User(target_copy)))
+      .resetPassword(createDTOFromUser(new User(target_copy)))
       .then((resp) => {
         if (resp.status === 200 || resp.status === 201) {
-          alertSucess('User actualizado.').then(() => {
+          alertSucess('Password actualizada.').then(() => {
             emit('close');
           });
         } else {

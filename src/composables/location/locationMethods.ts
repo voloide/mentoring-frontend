@@ -14,22 +14,20 @@ export default function useLocation() {
       id: locationDTO.id,
       uuid: locationDTO.uuid,
       locationLevel: locationDTO.locationLevel,
-      district:
-        locationDTO.districtDTO !== undefined
-          ? createDistrictFromDTO(locationDTO.districtDTO)
-          : '',
-      healthFacility:
-        locationDTO.healthFacilityDTO !== undefined
-          ? createHealthFacilityFromDTO(locationDTO.healthFacilityDTO)
-          : '',
-      province:
-        locationDTO.provinceDTO !== undefined
-          ? createProvinceFromDTO(locationDTO.provinceDTO)
-          : '',
+      district: locationDTO.districtDTO
+        ? createDistrictFromDTO(locationDTO.districtDTO)
+        : '',
+      healthFacility: locationDTO.healthFacilityDTO
+        ? createHealthFacilityFromDTO(locationDTO.healthFacilityDTO)
+        : '',
+      province: locationDTO.provinceDTO
+        ? createProvinceFromDTO(locationDTO.provinceDTO)
+        : '',
     });
   }
 
-  function createDTOFromLocation(location: Location) {
+  function createDTOFromLocation(location: any) {
+    // console.log('-----location.district-----', location.district);
     const { createDTOFromDistrict } = useDistrict();
     const { createDTOFromProvince } = useProvince();
     const { createDTOFromHealthFacility } = useHealthFacility();
@@ -38,18 +36,15 @@ export default function useLocation() {
       id: location.id,
       uuid: location.uuid,
       locationLevel: location.locationLevel,
-      districtDTO:
-        location.district !== undefined
-          ? createDTOFromDistrict(location.district)
-          : '',
-      healthFacilityDTO:
-        location.healthFacility !== undefined
-          ? createDTOFromHealthFacility(location.healthFacility)
-          : '',
-      provinceDTO:
-        location.province !== undefined
-          ? createDTOFromProvince(location.province)
-          : '',
+      districtDTO: location.district
+        ? createDTOFromDistrict(location.district)
+        : undefined,
+      healthFacilityDTO: location.healthFacility
+        ? createDTOFromHealthFacility(location.healthFacility)
+        : undefined,
+      provinceDTO: location.province
+        ? createDTOFromProvince(location.province)
+        : undefined,
     };
     return locationDTO;
   }
