@@ -36,6 +36,7 @@ export default function useUser() {
       id: user.id,
       username: user.username,
       password: user.password,
+      shouldResetPassword: user.shouldResetPassword,
       employeeDTO: createDTOFromEmployee(user.employee),
     };
     return userDTO;

@@ -13,10 +13,11 @@ export default class User extends Model {
       employee_id: this.attr(''),
       username: this.attr(''),
       password: this.attr(''),
+      shouldResetPassword: this.attr(''),
       // relationships
       employee: this.belongsTo(Employee, 'employee_id'),
       userRoles: this.hasMany(UserRole, 'user_id'),
-      lifeCycleStatus:  this.attr(''),
+      lifeCycleStatus: this.attr(''),
     };
   }
   static piniaOptions = {

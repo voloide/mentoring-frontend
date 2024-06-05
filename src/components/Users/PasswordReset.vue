@@ -117,6 +117,7 @@
             <div class="row q-my-sm">
               <q-checkbox
                 class="col"
+                v-model="user.shouldResetPassword"
                 label="Deve redefinir password no próximo login"
               />
             </div>
@@ -168,7 +169,7 @@ const user = ref(
 const emit = defineEmits(['cancel', 'close']);
 
 const { createDTOFromUser } = useUser();
-const { alertSucess, alertError, alertSucessAction } = useSwal();
+const { alertSucess, alertError } = useSwal();
 const selectedUserLaborInfo = ref('');
 
 //Ref's
@@ -182,11 +183,11 @@ if (!selectedUser) {
   throw new Error('selectedUser not provided');
 }
 
-
 const init = () => {
   user.value = Object.assign({}, selectedUser?.value);
   selectedUserLaborInfo.value =
     user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
+  user.value.shouldResetPassword = true;
 };
 onMounted(() => {
   init();
@@ -202,14 +203,13 @@ const submitForm = () => {
   passwordRef.value.validate();
   confirmPasswordRef.value.validate();
 
-  if (
-    !passwordRef.value.hasError &&
-    !confirmPasswordRef.value.hasError
-  ) {
+  if (!passwordRef.value.hasError && !confirmPasswordRef.value.hasError) {
     // Loading.show({
     //   spinner: QSpinnerRings,
     // });
     const target_copy = Object.assign({}, user.value);
+    console.log('-----on submit ------', user.value);
+    console.log('-----target_copy ------', target_copy);
 
     userService
       .resetPassword(createDTOFromUser(new User(target_copy)))
