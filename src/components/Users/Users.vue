@@ -36,7 +36,7 @@
               </q-td>
               <q-td key="options" :props="props">
                 <div class="col">
-                  <q-btn flat round class="q-ml-md" color="grey-7" icon="lock" @click="resetPassword(props.row.id)">
+                  <q-btn flat round class="q-ml-md" color="grey-7" icon="lock" @click="resetPassword(props.row)">
                     <q-tooltip class="bg-grey-7">Redefinição de senha</q-tooltip>
                   </q-btn>
                   <q-btn v-if="props.row.lifeCycleStatus=='INACTIVE'||props.row.lifeCycleStatus=='DELETED'" round class="q-ml-md" color="red-5" @click="activateUser(props.row.id)">
@@ -79,10 +79,9 @@
 </template>
 
 <script setup>
-import useEmployee from 'src/composables/employee/employeeMethods';
+import { onMounted, ref, provide,defineEmits } from 'vue';
 import userService from 'src/services/api/user/UsersService';
 import User from 'src/stores/model/user/User';
-import { onMounted, ref, provide } from 'vue';
 import UserForm from './UserForm.vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 
@@ -124,7 +123,7 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['goToUseringAreas']);
+const emit = defineEmits(['reset-password', 'select-user']);
 const currUser = ref(new User());
 
 onMounted(() => {
@@ -138,10 +137,11 @@ const editUser = (user) => {
   selectedUser.value = user;
 };
 
-const resetPassword = (user) =>{
+const resetPassword = (user) => {
   selectedUser.value = user;
-  emit('resetPassword');
-}
+  emit('reset-password');
+  emit('select-user', user);
+};
 
 const activateUser = (user) =>{
   selectedUser.value = user;
@@ -172,5 +172,5 @@ const deleteUser = (user) => {
 }
 
 provide('openForm', openForm);
-provide('selectedUser', selectedUser);
+
 </script>

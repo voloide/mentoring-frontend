@@ -57,7 +57,12 @@
     <professional-categories v-if="isProfessionalCategoryStep" />
     <health-facilities v-if="isHealthFacilityStep" />
     <partners v-if="isPartnerStep" />
-    <users v-if="isUserStep" @create="changeStep('userForm')" @resetPassword="changeStep('passwordReset')"/>
+    <users
+      v-if="isUserStep"
+      @create="changeStep('userForm')"
+      @reset-password="changeStep('passwordReset')"
+      @select-user="onUserSelection"
+    />
     <user-form v-if="isUserFormStep" @cancel="changeStep('user')" />
     <password-reset v-if="isPasswordResetStep" @cancel="changeStep('user')" />
   </div>
@@ -89,6 +94,7 @@ import { provide } from 'vue';
 
 const { closeLoading, showloading } = useLoading();
 const step = ref(null);
+const selectedUser = ref(null);
 
 onMounted(() => {
   showloading();
@@ -110,8 +116,11 @@ const init = () => {
 };
 
 const changeStep = (value) => {
-  console.log("--------changing step----------", value)
   step.value = value;
+};
+
+const onUserSelection = (user) => {
+  selectedUser.value = user;
 };
 
 const isProgramsStep = computed(() => {
@@ -138,10 +147,13 @@ const isUserStep = computed(() => {
 const isUserFormStep = computed(() => {
   return step.value === 'userForm';
 });
-const isPasswordResetStep = computed(()=>{
+const isPasswordResetStep = computed(() => {
   return step.value === 'passwordReset';
-})
+});
+
 provide('step', step);
+provide('selectedUser', selectedUser);
+
 </script>
 
 <style>

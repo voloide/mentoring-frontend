@@ -175,6 +175,12 @@ const surnameRef = ref(null);
 const passwordRef = ref(null);
 const confirmPasswordRef = ref(null);
 const selectedUser = inject('selectedUser');
+
+if (!selectedUser) {
+  throw new Error('selectedUser not provided');
+}
+
+
 const init = () => {
   user.value = Object.assign({}, selectedUser?.value);
   selectedUserLaborInfo.value =
