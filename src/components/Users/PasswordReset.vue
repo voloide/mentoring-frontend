@@ -196,20 +196,18 @@ onMounted(() => {
 const myForm = ref(null);
 
 const submitForm = () => {
-  // if (passwordRef.value != confirmPasswordRef.value) {
-  //   alertError('As senhas inseridas não coincidem, corrija as senhas!');
-  //   return;
-  // }
+  if (user.value.password != user.value.confirmPassword) {
+    alertError('As senhas inseridas não coincidem, corrija as senhas!');
+    return;
+  }
   passwordRef.value.validate();
   confirmPasswordRef.value.validate();
 
   if (!passwordRef.value.hasError && !confirmPasswordRef.value.hasError) {
-    // Loading.show({
-    //   spinner: QSpinnerRings,
-    // });
+    Loading.show({
+      spinner: QSpinnerRings,
+    });
     const target_copy = Object.assign({}, user.value);
-    console.log('-----on submit ------', user.value);
-    console.log('-----target_copy ------', target_copy);
 
     userService
       .resetPassword(createDTOFromUser(new User(target_copy)))

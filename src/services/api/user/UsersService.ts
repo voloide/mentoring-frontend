@@ -106,7 +106,6 @@ export default {
     });
   },
   async resetPassword(user: any) {
-    console.log('----url data------', user);
     return await api()
       .patch('/user/password-reset', user)
       .then((resp) => {

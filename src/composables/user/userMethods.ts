@@ -30,7 +30,6 @@ export default function useUser() {
   }
 
   function createDTOFromUser(user: any) {
-    console.log('--------user-------', user);
     const { createDTOFromEmployee } = useEmployee();
     const userDTO = {
       id: user.id,
