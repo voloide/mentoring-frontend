@@ -64,4 +64,15 @@ export default {
       throw error;
     }
   },
+  async updateProgram(program: any) {
+    return await api()
+      .patch('/programs/update', program)
+      .then((resp) => {
+        repo.save(createProgramFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
 };

@@ -21,7 +21,7 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="name" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedPartner.id === props.row.id">
                   <q-input
                     outlined
                     label="Nome"
@@ -44,7 +44,7 @@
                 </span>
               </q-td>
               <q-td key="description" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedPartner.id === props.row.id">
                   <q-input
                     outlined
                     label="Descrição"
@@ -90,10 +90,36 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editPartner(props.row)">
+                    <q-btn v-if="selectedPartner.id !== props.row.id" flat round class="q-ml-md" color="green-8" icon="edit" @click="editPartner(props.row)">
                       <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
                     </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deletePartner(props.row.id)"></q-btn>
+                    <q-btn
+                      v-if="selectedPartner.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="done"
+                      @click="saveUpdate(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedPartner.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="close"
+                      @click="resetFields()"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Descartar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn v-if="selectedPartner.id !== props.row.id" flat round class="q-ml-md" color="red-8" icon="delete" @click="deletePartner(props.row.id)"></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -180,7 +206,24 @@ const closeForm = () => {
 };
 
 const editPartner = (partner) => {
+  closeForm()
   selectedPartner.value = partner;
+  data.value = partner;
+};
+
+const saveUpdate = () => {
+  const partner = {
+    id: selectedPartner.value.id,
+    name: data.value.name,
+    description: data.value.description,
+  };
+  partnerService.updatePartner(partner);
+  resetFields()
+};
+
+const resetFields = () => {
+  selectedPartner.value = {};
+  data.value = { name: '', description: '' };
 };
 
 const deletePartner = (partner) => {
@@ -208,6 +251,7 @@ const deletePartner = (partner) => {
 }
 
 const addNewRow = () => {
+  resetFields();
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;

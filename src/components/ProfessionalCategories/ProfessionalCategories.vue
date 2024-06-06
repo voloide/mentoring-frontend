@@ -22,7 +22,7 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="code" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedProfessionalCategory.id === props.row.id">
                   <q-input
                     outlined
                     label="Code"
@@ -45,7 +45,7 @@
                 </span>
               </q-td>
               <q-td key="description" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedProfessionalCategory.id === props.row.id">
                   <q-input
                     outlined
                     label="Descrição"
@@ -91,10 +91,36 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editProfessionalCategory(props.row)">
+                    <q-btn  v-if="selectedProfessionalCategory.id !== props.row.id" flat round class="q-ml-md" color="green-8" icon="edit" @click="editProfessionalCategory(props.row)">
                       <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
                     </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteProfessionalCategory(props.row.id)"></q-btn>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="done"
+                      @click="saveUpdate(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="close"
+                      @click="resetFields()"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn v-if="selectedProfessionalCategory.id !== props.row.id" flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteProfessionalCategory(props.row.id)"></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -182,9 +208,27 @@ const closeForm = () => {
   removeRow();
 };
 
-const editProfessionalCategory = (ProfessionalCategory) => {
-  selectedProfessionalCategory.value = ProfessionalCategory;
+const editProfessionalCategory = (professionalCategory) => {
+  closeForm()
+  selectedProfessionalCategory.value = professionalCategory;
+  data.value = professionalCategory;
 };
+
+const saveUpdate = () => {
+  const professionalCategory = {
+    id: selectedProfessionalCategory.value.id,
+    code: data.value.code,
+    description: data.value.description,
+  };
+  professionalCategoryService.updateProfessionalCategory(professionalCategory);
+  resetFields()
+};
+
+const resetFields = () => {
+  selectedProfessionalCategory.value = {};
+  data.value = { code: '', description: '' };
+};
+
 
 const deleteProfessionalCategory = (ProfessionalCategory) => {
   alertWarningAction(
@@ -211,6 +255,7 @@ const deleteProfessionalCategory = (ProfessionalCategory) => {
 }
 
 const addNewRow = () => {
+  resetFields();
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;

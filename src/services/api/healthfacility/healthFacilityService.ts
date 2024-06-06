@@ -93,4 +93,15 @@ export default {
       throw error;
     }
   },
+  async updateHealthFacility(healthFacilityId: any) {
+    return await api()
+      .patch('/healthFacilities/update', healthFacilityId)
+      .then((resp) => {
+        healthFacilityRepo.save(createHealthFacilityFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
 };

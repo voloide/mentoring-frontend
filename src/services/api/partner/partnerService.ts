@@ -70,4 +70,15 @@ export default {
       throw error;
     }
   },
+  async updatePartner(partner: any) {
+    return await api()
+      .patch('/partner', partner)
+      .then((resp) => {
+        repo.save(createPartnerFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
 };

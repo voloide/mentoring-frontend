@@ -56,4 +56,16 @@ export default {
       throw error;
     }
   },
+
+  async updateProfessionalCategory(professionalCategory: any) {
+    return await api()
+      .patch('/professionalCategories/update', professionalCategory)
+      .then((resp) => {
+        repo.save(createProfessionalCategoryFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
 };

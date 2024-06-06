@@ -21,7 +21,7 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="code" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id">
                   <q-input
                     outlined
                     label="Code"
@@ -43,7 +43,7 @@
                 </span>
               </q-td>
               <q-td key="name" :props="props">
-                <span v-if="props.row.id === null"
+                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id"
                   ><q-input
                     outlined
                     label="Nome"
@@ -65,7 +65,7 @@
                 </span>
               </q-td>
               <q-td key="description" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id">
                   <q-input
                     outlined
                     label="Descrição"
@@ -87,7 +87,7 @@
                 </span>
               </q-td>
               <q-td key="program" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id">
                   <q-select
                     class="row"
                     use-input
@@ -141,10 +141,54 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editPogrammaticArea(props.row)">
-                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
+                    <q-btn
+                      v-if="selectedPogrammaticArea.id !== props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="edit"
+                      @click="editPogrammaticArea(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Detalhar/Editar Program</q-tooltip
+                      >
                     </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteProgrammaticArea(props.row.id)"></q-btn>
+                    <q-btn
+                      v-if="selectedPogrammaticArea.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="done"
+                      @click="saveUpdate(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedPogrammaticArea.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="close"
+                      @click="resetFields()"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Descartar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedPogrammaticArea.id !== props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="delete"
+                      @click="deleteProgrammaticArea(props.row.id)"
+                    ></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -176,7 +220,6 @@
 </template>
 
 <script setup>
-import ProgrammaticAreasService from 'src/services/api/programmaticArea/programmaticAreaService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
@@ -228,7 +271,7 @@ const currUser = ref(new User());
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
-  searchResults.value = ProgrammaticAreasService.piniaGetAll();
+  searchResults.value = programmaticAreaService.piniaGetAll();
 });
 
 const programs = computed(() => {
@@ -254,35 +297,60 @@ const closeForm = () => {
   removeRow();
 };
 
-const editPogrammaticArea = (Pogram) => {
-  selectedPogrammaticArea.value = Pogram;
+const editPogrammaticArea = (programmaticArea) => {
+  closeForm()
+  selectedPogrammaticArea.value = programmaticArea;
+  data.value = programmaticArea;
+};
+
+const saveUpdate = () => {
+  const programmaticArea = {
+    id: selectedPogrammaticArea.value.id,
+    code: data.value.code,
+    name: data.value.name,
+    description: data.value.description,
+    program: data.value.program,
+  };
+  programmaticAreaService.updateProgrammaticArea(programmaticArea);
+  resetFields();
+};
+
+const resetFields = () => {
+  selectedPogrammaticArea.value = {};
+  data.value = { code: '', name: '', description: '', program: '' };
 };
 
 const deleteProgrammaticArea = (ProgrammaticArea) => {
-  alertWarningAction(
-    'Tem certeza que deseja apagar o ProgrammaticAreaa?'
-  ).then((result) => {
-    if (result) {
-      programmaticAreaService.deleteProgrammaticArea(ProgrammaticArea).then((response) => {
-        if (response.status === 200 || esponse.status === 201) {
-          alertSucess('ProgrammaticArea apagado com sucesso!').then((result) => {
-            if (result) {
-              emit('close');
+  alertWarningAction('Tem certeza que deseja apagar o ProgrammaticAreaa?').then(
+    (result) => {
+      if (result) {
+        programmaticAreaService
+          .deleteProgrammaticArea(ProgrammaticArea)
+          .then((response) => {
+            if (response.status === 200 || esponse.status === 201) {
+              alertSucess('ProgrammaticArea apagado com sucesso!').then(
+                (result) => {
+                  if (result) {
+                    emit('close');
+                  }
+                }
+              );
+            } else {
+              alertError('Não foi possivel apagar o ProgrammaticAreaa.');
             }
+          })
+          .catch((error) => {
+            console.error(error);
           });
-        } else {
-          alertError('Não foi possivel apagar o ProgrammaticAreaa.')
-        }
-      }).catch((error) => {
-        console.error(error);
-      });
-    } else {
-      console.info("OK. the Item Has not removed")
+      } else {
+        console.info('OK. the Item Has not removed');
+      }
     }
-  });
-}
+  );
+};
 
 const addNewRow = () => {
+  resetFields();
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;

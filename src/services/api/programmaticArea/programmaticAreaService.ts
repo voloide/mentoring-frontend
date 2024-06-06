@@ -71,4 +71,15 @@ export default {
       throw error;
     }
   },
+  async updateProgrammaticArea(program: any) {
+    return await api()
+      .patch('/programmaticareas', program)
+      .then((resp) => {
+        repo.save(createProgrammaticAreaFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
 };

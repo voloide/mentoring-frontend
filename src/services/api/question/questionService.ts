@@ -82,4 +82,17 @@ export default {
       throw error;
     }
   },
+
+  async updateQuestion(program: any) {
+    return await api()
+      .patch('/questions/update', program)
+      .then((resp) => {
+        repo.save(createQuestionFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
+
 };
