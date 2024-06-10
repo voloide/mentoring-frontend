@@ -36,21 +36,61 @@
               </q-td>
               <q-td key="options" :props="props">
                 <div class="col">
-                  <q-btn flat round class="q-ml-md" color="grey-7" icon="lock" @click="resetPassword(props.row)">
-                    <q-tooltip class="bg-grey-7">Redefinição de senha</q-tooltip>
+                  <q-btn
+                    flat
+                    round
+                    class="q-ml-md"
+                    color="grey-7"
+                    icon="lock"
+                    @click="resetPassword(props.row)"
+                  >
+                    <q-tooltip class="bg-grey-7"
+                      >Redefinição de senha</q-tooltip
+                    >
                   </q-btn>
-                  <q-btn v-if="props.row.lifeCycleStatus=='INACTIVE'||props.row.lifeCycleStatus=='DELETED'" round class="q-ml-md" color="red-5" @click="activateUser(props.row.id)">
+                  <q-btn
+                    v-if="
+                      props.row.lifeCycleStatus == 'INACTIVE' ||
+                      props.row.lifeCycleStatus == 'DELETED'
+                    "
+                    round
+                    class="q-ml-md"
+                    color="red-5"
+                    @click="activateUser(props.row.id)"
+                  >
                     <q-tooltip class="grey-8">Inactivo</q-tooltip>
                   </q-btn>
-                  <q-btn v-if="props.row.lifeCycleStatus=='ACTIVE'" round class="q-ml-md" color="green-5"  @click="activateUser(props.row.id)" >
+                  <q-btn
+                    v-if="props.row.lifeCycleStatus == 'ACTIVE'"
+                    round
+                    class="q-ml-md"
+                    color="green-5"
+                    @click="activateUser(props.row.id)"
+                  >
                     <q-tooltip class="bg-green-5">Activo</q-tooltip>
                   </q-btn>
-                  <q-btn flat round class="q-ml-md" color="yellow-8" icon="edit" @click="editUser(props.row)">
-                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
-                    </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteUser(props.row.id)">
-                      <q-tooltip class="bg-red-5">Exluir</q-tooltip>
-                    </q-btn>
+                  <q-btn
+                    flat
+                    round
+                    class="q-ml-md"
+                    color="yellow-8"
+                    icon="edit"
+                    @click="editUser(props.row)"
+                  >
+                    <q-tooltip class="bg-green-5"
+                      >Detalhar/Editar Program</q-tooltip
+                    >
+                  </q-btn>
+                  <q-btn
+                    flat
+                    round
+                    class="q-ml-md"
+                    color="red-8"
+                    icon="delete"
+                    @click="deleteUser(props.row.id)"
+                  >
+                    <q-tooltip class="bg-red-5">Exluir</q-tooltip>
+                  </q-btn>
                 </div>
               </q-td>
             </q-tr>
@@ -72,14 +112,12 @@
     </div>
   </div>
   <q-dialog persistent v-model="openForm">
-      <UserForm
-        @close="openForm = false"
-      />
+    <UserForm @close="openForm = false" />
   </q-dialog>
 </template>
 
 <script setup>
-import { onMounted, ref, provide,defineEmits } from 'vue';
+import { onMounted, ref, provide, defineEmits } from 'vue';
 import userService from 'src/services/api/user/UsersService';
 import User from 'src/stores/model/user/User';
 import UserForm from './UserForm.vue';
@@ -123,18 +161,18 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['reset-password', 'select-user']);
+const emit = defineEmits(['reset-password', 'select-user', 'edit-user']);
 const currUser = ref(new User());
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(userService.getLogedUser()));
   searchResults.value = userService.piniaGetAll();
-
 });
-
 
 const editUser = (user) => {
   selectedUser.value = user;
+  emit('edit-user', 'userForm');
+  emit('select-user', user);
 };
 
 const resetPassword = (user) => {
@@ -143,34 +181,34 @@ const resetPassword = (user) => {
   emit('select-user', user);
 };
 
-const activateUser = (user) =>{
+const activateUser = (user) => {
   selectedUser.value = user;
-}
+};
 
 const deleteUser = (user) => {
-  alertWarningAction(
-    'Tem certeza que deseja apagar o user?'
-  ).then((result) => {
+  alertWarningAction('Tem certeza que deseja apagar o user?').then((result) => {
     if (result) {
-      userService.deleteUser(user).then((response) => {
-        if (response.status === 200 || esponse.status === 201) {
-          alertSucess('User apagado com sucesso!').then((result) => {
-            if (result) {
-              emit('close');
-            }
-          });
-        } else {
-          alertError('Não foi possivel apagar o usera.')
-        }
-      }).catch((error) => {
-        console.error(error);
-      });
+      userService
+        .deleteUser(user)
+        .then((response) => {
+          if (response.status === 200 || esponse.status === 201) {
+            alertSucess('User apagado com sucesso!').then((result) => {
+              if (result) {
+                emit('close');
+              }
+            });
+          } else {
+            alertError('Não foi possivel apagar o usera.');
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     } else {
-      console.info("OK. the Item Has not removed")
+      console.info('OK. the Item Has not removed');
     }
   });
-}
+};
 
 provide('openForm', openForm);
-
 </script>

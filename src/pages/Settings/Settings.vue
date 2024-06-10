@@ -62,8 +62,12 @@
       @create="changeStep('userForm')"
       @reset-password="changeStep('passwordReset')"
       @select-user="onUserSelection"
+      @edit-user="changeStep('userEdit')"
     />
-    <user-form v-if="isUserFormStep" @cancel="changeStep('user')" />
+    <user-form
+      v-if="isUserFormStep || isUserEditStep"
+      @cancel="changeStep('user')"
+    />
     <password-reset v-if="isPasswordResetStep" @cancel="changeStep('user')" />
   </div>
 </template>
@@ -147,13 +151,15 @@ const isUserStep = computed(() => {
 const isUserFormStep = computed(() => {
   return step.value === 'userForm';
 });
+const isUserEditStep = computed(() => {
+  return step.value === 'userEdit';
+});
 const isPasswordResetStep = computed(() => {
   return step.value === 'passwordReset';
 });
 
 provide('step', step);
 provide('selectedUser', selectedUser);
-
 </script>
 
 <style>

@@ -116,4 +116,15 @@ export default {
         console.error('Error', error.message);
       });
   },
+  async updateUser(user: any) {
+    return await api()
+      .patch('/user/update', user)
+      .then((resp) => {
+        userRepo.save(createUserFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+  },
 };
