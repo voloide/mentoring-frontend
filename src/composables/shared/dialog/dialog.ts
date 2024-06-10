@@ -77,10 +77,10 @@ function confirmeServiceReport(){
           <div class="q-pa-md">
             <input type="checkbox" id="tarvCheckbox" >
             <label for="tarvCheckbox">TARV</label>
-    
+
             <input type="checkbox" id="tbCheckbox" >
             <label for="tbCheckbox">TB</label>
-    
+
             <input type="checkbox" id="smiCheckbox" >
             <label for="smiCheckbox">SMI</label>
           </div>

@@ -593,8 +593,8 @@ const submitForm = () => {
       try {
         const userDTO = createDTOFromUser(new User(target_copy));
         userService.saveUser(userDTO);
-        alertSucessAction(
-          'User criado com sucesso, avançar para áreas de mentória'
+        alertSucess(
+          'User criado com sucesso'
         );
         Loading.hide();
         emit('cancel');
