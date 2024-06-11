@@ -171,13 +171,13 @@ const columns = [
   {
     name: 'name',
     align: 'left',
-    label: 'name',
+    label: 'Nome',
     sortable: false,
   },
   {
     name: 'description',
     align: 'left',
-    label: 'Descrção',
+    label: 'Descrição',
     sortable: false,
   },
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
