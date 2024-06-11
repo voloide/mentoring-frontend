@@ -199,14 +199,14 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
-  data.value.description = '';
-  data.value.name = '';
+  resetFields();
   removeRow();
+  openForm.value = false;
 };
 
 const editPartner = (partner) => {
-  closeForm()
+  removeRow();
+  openForm.value = false;
   selectedPartner.value = partner;
   data.value = partner;
 };
@@ -269,9 +269,11 @@ const addNewRow = () => {
   }
 };
 
-const removeRow = (row) => {
+const removeRow = () => {
+  if (openForm.value==true) {
   const index = searchResults.value.findIndex((item) => item.id === null);
   searchResults.value.splice(index, 1);
   newRowAdded.value = false;
+  }
 };
 </script>

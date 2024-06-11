@@ -245,7 +245,6 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
   data.value.code = '';
   data.value.question = '';
   data.value.questionCategory = '';
@@ -253,7 +252,7 @@ const closeForm = () => {
 };
 
 const editQuestion = (question) => {
-  closeForm()
+  removeRow();
   selectedQuestion.value = question;
   data.value = question;
 };
@@ -318,9 +317,12 @@ const addNewRow = () => {
   }
 };
 
-const removeRow = (row) => {
+const removeRow = () => {
+  console.log('------openForm-----', openForm.value);
+  if (openForm.value==true) {
   const index = searchResults.value.findIndex((item) => item.id === null);
   searchResults.value.splice(index, 1);
   newRowAdded.value = false;
+  }
 };
 </script>

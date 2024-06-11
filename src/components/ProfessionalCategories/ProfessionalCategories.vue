@@ -1,7 +1,6 @@
 <template>
   <div class="q-pt-sm" style="height: 100%">
     <div class="q-ma-md q-pa-md page-container">
-      <div v-if="openForm" class="row"></div>
       <div>
         <q-table
           class="col"
@@ -22,7 +21,12 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="code" :props="props">
-                <span v-if="props.row.id === null || selectedProfessionalCategory.id === props.row.id">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedProfessionalCategory.id === props.row.id
+                  "
+                >
                   <q-input
                     outlined
                     label="Code"
@@ -45,7 +49,12 @@
                 </span>
               </q-td>
               <q-td key="description" :props="props">
-                <span v-if="props.row.id === null || selectedProfessionalCategory.id === props.row.id">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedProfessionalCategory.id === props.row.id
+                  "
+                >
                   <q-input
                     outlined
                     label="Descrição"
@@ -91,8 +100,18 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn  v-if="selectedProfessionalCategory.id !== props.row.id" flat round class="q-ml-md" color="green-8" icon="edit" @click="editProfessionalCategory(props.row)">
-                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id !== props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="edit"
+                      @click="editProfessionalCategory(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Detalhar/Editar Program</q-tooltip
+                      >
                     </q-btn>
                     <q-btn
                       v-if="selectedProfessionalCategory.id === props.row.id"
@@ -120,7 +139,15 @@
                         >Guardar Alteração</q-tooltip
                       >
                     </q-btn>
-                    <q-btn v-if="selectedProfessionalCategory.id !== props.row.id" flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteProfessionalCategory(props.row.id)"></q-btn>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id !== props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="delete"
+                      @click="deleteProfessionalCategory(props.row.id)"
+                    ></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -202,14 +229,14 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
-  data.value.code = '';
-  data.value.description = '';
+  resetFields();
   removeRow();
+  openForm.value = false;
 };
 
 const editProfessionalCategory = (professionalCategory) => {
-  closeForm()
+  removeRow();
+  openForm.value = false;
   selectedProfessionalCategory.value = professionalCategory;
   data.value = professionalCategory;
 };
@@ -221,7 +248,7 @@ const saveUpdate = () => {
     description: data.value.description,
   };
   professionalCategoryService.updateProfessionalCategory(professionalCategory);
-  resetFields()
+  resetFields();
 };
 
 const resetFields = () => {
@@ -229,30 +256,34 @@ const resetFields = () => {
   data.value = { code: '', description: '' };
 };
 
-
 const deleteProfessionalCategory = (ProfessionalCategory) => {
   alertWarningAction(
     'Tem certeza que deseja apagar a categoria profissional?'
   ).then((result) => {
     if (result) {
-      professionalCategoryService.deleteProfessionalCategory(ProfessionalCategory).then((response) => {
-        if (response.status === 200 || esponse.status === 201) {
-          alertSucess('categoria profissional apagada com sucesso!').then((result) => {
-            if (result) {
-              emit('close');
-            }
-          });
-        } else {
-          alertError('Não foi possivel apagar a categoria profissional.')
-        }
-      }).catch((error) => {
-        console.error(error);
-      });
+      professionalCategoryService
+        .deleteProfessionalCategory(ProfessionalCategory)
+        .then((response) => {
+          if (response.status === 200 || esponse.status === 201) {
+            alertSucess('categoria profissional apagada com sucesso!').then(
+              (result) => {
+                if (result) {
+                  emit('close');
+                }
+              }
+            );
+          } else {
+            alertError('Não foi possivel apagar a categoria profissional.');
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     } else {
-      console.info("OK. the Item Has not removed")
+      console.info('OK. the Item Has not removed');
     }
   });
-}
+};
 
 const addNewRow = () => {
   resetFields();
@@ -273,10 +304,11 @@ const addNewRow = () => {
   }
 };
 
-const removeRow = (row) => {
-  const index = searchResults.value.findIndex((item) => item.id === null);
-  searchResults.value.splice(index, 1);
-  newRowAdded.value = false;
+const removeRow = () => {
+  if (openForm.value == true) {
+    const index = searchResults.value.findIndex((item) => item.id === null);
+    searchResults.value.splice(index, 1);
+    newRowAdded.value = false;
+  }
 };
-
 </script>
