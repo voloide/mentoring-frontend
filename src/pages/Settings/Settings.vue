@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="q-mx-md">
     <ul>
       <li>
         <a
@@ -26,7 +26,7 @@
         <a
           @click="changeStep('question')"
           :class="{ selected: step === 'question' }"
-          >Questões</a
+          >Competências</a
         >
       </li>
       <li>
@@ -45,7 +45,7 @@
       </li>
       <li>
         <a @click="changeStep('user')" :class="{ selected: step === 'user' }"
-          >Utilizadoras</a
+          >Utilizadores</a
         >
       </li>
     </ul>
