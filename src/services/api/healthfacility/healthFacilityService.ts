@@ -93,9 +93,9 @@ export default {
       throw error;
     }
   },
-  async updateHealthFacility(healthFacilityId: any) {
+  async updateHealthFacility(healthFacility: any) {
     return await api()
-      .patch('/healthFacilities/update', healthFacilityId)
+      .patch('/healthFacilities/update', healthFacility)
       .then((resp) => {
         healthFacilityRepo.save(createHealthFacilityFromDTO(resp.data));
         return resp;

@@ -31,7 +31,6 @@ export default function useEmployee() {
   }
 
   function createDTOFromEmployee(employee: any) {
-    // console.log('------ employee.locations--------', employee.locations);
     const { createDTOFromProfessionalCategory } = useProfessionalCategory();
     const { createDTOFromPartner } = usePartner();
     const employeeDTO = {

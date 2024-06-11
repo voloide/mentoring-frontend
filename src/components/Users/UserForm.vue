@@ -504,8 +504,6 @@ const init = () => {
   user.value.role = roles.value[0];
 };
 onMounted(() => {
-  console.log('------User Form Mount-------', selectedUser);
-  console.log('-----step.value-----', step.value);
   init();
 });
 

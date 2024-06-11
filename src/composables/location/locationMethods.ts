@@ -27,7 +27,6 @@ export default function useLocation() {
   }
 
   function createDTOFromLocation(location: any) {
-    // console.log('-----location.district-----', location.district);
     const { createDTOFromDistrict } = useDistrict();
     const { createDTOFromProvince } = useProvince();
     const { createDTOFromHealthFacility } = useHealthFacility();

@@ -80,7 +80,7 @@
                   </q-select>
                 </span>
                 <span v-else>
-                  {{ props.row.district.province.designation }}</span
+                  {{ props.row.district.province?.designation }}</span
                 >
               </q-td>
 
@@ -176,7 +176,7 @@
                       class="q-ml-md"
                       color="red-8"
                       icon="close"
-                      @click="resetFields()"
+                      @click="deschargeSelectedHeathFacility()"
                     >
                       <q-tooltip class="bg-green-5"
                         >Descartar Alteração</q-tooltip
@@ -279,7 +279,7 @@ const provinces = computed(() => {
 
 const districts = computed(() => {
   const districts = districtService.piniaGetAll();
-  districts.filter((item) => item.province_id == data.value.province.id);
+  districts.filter((item) => item.province_id == data.value.province?.id);
   return data.value.province ? districts : '';
 });
 
@@ -292,18 +292,17 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
-  data.value.healthFacility = '';
-  data.value.province = '';
-  data.value.district = '';
+  deschargeSelectedHeathFacility();
   removeRow();
+  openForm.value = false;
 };
 
 const editHealthFacility = (healthFacility) => {
-  closeForm();
-  console.log('----healthFacility----', healthFacility);
+  removeRow();
+  openForm.value = false;
   selectedHealthFacility.value = healthFacility;
-  // data.value = healthFacility;
+  data.value = healthFacility;
+  data.value.province = healthFacility.district.province;
 };
 
 const saveUpdate = () => {
@@ -314,13 +313,17 @@ const saveUpdate = () => {
     districtDTO: data.value.district,
   };
   healthFacilityService.updateHealthFacility(question);
-  resetFields();
+  deschargeSelectedHeathFacility();
 };
 const resetFields = () => {
   selectedHealthFacility.value = {};
   data.value.healthFacility = '';
   data.value.province = '';
   data.value.district = '';
+};
+
+const deschargeSelectedHeathFacility = () => {
+  selectedHealthFacility.value = {};
 };
 
 const deleteHealthFacility = (healthFacility) => {
@@ -353,7 +356,7 @@ const deleteHealthFacility = (healthFacility) => {
 };
 
 const addNewRow = () => {
-  resetFields();
+  deschargeSelectedHeathFacility();
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;
@@ -372,9 +375,11 @@ const addNewRow = () => {
   }
 };
 
-const removeRow = (row) => {
-  const index = searchResults.value.findIndex((item) => item.id === null);
-  searchResults.value.splice(index, 1);
-  newRowAdded.value = false;
+const removeRow = () => {
+  if (openForm.value == true) {
+    const index = searchResults.value.findIndex((item) => item.id === null);
+    searchResults.value.splice(index, 1);
+    newRowAdded.value = false;
+  }
 };
 </script>
