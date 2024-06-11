@@ -229,14 +229,14 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
-  data.value.name = '';
-  data.value.description = '';
+  resetFields();
   removeRow();
+  openForm.value = false;
 };
 
 const editProgram = (program) => {
-  closeForm()
+  removeRow();
+  openForm.value = false;
   selectedProgram.value = program;
   data.value = program;
 };
@@ -248,7 +248,7 @@ const saveUpdate = () => {
     description: data.value.description,
   };
   programService.updateProgram(program);
-  resetFields()
+  resetFields();
 };
 
 const resetFields = () => {
@@ -306,8 +306,10 @@ const addNewRow = () => {
 };
 
 const removeRow = () => {
-  const index = searchResults.value.findIndex((item) => item.id === null);
-  searchResults.value.splice(index, 1);
-  newRowAdded.value = false;
+  if (openForm.value==true) {
+    const index = searchResults.value.findIndex((item) => item.id === null);
+    searchResults.value.splice(index, 1);
+    newRowAdded.value = false;
+  }
 };
 </script>
