@@ -21,7 +21,12 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="code" :props="props">
-                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedPogrammaticArea.id === props.row.id
+                  "
+                >
                   <q-input
                     outlined
                     label="Code"
@@ -43,7 +48,11 @@
                 </span>
               </q-td>
               <q-td key="name" :props="props">
-                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id"
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedPogrammaticArea.id === props.row.id
+                  "
                   ><q-input
                     outlined
                     label="Nome"
@@ -65,7 +74,12 @@
                 </span>
               </q-td>
               <q-td key="description" :props="props">
-                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedPogrammaticArea.id === props.row.id
+                  "
+                >
                   <q-input
                     outlined
                     label="Descrição"
@@ -87,7 +101,12 @@
                 </span>
               </q-td>
               <q-td key="program" :props="props">
-                <span v-if="props.row.id === null || selectedPogrammaticArea.id === props.row.id">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedPogrammaticArea.id === props.row.id
+                  "
+                >
                   <q-select
                     class="row"
                     use-input
@@ -289,16 +308,14 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
-  data.value.code = '';
-  data.value.name = '';
-  data.value.description = '';
-  data.value.program = '';
+  resetFields();
   removeRow();
+  openForm.value = false;
 };
 
 const editPogrammaticArea = (programmaticArea) => {
-  closeForm()
+  removeRow();
+  openForm.value = false;
   selectedPogrammaticArea.value = programmaticArea;
   data.value = programmaticArea;
 };
@@ -370,9 +387,11 @@ const addNewRow = () => {
   }
 };
 
-const removeRow = (row) => {
-  const index = searchResults.value.findIndex((item) => item.id === null);
-  searchResults.value.splice(index, 1);
-  newRowAdded.value = false;
+const removeRow = () => {
+  if (openForm.value == true) {
+    const index = searchResults.value.findIndex((item) => item.id === null);
+    searchResults.value.splice(index, 1);
+    newRowAdded.value = false;
+  }
 };
 </script>
