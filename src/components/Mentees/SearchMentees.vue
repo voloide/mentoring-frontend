@@ -222,7 +222,7 @@ const search = () => {
       searchResults.value = menteesService.getMenteesList();
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
     });
 };
 </script>

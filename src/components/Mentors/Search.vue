@@ -233,7 +233,7 @@ const search = () => {
             searchResults.value.push(createMentorFromDTO(dto));
         })
     }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
 };
 

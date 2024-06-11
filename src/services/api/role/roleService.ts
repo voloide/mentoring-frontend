@@ -9,13 +9,13 @@ const { createRoleFromDTO } = useRole();
 export default {
   async getAll() {
     return await api()
-       .get('/roles/getAll')
+      .get('/roles/getAll')
       .then((resp) => {
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
@@ -26,20 +26,21 @@ export default {
   },
   piniaGetAll() {
     const res = repo
-    .query()
-    .withAllRecursive(2)
-    .orderBy('description', 'asc').get();
+      .query()
+      .withAllRecursive(2)
+      .orderBy('description', 'asc')
+      .get();
     return res;
   },
   async saveQuestion(question: any) {
-        return await api()
-          .post('/roles/save', question)
-          .then((resp) => {
-            repo.save(createRoleFromDTO(resp.data));
-            return resp;
-          })
-          .catch((error) => {
-            console.log('Error', error.message);
-          });
+    return await api()
+      .post('/roles/save', question)
+      .then((resp) => {
+        repo.save(createRoleFromDTO(resp.data));
+        return resp;
+      })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
   },
 };

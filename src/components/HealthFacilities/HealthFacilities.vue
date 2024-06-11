@@ -20,9 +20,13 @@
           </template>
           <template #body="props">
             <q-tr :props="props">
-
               <q-td key="healthFacility" :props="props">
-                <span v-if="props.row.id === null">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedHealthFacility.id === props.row.id
+                  "
+                >
                   <q-input
                     outlined
                     label="Unidade Sanitaria"
@@ -44,7 +48,12 @@
               </q-td>
 
               <q-td key="province" :props="props">
-                <span v-if="props.row.id === null">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedHealthFacility.id === props.row.id
+                  "
+                >
                   <q-select
                     class="row"
                     use-input
@@ -70,12 +79,18 @@
                     </template>
                   </q-select>
                 </span>
-                <span v-else> {{ props.row.district.province.designation }}</span>
+                <span v-else>
+                  {{ props.row.district.province.designation }}</span
+                >
               </q-td>
 
-
               <q-td key="district" :props="props">
-                <span v-if="props.row.id === null">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedHealthFacility.id === props.row.id
+                  "
+                >
                   <q-select
                     class="row"
                     use-input
@@ -129,10 +144,52 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editHealthFacility(props.row)">
-                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
+                    <q-btn
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="edit"
+                      @click="editHealthFacility(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Detalhar/Editar Program</q-tooltip
+                      >
                     </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteHealthFacility(props.row.id)"></q-btn>
+                    <q-btn
+                      v-if="selectedHealthFacility.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="done"
+                      @click="saveUpdate(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedHealthFacility.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="close"
+                      @click="resetFields()"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Descartar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="delete"
+                      @click="deleteHealthFacility(props.row.id)"
+                    ></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -214,8 +271,6 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   searchResults.value = healthFacilityService.piniaGetAll();
-  console.log(searchResults.value);
-  // console.log('----piniaGetAll-----', healthFacilityService.piniaGetAll());
 });
 
 const provinces = computed(() => {
@@ -245,34 +300,60 @@ const closeForm = () => {
 };
 
 const editHealthFacility = (healthFacility) => {
+  closeForm();
+  console.log('----healthFacility----', healthFacility);
   selectedHealthFacility.value = healthFacility;
+  // data.value = healthFacility;
+};
+
+const saveUpdate = () => {
+  const question = {
+    id: selectedHealthFacility.value.id,
+    healthFacility: data.value.healthFacility,
+    province: data.value.province,
+    districtDTO: data.value.district,
+  };
+  healthFacilityService.updateHealthFacility(question);
+  resetFields();
+};
+const resetFields = () => {
+  selectedHealthFacility.value = {};
+  data.value.healthFacility = '';
+  data.value.province = '';
+  data.value.district = '';
 };
 
 const deleteHealthFacility = (healthFacility) => {
-  alertWarningAction(
-    'Tem certeza que deseja apagar a unidade sanitaria?'
-  ).then((result) => {
-    if (result) {
-      healthFacilityService.deleteHealthFacility(healthFacility).then((response) => {
-        if (response.status === 200 || esponse.status === 201) {
-          alertSucess('Unidade sanitaria apagada com sucesso!').then((result) => {
-            if (result) {
-              emit('close');
+  alertWarningAction('Tem certeza que deseja apagar a unidade sanitaria?').then(
+    (result) => {
+      if (result) {
+        healthFacilityService
+          .deleteHealthFacility(healthFacility)
+          .then((response) => {
+            if (response.status === 200 || esponse.status === 201) {
+              alertSucess('Unidade sanitaria apagada com sucesso!').then(
+                (result) => {
+                  if (result) {
+                    emit('close');
+                  }
+                }
+              );
+            } else {
+              alertError('Não foi possivel apagar a unidade sanitaria.');
             }
+          })
+          .catch((error) => {
+            console.error(error);
           });
-        } else {
-          alertError('Não foi possivel apagar a unidade sanitaria.')
-        }
-      }).catch((error) => {
-        console.log(error);
-      });
-    } else {
-      console.log("OK. the Item Has not removed")
+      } else {
+        console.info('OK. the Item Has not removed');
+      }
     }
-  });
-}
+  );
+};
 
 const addNewRow = () => {
+  resetFields();
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;

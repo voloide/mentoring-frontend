@@ -1,7 +1,6 @@
 <template>
   <div class="q-pt-sm" style="height: 100%">
     <div class="q-ma-md q-pa-md page-container">
-      <div v-if="openForm" class="row"></div>
       <div>
         <q-table
           class="col"
@@ -22,7 +21,12 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="code" :props="props">
-                <span v-if="props.row.id === null">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedProfessionalCategory.id === props.row.id
+                  "
+                >
                   <q-input
                     outlined
                     label="Code"
@@ -45,7 +49,12 @@
                 </span>
               </q-td>
               <q-td key="description" :props="props">
-                <span v-if="props.row.id === null">
+                <span
+                  v-if="
+                    props.row.id === null ||
+                    selectedProfessionalCategory.id === props.row.id
+                  "
+                >
                   <q-input
                     outlined
                     label="Descrição"
@@ -91,10 +100,54 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editProfessionalCategory(props.row)">
-                      <q-tooltip class="bg-green-5">Detalhar/Editar Program</q-tooltip>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id !== props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="edit"
+                      @click="editProfessionalCategory(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Detalhar/Editar Program</q-tooltip
+                      >
                     </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteProfessionalCategory(props.row.id)"></q-btn>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="done"
+                      @click="saveUpdate(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="close"
+                      @click="resetFields()"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedProfessionalCategory.id !== props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="delete"
+                      @click="deleteProfessionalCategory(props.row.id)"
+                    ></q-btn>
                   </span>
                 </div>
               </q-td>
@@ -163,8 +216,6 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   searchResults.value = ProfessionalCategoryService.piniaGetAll();
-  // console.log("----searchResults----",searchResults.value)
-  // console.log('----piniaGetAll-----', ProfessionalCategoryService.piniaGetAll());
 });
 
 const submitForm = () => {
@@ -178,14 +229,31 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
-  data.value.code = '';
-  data.value.description = '';
+  resetFields();
   removeRow();
+  openForm.value = false;
 };
 
-const editProfessionalCategory = (ProfessionalCategory) => {
-  selectedProfessionalCategory.value = ProfessionalCategory;
+const editProfessionalCategory = (professionalCategory) => {
+  removeRow();
+  openForm.value = false;
+  selectedProfessionalCategory.value = professionalCategory;
+  data.value = professionalCategory;
+};
+
+const saveUpdate = () => {
+  const professionalCategory = {
+    id: selectedProfessionalCategory.value.id,
+    code: data.value.code,
+    description: data.value.description,
+  };
+  professionalCategoryService.updateProfessionalCategory(professionalCategory);
+  resetFields();
+};
+
+const resetFields = () => {
+  selectedProfessionalCategory.value = {};
+  data.value = { code: '', description: '' };
 };
 
 const deleteProfessionalCategory = (ProfessionalCategory) => {
@@ -193,26 +261,32 @@ const deleteProfessionalCategory = (ProfessionalCategory) => {
     'Tem certeza que deseja apagar a categoria profissional?'
   ).then((result) => {
     if (result) {
-      professionalCategoryService.deleteProfessionalCategory(ProfessionalCategory).then((response) => {
-        if (response.status === 200 || esponse.status === 201) {
-          alertSucess('categoria profissional apagada com sucesso!').then((result) => {
-            if (result) {
-              emit('close');
-            }
-          });
-        } else {
-          alertError('Não foi possivel apagar a categoria profissional.')
-        }
-      }).catch((error) => {
-        console.log(error);
-      });
+      professionalCategoryService
+        .deleteProfessionalCategory(ProfessionalCategory)
+        .then((response) => {
+          if (response.status === 200 || esponse.status === 201) {
+            alertSucess('categoria profissional apagada com sucesso!').then(
+              (result) => {
+                if (result) {
+                  emit('close');
+                }
+              }
+            );
+          } else {
+            alertError('Não foi possivel apagar a categoria profissional.');
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     } else {
-      console.log("OK. the Item Has not removed")
+      console.info('OK. the Item Has not removed');
     }
   });
-}
+};
 
 const addNewRow = () => {
+  resetFields();
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;
@@ -230,10 +304,11 @@ const addNewRow = () => {
   }
 };
 
-const removeRow = (row) => {
-  const index = searchResults.value.findIndex((item) => item.id === null);
-  searchResults.value.splice(index, 1);
-  newRowAdded.value = false;
+const removeRow = () => {
+  if (openForm.value == true) {
+    const index = searchResults.value.findIndex((item) => item.id === null);
+    searchResults.value.splice(index, 1);
+    newRowAdded.value = false;
+  }
 };
-
 </script>

@@ -43,7 +43,6 @@ const changeStep = (stepp) => {
 };
 
 const goToMenteesEdit = (mentees) => {
-  console.log(mentees);
   selectedMentee.value = mentees;
   changeStep('edit');
 };

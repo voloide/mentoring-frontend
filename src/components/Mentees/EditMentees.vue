@@ -501,7 +501,7 @@ const submitForm = () => {
       })
       .catch((error) => {
         Loading.hide()
-        console.log('Error', error.message);
+        console.error('Error', error.message);
         alertError('Ocorreu um erro inesperado nesta operação.');
       });
   }

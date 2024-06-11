@@ -21,7 +21,7 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="code" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null|| selectedQuestion.id === props.row.id">
                   <q-input
                     outlined
                     label="Código"
@@ -42,7 +42,7 @@
                 <span v-else> {{ props.row.code }}</span>
               </q-td>
               <q-td key="question" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedQuestion.id === props.row.id">
                   <q-input
                     outlined
                     label="Competência"
@@ -65,7 +65,7 @@
                 </span>
               </q-td>
               <q-td key="questionCategory" :props="props">
-                <span v-if="props.row.id === null">
+                <span v-if="props.row.id === null || selectedQuestion.id === props.row.id">
                   <q-select
                     class="col"
                     use-input
@@ -118,10 +118,37 @@
                     </q-btn>
                   </span>
                   <span v-else>
-                    <q-btn flat round class="q-ml-md" color="green-8" icon="edit" @click="editQuestion(props.row)">
+                    <q-btn   v-if="selectedQuestion.id !== props.row.id" flat round class="q-ml-md" color="green-8" icon="edit" @click="editQuestion(props.row)">
                       <q-tooltip class="bg-green-5">Detalhar/Editar Competência</q-tooltip>
+
                     </q-btn>
-                    <q-btn flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteQuestion(props.row.id)"></q-btn>
+                    <q-btn
+                      v-if="selectedQuestion.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="green-8"
+                      icon="done"
+                      @click="saveUpdate(props.row)"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Guardar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn
+                      v-if="selectedQuestion.id === props.row.id"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="red-8"
+                      icon="close"
+                      @click="resetFields()"
+                    >
+                      <q-tooltip class="bg-green-5"
+                        >Descartar Alteração</q-tooltip
+                      >
+                    </q-btn>
+                    <q-btn  v-if="selectedQuestion.id !== props.row.id" flat round class="q-ml-md" color="red-8" icon="delete" @click="deleteQuestion(props.row.id)"></q-btn>
                     </span
 
                   >
@@ -204,8 +231,6 @@ const currUser = ref(new User());
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   searchResults.value = questionService.piniaGetAll();
-  // console.log("----searchResults----",searchResults.value)
-  // console.log('----piniaGetAll-----', questionService.piniaGetAll());
 });
 
 const questionCategories = computed(() => {
@@ -222,7 +247,6 @@ const submitForm = () => {
 };
 
 const closeForm = () => {
-  openForm.value = false;
   data.value.code = '';
   data.value.question = '';
   data.value.questionCategory = '';
@@ -230,7 +254,25 @@ const closeForm = () => {
 };
 
 const editQuestion = (question) => {
+  removeRow();
   selectedQuestion.value = question;
+  data.value = question;
+};
+
+const saveUpdate = () => {
+  const question = {
+    id: selectedQuestion.value.id,
+    code: data.value.code,
+    question: data.value.question,
+    questionCategory: data.value.questionCategory,
+  };
+  questionService.updateQuestion(question);
+  resetFields()
+};
+
+const resetFields = () => {
+  selectedQuestion.value = {};
+  data.value = { code: '', description: '' };
 };
 
 const deleteQuestion = (question) => {
@@ -249,15 +291,16 @@ const deleteQuestion = (question) => {
           alertError('Não foi possivel apagar o questiona.')
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     } else {
-      console.log("OK. the Item Has not removed")
+      console.info("OK. the Item Has not removed")
     }
   });
 }
 
 const addNewRow = () => {
+  resetFields();
   openForm.value = true;
   if (!newRowAdded.value) {
     newRowAdded.value = true;
@@ -276,9 +319,12 @@ const addNewRow = () => {
   }
 };
 
-const removeRow = (row) => {
+const removeRow = () => {
+  console.log('------openForm-----', openForm.value);
+  if (openForm.value==true) {
   const index = searchResults.value.findIndex((item) => item.id === null);
   searchResults.value.splice(index, 1);
   newRowAdded.value = false;
+  }
 };
 </script>

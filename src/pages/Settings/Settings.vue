@@ -57,8 +57,18 @@
     <professional-categories v-if="isProfessionalCategoryStep" />
     <health-facilities v-if="isHealthFacilityStep" />
     <partners v-if="isPartnerStep" />
-    <users v-if="isUserStep" @create="changeStep('userForm')" />
-    <user-form v-if="isUserFormStep" @cancel="changeStep('user')" />
+    <users
+      v-if="isUserStep"
+      @create="changeStep('userForm')"
+      @reset-password="changeStep('passwordReset')"
+      @select-user="onUserSelection"
+      @edit-user="changeStep('userEdit')"
+    />
+    <user-form
+      v-if="isUserFormStep || isUserEditStep"
+      @cancel="changeStep('user')"
+    />
+    <password-reset v-if="isPasswordResetStep" @cancel="changeStep('user')" />
   </div>
 </template>
 
@@ -72,6 +82,7 @@ import HealthFacilities from 'src/components/HealthFacilities/HealthFacilities.v
 import Partners from 'src/components/Partners/Partners.vue';
 import Users from 'src/components/Users/Users.vue';
 import UserForm from 'src/components/Users/UserForm.vue';
+import PasswordReset from 'src/components/Users/PasswordReset.vue';
 import { useLoading } from 'src/composables/shared/loading/loading';
 import programService from 'src/services/api/program/programService';
 import programmaticAreasService from 'src/services/api/programmaticArea/programmaticAreaService';
@@ -87,6 +98,7 @@ import { provide } from 'vue';
 
 const { closeLoading, showloading } = useLoading();
 const step = ref(null);
+const selectedUser = ref(null);
 
 onMounted(() => {
   showloading();
@@ -109,6 +121,10 @@ const init = () => {
 
 const changeStep = (value) => {
   step.value = value;
+};
+
+const onUserSelection = (user) => {
+  selectedUser.value = user;
 };
 
 const isProgramsStep = computed(() => {
@@ -135,8 +151,15 @@ const isUserStep = computed(() => {
 const isUserFormStep = computed(() => {
   return step.value === 'userForm';
 });
+const isUserEditStep = computed(() => {
+  return step.value === 'userEdit';
+});
+const isPasswordResetStep = computed(() => {
+  return step.value === 'passwordReset';
+});
 
 provide('step', step);
+provide('selectedUser', selectedUser);
 </script>
 
 <style>

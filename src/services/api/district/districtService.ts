@@ -16,7 +16,7 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   async getAll() {
@@ -27,7 +27,7 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {

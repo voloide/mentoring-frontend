@@ -18,7 +18,6 @@ export default {
   },
 
   async update(mentees: any) {
-    console.log(mentees);
     return await api()
       .patch('/tutored/update', mentees)
       .then((resp) => {
@@ -26,7 +25,7 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error);
+        console.error('Error', error);
       });
   },
   async getByUuid(uuid: string) {
@@ -37,7 +36,7 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.log('Error', error.message);
+        console.error('Error', error.message);
       });
   },
 

@@ -189,54 +189,6 @@
                 option-label="code"
                 label="Perfil de Acesso"
               />
-
-              <q-checkbox
-                class="col"
-                label="Deve redefinir password no próximo login"
-              />
-            </div>
-
-            <div class="row q-my-sm">
-              <q-input
-                outlined
-                label="Password"
-                type="password"
-                dense
-                ref="passwordRef"
-                :rules="[(val) => !!val || 'Por favor indicar a password']"
-                lazy-rules
-                class="col"
-                v-model="user.password"
-                @update:model-value="(value) => (filter = value)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    name="close"
-                    @click="user.password = ''"
-                    class="cursor-pointer"
-                  />
-                </template>
-              </q-input>
-              <q-input
-                outlined
-                label="Confirma a Password"
-                type="password"
-                dense
-                :rules="[(val) => !!val || 'Por favor confirma a password']"
-                lazy-rules
-                ref="confirmPasswordRef"
-                class="col q-ml-md"
-                v-model="user.confirmPassword"
-                @update:model-value="(value) => (filter = value)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    name="close"
-                    @click="user.confirmPassword = ''"
-                    class="cursor-pointer"
-                  />
-                </template>
-              </q-input>
             </div>
 
             <div class="q-mt-lg">
@@ -385,8 +337,6 @@
                 dense
                 outlined
                 ref="districtRef"
-                lazy-rules
-                :rules="[(val) => !!val || 'Por favor indicar o Distrito']"
                 v-model="user.employee.locations[0].district"
                 :options="filterRedDistricts"
                 option-value="id"
@@ -412,10 +362,6 @@
                 dense
                 outlined
                 ref="hfRef"
-                lazy-rules
-                :rules="[
-                  (val) => !!val || 'Por favor indicar a Unidade Sanitária',
-                ]"
                 v-model="user.employee.locations[0].healthFacility"
                 :options="filterRedHealthFacilities"
                 option-value="id"
@@ -431,6 +377,30 @@
                   </q-item>
                 </template>
               </q-select>
+            </div>
+            <div class="q-mt-lg">
+              <div class="row items-center q-mb-md">
+                <q-icon name="local_hospital" size="sm" />
+                <span class="q-pl-sm text-subtitle2">Estado do Utilizador</span>
+              </div>
+              <q-separator color="grey-13" size="1px" />
+            </div>
+            <div class="row q-my-sm q-mt-md">
+              <q-select
+                use-input
+                hide-selected
+                fill-input
+                input-debounce="0"
+                @update:model-value="onChangeStatus()"
+                dense
+                outlined
+                ref="statusRef"
+                lazy-rules
+                :rules="[(val) => !!val || 'Por favor indicar o STatus']"
+                v-model="user.lifeCycleStatus"
+                :options="statuses"
+                label="Status"
+              />
             </div>
             <div class="row q-my-sm">
               <q-space />
@@ -470,6 +440,7 @@ import userService from 'src/services/api/user/UsersService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { Loading, QSpinnerRings } from 'quasar';
 import roleService from 'src/services/api/role/roleService';
+import { listActiveAndInactiveLifeCycleStatuses } from '../../utils/LifeCycleStatus';
 
 const user = ref(
   new User({
@@ -510,15 +481,14 @@ const provinceRef = ref(null);
 const districtRef = ref(null);
 const hfRef = ref(null);
 const usernameRef = ref(null);
-const passwordRef = ref(null);
-const confirmPasswordRef = ref(null);
+const statuses = ref(listActiveAndInactiveLifeCycleStatuses());
 // const right = ref('');
 
 const selectedUser = inject('selectedUser');
 const step = inject('step');
 
 const isEditStep = computed(() => {
-  return step.value === 'edit';
+  return step.value === 'userEdit';
 });
 
 const roles = computed(() => {
@@ -531,8 +501,11 @@ const init = () => {
     selectedUserLaborInfo.value =
       user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
   }
+  user.value.role = roles.value[0];
 };
 onMounted(() => {
+  console.log('------User Form Mount-------', selectedUser);
+  console.log('-----step.value-----', step.value);
   init();
 });
 
@@ -568,10 +541,6 @@ const partners = computed(() => {
 const myForm = ref(null);
 
 const submitForm = () => {
-  // if (passwordRef.value != confirmPasswordRef.value) {
-  //   alertError('As senhas inseridas não coincidem, corrija as senhas!');
-  //   return;
-  // }
   nameRef.value.validate();
   surnameRef.value.validate();
   nuitRef.value.validate();
@@ -585,15 +554,11 @@ const submitForm = () => {
   districtRef.value.validate();
   hfRef.value.validate();
   usernameRef.value.validate();
-  passwordRef.value.validate();
-  confirmPasswordRef.value.validate();
 
   if (
     !nameRef.value.hasError &&
     !surnameRef.value.hasError &&
     !phoneNumberRef.value.hasError &&
-    !passwordRef.value.hasError &&
-    !confirmPasswordRef.value.hasError &&
     !usernameRef.value.hasError &&
     !emailRef.value.hasError &&
     !categoryRef.value.hasError &&
@@ -609,7 +574,7 @@ const submitForm = () => {
     const target_copy = Object.assign({}, user.value);
     if (isEditStep.value) {
       userService
-        .update(createDTOFromUser(new User(target_copy)))
+        .updateUser(createDTOFromUser(new User(target_copy)))
         .then((resp) => {
           if (resp.status === 200 || resp.status === 201) {
             alertSucess('User actualizado.').then((result) => {
@@ -622,19 +587,19 @@ const submitForm = () => {
         })
         .catch((error) => {
           Loading.hide();
-          console.log('Error', error);
+          console.error('Error', error);
         });
     } else {
       try {
         const userDTO = createDTOFromUser(new User(target_copy));
         userService.saveUser(userDTO);
-        alertSucessAction(
-          'User criado com sucesso, avançar para áreas de mentória'
+        alertSucess(
+          'User criado com sucesso'
         );
         Loading.hide();
-        emit('cancel')
+        emit('cancel');
       } catch (error) {
-        console.log('Error', error);
+        console.error('Error', error);
         alertError(resp?.message);
       }
     }
@@ -776,6 +741,10 @@ const filterCategories = (val, update, abort) => {
 const onChangeProvincia = () => {
   user.value.employee.locations[0].district = '';
   user.value.employee.locations[0].district = '';
+};
+
+const onChangeStatus = (status) => {
+  user.value.status = status;
 };
 
 const onChangeVinculo = (selected) => {
