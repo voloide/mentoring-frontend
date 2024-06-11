@@ -318,7 +318,6 @@ const addNewRow = () => {
 };
 
 const removeRow = () => {
-  console.log('------openForm-----', openForm.value);
   if (openForm.value==true) {
   const index = searchResults.value.findIndex((item) => item.id === null);
   searchResults.value.splice(index, 1);
