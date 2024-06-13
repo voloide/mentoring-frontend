@@ -91,6 +91,7 @@ export default {
   async deleteUser(userId: number) {
     try {
       const resp = await api().patch(`/user/${userId}`);
+      await api().delete(`/user/${userId}`);
       userRepo.save(createUserFromDTO(resp.data));
       return resp;
     } catch (error: any) {

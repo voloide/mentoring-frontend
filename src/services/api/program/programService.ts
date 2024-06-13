@@ -56,6 +56,7 @@ export default {
   async deleteProgram(programId: number) {
     try {
       const resp = await api().patch(`/programs/${programId}`);
+      await api().delete(`/programs/${programId}`);
       repo.save(createProgramFromDTO(resp.data));
       return resp;
     } catch (error: any) {

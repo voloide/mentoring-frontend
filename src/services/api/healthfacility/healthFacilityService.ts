@@ -85,6 +85,7 @@ export default {
   async deleteHealthFacility(healthFacilityId: number) {
     try {
       const resp = await api().patch(`/healthFacilities/${healthFacilityId}`);
+      await api().delete(`/healthFacilities/${healthFacilityId}`);
       healthFacilityRepo.save(createHealthFacilityFromDTO(resp.data));
       return resp;
     } catch (error: any) {
