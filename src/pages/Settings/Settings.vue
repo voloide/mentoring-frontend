@@ -26,7 +26,7 @@
         <a
           @click="changeStep('question')"
           :class="{ selected: step === 'question' }"
-          >Questões</a
+          >Competências</a
         >
       </li>
       <li>
