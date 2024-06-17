@@ -74,6 +74,7 @@ export default {
   async deleteQuestion(questionId: number) {
     try {
       const resp = await api().patch(`/questions/${questionId}`);
+      await api().delete(`/questions/${questionId}`);
       repo.save(createQuestionFromDTO(resp.data));
       return resp;
     } catch (error: any) {

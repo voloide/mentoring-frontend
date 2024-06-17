@@ -62,6 +62,7 @@ export default {
   async deletePartner(partnerId: number) {
     try {
       const resp = await api().patch(`/partner/${partnerId}`);
+      await api().delete(`/partner/${partnerId}`);
       repo.save(createPartnerFromDTO(resp.data));
       return resp;
     } catch (error: any) {

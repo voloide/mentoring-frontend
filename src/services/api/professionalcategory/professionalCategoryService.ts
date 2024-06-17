@@ -48,6 +48,7 @@ export default {
       const resp = await api().patch(
         `/professionalCategories/${professionalCategoryId}`
       );
+      await api().delete(`/professionalCategories/${professionalCategoryId}`);
       repo.save(createProfessionalCategoryFromDTO(resp.data));
       return resp;
     } catch (error: any) {
