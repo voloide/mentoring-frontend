@@ -1,6 +1,6 @@
 import useRole from 'src/composables/role/roleMethods'
 import useEmployee from '../employee/employeeMethods';
-import TutorProgrammaticArea from 'src/stores/model/TutorProgrammaticArea/TutorProgrammaticArea'
+import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea'
 
 export default function useTutorEmployee() {
 

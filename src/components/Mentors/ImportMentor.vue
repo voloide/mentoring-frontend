@@ -146,7 +146,7 @@ import Location from 'stores/model/location/Location';
 import partnerService from 'src/services/api/partner/partnerService';
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 import employeeService from 'src/services/api/employee/employeeService';
-import TutorProgrammaticArea from 'stores/model/TutorProgrammaticArea/TutorProgrammaticArea';
+import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea';
 import mentorService from 'src/services/api/mentor/mentorService';
 import { v4 as uuidv4 } from 'uuid';
 
