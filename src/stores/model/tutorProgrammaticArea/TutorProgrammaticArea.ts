@@ -7,14 +7,16 @@ export default class TutorProgrammaticArea extends Model {
   static primaryKey = 'id';
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr( null),
       uuid: this.attr(''),
       salt: this.attr(''),
-      tutor_id: this.attr(''),
-      programmaticArea_id: this.attr(''),
+      mentor_id: this.attr(''),
+      programmatic_area_id: this.attr(''),
+      lifeCycleStatus: this.attr(''),
       // relationships
-      tutor: this.belongsTo(Mentor, 'tutor_id'),
-      programmaticArea: this.belongsTo(ProgrammaticArea, 'programmaticArea_id'),
+
+      mentor: this.belongsTo(Mentor, 'mentor_id'),
+      programmaticArea: this.belongsTo(ProgrammaticArea, 'programmatic_area_id'),
     };
   }
   static piniaOptions = {
