@@ -186,7 +186,7 @@
                 v-model="user.role"
                 :options="roles"
                 option-value="id"
-                option-label="code"
+                option-label="label"
                 label="Perfil de Acesso"
               />
             </div>
@@ -492,7 +492,12 @@ const isEditStep = computed(() => {
 });
 
 const roles = computed(() => {
-  return roleService.piniaGetAll();
+  const roles = roleService.piniaGetAll().map((role) => ({
+    ...role,
+    label: `${role.description} ${role.level}`,
+  }));
+
+  return roles.filter((item) => item.code !== 'ROOT');
 });
 
 const init = () => {
@@ -591,9 +596,7 @@ const submitForm = () => {
       try {
         const userDTO = createDTOFromUser(new User(target_copy));
         userService.saveUser(userDTO);
-        alertSucess(
-          'User criado com sucesso'
-        );
+        alertSucess('User criado com sucesso');
         Loading.hide();
         emit('cancel');
       } catch (error) {
