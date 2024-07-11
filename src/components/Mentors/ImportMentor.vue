@@ -149,6 +149,7 @@ import employeeService from 'src/services/api/employee/employeeService';
 import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea';
 import mentorService from 'src/services/api/mentor/mentorService';
 import { v4 as uuidv4 } from 'uuid';
+import {useLoading} from "src/composables/shared/loading/loading";
 
 const { alertError, alertSucess, alertWarningAction, alertInfo } = useSwal();
 
@@ -343,8 +344,8 @@ const startComposingMentor = async (rowFromExcel) => {
             })
             //
             const mentorDTO = createDTOFromMentor(mentor)
-            console.log(mentorDTO)
             // Salvar
+            useLoading().showloading()
             mentorService.save(mentorDTO).then((resp) => {
               if (resp.status !== 201) {
                 totalNotImported.value += 1
@@ -356,6 +357,7 @@ const startComposingMentor = async (rowFromExcel) => {
                   'Importação Terminada.'
               )
             })
+            useLoading().closeLoading()
             // } else {
             //   // Nao existe essa Area programatica
             //   totalNotImported.value += 1
