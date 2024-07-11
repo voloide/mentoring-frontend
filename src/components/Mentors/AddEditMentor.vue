@@ -552,7 +552,7 @@ const isValidNuit = (nuit) => {
 };
 
 const isValidTrainingYear = (year) => {
-  return year !== '' && !stringContains(year, '#');
+  return year >= 1960 && year !== '' && !stringContains(year, '#');
 };
 
 const isValidPhoneNumber = (phoneNumber) => {
