@@ -319,8 +319,6 @@
                 dense
                 outlined
                 ref="provinceRef"
-                lazy-rules
-                :rules="[(val) => !!val || 'Por favor indicar a Província']"
                 v-model="user.employee.locations[0].province"
                 :options="provinces"
                 option-value="id"

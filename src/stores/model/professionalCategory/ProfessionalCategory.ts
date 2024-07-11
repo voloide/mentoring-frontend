@@ -9,6 +9,7 @@ export default class ProfessionalCategory extends Model {
       uuid: this.attr(''),
       code: this.attr(''),
       description: this.attr(''),
+      lifeCycleStatus: this.attr(''),
     };
   }
   static piniaOptions = {

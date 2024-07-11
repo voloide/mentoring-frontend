@@ -9,6 +9,7 @@ export default class Partner extends Model {
       uuid: this.attr(''),
       name: this.attr(''),
       description: this.attr(''),
+      lifeCycleStatus: this.attr(''),
     };
   }
   static piniaOptions = {
