@@ -149,6 +149,7 @@ import employeeService from 'src/services/api/employee/employeeService';
 import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea';
 import mentorService from 'src/services/api/mentor/mentorService';
 import { v4 as uuidv4 } from 'uuid';
+import {useLoading} from "src/composables/shared/loading/loading";
 
 const { alertError, alertSucess, alertWarningAction, alertInfo } = useSwal();
 
@@ -252,7 +253,7 @@ const loadList = () => {
   }
 };
 
-const startComposingMentor = (rowFromExcel) => {
+const startComposingMentor = async (rowFromExcel) => {
   const addErrorRow = (errorMessage) => {
     importResults.value.push({
       nuit: rowFromExcel.NUIT,
@@ -275,7 +276,7 @@ const startComposingMentor = (rowFromExcel) => {
     province = provinceService.getById(district.province_id)
     if (province) {
       healthFacility = healthFacilityService.getByHealthFacility(rowFromExcel.US)
-      if(healthFacility) {
+      if (healthFacility) {
         // NEW LOCATION
         location = new Location({
           id: null,
@@ -287,90 +288,91 @@ const startComposingMentor = (rowFromExcel) => {
           healthFacility_id: healthFacility.id,
           healthFacility: healthFacility
         })
-          // Pegar Parceiro (Devera sempre ter um)
-          if (rowFromExcel.Nome_da_Instituicao === '') {
-            partner = partnerService.getByName("MISAU");
+        // Pegar Parceiro (Devera sempre ter um)
+        if (rowFromExcel.Nome_da_Instituicao === '') {
+          partner = partnerService.getByName("MISAU");
+        } else {
+          partner = partnerService.getByName(rowFromExcel.Nome_da_Instituicao)
+        }
+
+        if (partner) {
+          // Pegar Categoria Profissional (ira existir sempre)
+          professionalCategory = await professionalCategoryService.getByCode(rowFromExcel.Categoria_Profissional)
+
+          if (professionalCategory) {
+            // criar employee
+            employee = new Employee({
+              id: null,
+              uuid: null,
+              name: rowFromExcel.Nome,
+              surname: rowFromExcel.Apelido,
+              nuit: rowFromExcel.NUIT,
+              trainingYear: rowFromExcel.Ano_de_Formacao,
+              phoneNumber: rowFromExcel.Numero_de_Telefone,
+              email: rowFromExcel.Email,
+              category_id: professionalCategory.id,
+              partner_id: partner.id,
+              professionalCategory: professionalCategory,
+              partner: partner,
+              locations: [location]
+            })
+            // Pegar Area Programatica
+            // programmaticArea = programmaticAreaService.getByName(rowFromExcel.Area_de_Mentoria)
+
+            // if(programmaticArea) {
+            // Criar TutorProgramaticArea
+            // tutorProgrammaticArea = new TutorProgrammaticArea({
+            //   id: null,
+            //   uuid: uuidv4(),
+            //   mentor_id: null,
+            //   programmatic_area_id: programmaticArea.id,
+            //   lifeCycleStatus: null,
+            //
+            //   //relationships
+            //   mentor: null,
+            //   programmaticArea: programmaticArea
+            // })
+            // Criar mentor e mandar post
+            mentor = new Mentor({
+              id: null,
+              uuid: null,
+              perfil: rowFromExcel.Perfil_de_Acesso,
+              nivel_de_acesso: rowFromExcel.Nivel_de_Acesso,
+              employee_id: employee.id,
+              employee: employee,
+              tutorProgrammaticAreas: []
+            })
+            //
+            const mentorDTO = createDTOFromMentor(mentor)
+            // Salvar
+            useLoading().showloading()
+            mentorService.save(mentorDTO).then((resp) => {
+              if (resp.status !== 201) {
+                totalNotImported.value += 1
+                addErrorRow(resp.response.data.message)
+              } else {
+                totalImported.value += 1
+              }
+              alertInfo(
+                  'Importação Terminada.'
+              )
+            })
+            useLoading().closeLoading()
+            // } else {
+            //   // Nao existe essa Area programatica
+            //   totalNotImported.value += 1
+            //   addErrorRow('Area programatica não encontrada')
+            // }
           } else {
-            partner = partnerService.getByName(rowFromExcel.Nome_da_Instituicao)
-          }
-
-          if(partner) {
-            // Pegar Categoria Profissional (ira existir sempre)
-            professionalCategory = professionalCategoryService.getByCode(rowFromExcel.Categoria_Profissional)
-
-            if (professionalCategory){
-              // criar employee
-              employee = new Employee({
-                id: null,
-                uuid: null,
-                name: rowFromExcel.Nome,
-                surname: rowFromExcel.Apelido,
-                nuit: rowFromExcel.NUIT,
-                trainingYear: rowFromExcel.Ano_de_Formacao,
-                phoneNumber: rowFromExcel.Numero_de_Telefone,
-                email: rowFromExcel.Email,
-                category_id: professionalCategory.id,
-                partner_id: partner.id,
-                professionalCategory: professionalCategory,
-                partner: partner,
-                locations: [location]
-              })
-                // Pegar Area Programatica
-                programmaticArea = programmaticAreaService.getByName(rowFromExcel.Area_de_Mentoria)
-
-                if(programmaticArea) {
-                  // Criar TutorProgramaticArea
-                  tutorProgrammaticArea = new TutorProgrammaticArea({
-                    id: null,
-                    uuid: uuidv4(),
-                    mentor_id: null,
-                    programmatic_area_id: programmaticArea.id,
-                    lifeCycleStatus: null,
-
-                    //relationships
-                    mentor: null,
-                    programmaticArea: programmaticArea
-                  })
-                  // Criar mentor e mandar post
-                  mentor = new Mentor({
-                    id: null,
-                    uuid: null,
-                    perfil: rowFromExcel.Perfil_de_Acesso,
-                    nivel_de_acesso: rowFromExcel.Nivel_de_Acesso,
-                    employee_id: employee.id,
-                    employee: employee,
-                    tutorProgrammaticAreas: [tutorProgrammaticArea]
-                  })
-                  //
-                  const mentorDTO = createDTOFromMentor(mentor)
-                  // Salvar
-                  mentorService.save(mentorDTO)
-                    .then((resp) => {
-                      if(resp.status !== 201){
-                        totalNotImported.value += 1
-                        addErrorRow(resp.response.data.message)
-                      } else {
-                        totalImported.value += 1
-                      }
-                      alertInfo(
-                        'Importação Terminada.'
-                      )
-                    })
-                } else {
-                  // Nao existe essa Area programatica
-                  totalNotImported.value += 1
-                  addErrorRow('Area programatica não encontrada')
-                }
-            } else {
-              // Categoria Profissional Nao Existe
-              totalNotImported.value += 1
-              addErrorRow('Categoria Profissional não encontrada')
-            }
-          } else {
-            // esse parceiro nao existe
+            // Categoria Profissional Nao Existe
             totalNotImported.value += 1
-            addErrorRow('Parceiro não encontrado')
+            addErrorRow('Categoria Profissional não encontrada')
           }
+        } else {
+          // esse parceiro nao existe
+          totalNotImported.value += 1
+          addErrorRow('Parceiro não encontrado')
+        }
       } else {
         // HealthFacility nao encontrada
         totalNotImported.value += 1

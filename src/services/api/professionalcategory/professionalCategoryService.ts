@@ -69,4 +69,13 @@ export default {
         console.error('Error', error.message);
       });
   },
+
+  async getByCode(code: any){
+    return repo
+        .query()
+        .withAllRecursive(2)
+        .where('code', code)
+        .orderBy('id', 'asc')
+        .first();
+  },
 };

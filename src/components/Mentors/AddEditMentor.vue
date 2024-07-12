@@ -375,6 +375,7 @@ import useMentor from 'src/composables/mentor/mentorMethods';
 import mentorService from 'src/services/api/mentor/mentorService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { Loading, QSpinnerRings } from 'quasar';
+import programmaticAreaService from "src/services/api/programmaticArea/programmaticAreaService";
 
 const mentor = ref(
   new Mentor({
@@ -400,6 +401,7 @@ const filterRedPartners = ref([]);
 const selectedMentorLaborInfo = ref('');
 const mentorLaborInfo = ref(['SNS', 'ONG']);
 const location = ref(new Location());
+const partnerRefHasError = ref(true);
 
 //Ref's
 const nameRef = ref(null);
@@ -473,7 +475,13 @@ const submitForm = () => {
   categoryRef.value.validate();
   trainingYearRef.value.validate();
   vinculoRef.value.validate();
-  if (partnerRef.value !== null) partnerRef.value.validate();
+
+  if (!mentor.value.employee.partner) {
+    partnerRef.value.validate();
+  }
+  if (mentor.value.employee.partner) {
+    partnerRefHasError.value = partnerRef.value?.hasError
+  };
   provinceRef.value.validate();
   districtRef.value.validate();
   hfRef.value.validate();
@@ -488,7 +496,8 @@ const submitForm = () => {
     !vinculoRef.value.hasError &&
     !provinceRef.value.hasError &&
     !districtRef.value.hasError &&
-    !hfRef.value.hasError
+    !hfRef.value.hasError &&
+    !partnerRefHasError.value
   ) {
     Loading.show({
       spinner: QSpinnerRings,
@@ -518,12 +527,14 @@ const submitForm = () => {
           if (resp.status === 200 || resp.status === 201) {
             alertSucessAction(
               'Mentor criado com sucesso, avançar para áreas de mentória'
-            ).then((result) => {
-              if (result) {
-                emit('goToMentoringAreas', mentorService.getById(resp.data.id));
-              } else {
-                emit('close');
-              }
+            ).then(async (result) => {
+                if (result) {
+                    await programmaticAreaService.getAll()
+                    selectedMentor.value = useMentor().createMentorFromDTO(resp.data);
+                    emit('goToMentoringAreas', selectedMentor.value);
+                } else {
+                    emit('close');
+                }
             });
           } else {
             alertError(resp.message);
@@ -546,7 +557,7 @@ const isValidNuit = (nuit) => {
 };
 
 const isValidTrainingYear = (year) => {
-  return year !== '' && !stringContains(year, '#');
+  return year >= 1960 && year !== '' && !stringContains(year, '#');
 };
 
 const isMinYear = (year) => {
