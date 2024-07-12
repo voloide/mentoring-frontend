@@ -186,6 +186,11 @@
                 :rules="[
                   (val) =>
                     isValidTrainingYear(val) || 'Ano de formação inválido',
+                  (val) => isMinYear(val) || 'Ano tem que ser superior a 1960',
+                  (val) =>
+                    isMaxYear(val) ||
+                    'Ano nao pode ser superior ao Ano Atual ' +
+                      new Date().getFullYear(),
                 ]"
                 lazy-rules
                 mask="####"
@@ -542,6 +547,14 @@ const isValidNuit = (nuit) => {
 
 const isValidTrainingYear = (year) => {
   return year !== '' && !stringContains(year, '#');
+};
+
+const isMinYear = (year) => {
+  return year >= 1960;
+};
+
+const isMaxYear = (year) => {
+  return year <= new Date().getFullYear();
 };
 
 const isValidPhoneNumber = (phoneNumber) => {
