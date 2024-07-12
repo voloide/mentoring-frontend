@@ -89,6 +89,7 @@ import programmaticAreasService from 'src/services/api/programmaticArea/programm
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 import questionService from 'src/services/api/question/questionService';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
+import questionCategoryService from 'src/services/api/question/questionCategoryService';
 import partnerService from 'src/services/api/partner/partnerService';
 import roleService from 'src/services/api/role/roleService';
 import userService from 'src/services/api/user/UsersService';
@@ -111,6 +112,7 @@ const init = () => {
   });
   programmaticAreasService.getAll();
   professionalCategoryService.getAll();
+  questionCategoryService.getAll();
   questionService.getAll();
   healthFacilityService.getAll();
   partnerService.getAll();
