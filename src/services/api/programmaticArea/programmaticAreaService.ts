@@ -65,6 +65,7 @@ export default {
       const resp = await api().patch(`/programmaticareas/${programmaticareaId}`);
       await api().delete(`/programmaticareas/${programmaticareaId}`);
       repo.save(createProgrammaticAreaFromDTO(resp.data));
+      repo.delete(programmaticareaId);
       return resp;
     } catch (error: any) {
       console.error('Error', error.message);

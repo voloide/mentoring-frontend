@@ -158,21 +158,11 @@
 
       <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
         <q-fab
-          v-model="fabRight"
-          vertical-actions-align="right"
           color="primary"
           glossy
           icon="add"
-          direction="left"
-        >
-          <q-fab-action
-            label-position="left"
-            color="primary"
-            @click="addNewRow()"
-            icon="edit_square"
-            label="Criar"
-          />
-        </q-fab>
+          @click="addNewRow()"
+        />
       </q-page-sticky>
     </div>
   </div>
@@ -185,6 +175,7 @@ import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import programmaticAreaService from "src/services/api/programmaticArea/programmaticAreaService";
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
@@ -225,7 +216,11 @@ const submitForm = () => {
   };
   professionalCategoryService
     .saveProfessionalCategory(professionalCategory)
-    .then(closeForm);
+    .then((res) => {
+      searchResults.value = ProfessionalCategoryService.piniaGetAll();
+      newRowAdded.value = false;
+      closeForm
+    });
 };
 
 const closeForm = () => {
@@ -247,8 +242,11 @@ const saveUpdate = () => {
     code: data.value.code,
     description: data.value.description,
   };
-  professionalCategoryService.updateProfessionalCategory(professionalCategory);
-  resetFields();
+
+  professionalCategoryService.updateProfessionalCategory(professionalCategory).then((res) => {
+    searchResults.value = professionalCategoryService.piniaGetAll();
+    resetFields();
+  });
 };
 
 const resetFields = () => {
@@ -267,9 +265,12 @@ const deleteProfessionalCategory = (ProfessionalCategory) => {
           if (response.status === 200 || esponse.status === 201) {
             alertSucess('categoria profissional apagada com sucesso!').then(
               (result) => {
-                if (result) {
-                  emit('close');
-                }
+                professionalCategoryService.getAll().then((res) => {
+                  searchResults.value = ProfessionalCategoryService.piniaGetAll();
+                })
+                // if (result) {
+                //   emit('close');
+                // }
               }
             );
           } else {
