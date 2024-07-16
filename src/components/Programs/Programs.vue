@@ -159,21 +159,11 @@
 
       <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
         <q-fab
-          v-model="fabRight"
-          vertical-actions-align="right"
           color="primary"
           glossy
           icon="add"
-          direction="left"
-        >
-          <q-fab-action
-            label-position="left"
-            color="primary"
-            @click="addNewRow()"
-            icon="edit_square"
-            label="Criar"
-          />
-        </q-fab>
+          @click="addNewRow()"
+        />
       </q-page-sticky>
     </div>
   </div>
@@ -207,7 +197,7 @@ const columns = [
   {
     name: 'description',
     align: 'left',
-    label: 'Descrção',
+    label: 'Descrição',
     sortable: false,
   },
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
@@ -225,7 +215,11 @@ const submitForm = () => {
     name: data.value.name,
     description: data.value.description,
   };
-  programService.saveProgram(program).then(closeForm);
+  programService.saveProgram(program).then((res) => {
+    closeForm;
+    newRowAdded.value = false
+    searchResults.value = programService.piniaGetAll();
+  });
 };
 
 const closeForm = () => {
@@ -247,8 +241,11 @@ const saveUpdate = () => {
     name: data.value.name,
     description: data.value.description,
   };
-  programService.updateProgram(program);
-  resetFields();
+  programService.updateProgram(program).then((res) => {
+    searchResults.value = programService.piniaGetAll();
+    resetFields();
+  });
+
 };
 
 const resetFields = () => {
@@ -265,11 +262,14 @@ const deleteProgram = (program) => {
           .deleteProgram(selectedProgram.value)
           .then((response) => {
             if (response.status === 200 || esponse.status === 201) {
-              alertSucess('Tabela de Competências registada com sucesso!').then(
+              alertSucess('Programa apagado com sucesso!').then(
                 (result) => {
-                  if (result) {
-                    emit('close');
-                  }
+                  programService.getAll().then((res) => {
+                    searchResults.value = programService.piniaGetAll();
+                  })
+                  // if (result) {
+                  //   emit('close');
+                  // }
                 }
               );
             } else {

@@ -58,6 +58,7 @@ export default {
       const resp = await api().patch(`/programs/${programId}`);
       await api().delete(`/programs/${programId}`);
       repo.save(createProgramFromDTO(resp.data));
+      repo.delete(programId);
       return resp;
     } catch (error: any) {
       console.error('Error', error.message);
