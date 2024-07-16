@@ -28,7 +28,6 @@ export default {
         return resp;
       })
       .catch((error) => {
-        console.error('Error', error);
         return error;
       });
   },
