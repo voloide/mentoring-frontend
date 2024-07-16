@@ -125,35 +125,9 @@
                 </div>
                 <div class="row">
                   <div class="col">
-                      <q-input
-                      outlined
-                      label="Código"
-                      dense
-                      ref="codeRef"
-                      :rules="[
-                          (val) =>
-                            !!val || 'Por favor indicar o Código',
-                        ]"
-                      lazy-rules
-                      class="col"
-                      v-model="form.code"
-                      @update:model-value="(value) => (filter = value)"
-                      >
-                      <template
-                      v-slot:append
-                      >
-                      <q-icon
-                          name="close"
-                          @click="form.code = ''"
-                          class="cursor-pointer"
-                      />
-                      </template>
-                     </q-input>
-                  </div>
-                  <div class="col">
                     <div class="row">
                       <q-input
-                      class="col q-ml-md"
+                      class="col"
                       label="Número de Observações de Consulta"
                       outlined
                       dense
@@ -253,18 +227,18 @@
                       <q-th style="width: 110px">{{ columns[1].label }}</q-th>
                       <q-th style="width: 120px">{{ columns[2].label }}</q-th>
                       <q-th style="width: 190px">{{ columns[3].label }}</q-th>
-                      <q-th class="col">{{ columns[4].label }}</q-th>
-                      <q-th style="width: 80px">{{ columns[5].label }}</q-th>
+<!--                      <q-th class="col">{{ columns[4].label }}</q-th>-->
+<!--                      <q-th style="width: 80px">{{ columns[5].label }}</q-th>-->
                     </q-tr>
                   </template>
                         <template #body="props">
                             <q-tr :props="props">
-                                <q-td key="sequence" :props="props">
-                                   {{ props.row.sequence }}
-                                </q-td>
-                                <q-td key="code" :props="props">
-                                    {{ props.row.question.code }}
-                                </q-td>
+<!--                                <q-td key="sequence" :props="props">-->
+<!--                                   {{ props.row.sequence }}-->
+<!--                                </q-td>-->
+<!--                                <q-td key="code" :props="props">-->
+<!--                                    {{ props.row.question.code }}-->
+<!--                                </q-td>-->
                                 <q-td key="evaluationType" :props="props">
                                     {{ props.row.evaluationType.description }}
                                 </q-td>
@@ -354,7 +328,7 @@ const currUser = ref(new User());
 //Ref's
 const programRef = ref(null);
 const programmaticAreaRef = ref(null);
-const codeRef = ref(null);
+// const codeRef = ref(null);
 const nameRef = ref(null);
 const targetPatientRef = ref(null);
 const targetFileRef = ref(null);
@@ -375,20 +349,20 @@ const addedFormQuestions = reactive(ref(new FormQuestion({
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 
 const columns = [
-  {
-    name: 'sequence',
-    align: 'left',
-    label: 'Seq',
-    field: (row) => (row.sequence),
-    sortable: false,
-  },
-  {
-    name: 'code',
-    align: 'left',
-    label: 'Código',
-    field: (row) => (row.question.code),
-    sortable: false,
-  },
+  // {
+  //   name: 'sequence',
+  //   align: 'left',
+  //   label: 'Seq',
+  //   field: (row) => (row.sequence),
+  //   sortable: false,
+  // },
+  // {
+  //   name: 'code',
+  //   align: 'left',
+  //   label: 'Código',
+  //   field: (row) => (row.question.code),
+  //   sortable: false,
+  // },
   {
     name: 'evaluationType',
     align: 'left',
@@ -489,7 +463,7 @@ const cancel = () => {
 const goToFormQuestions = (form) => {
   programRef.value.validate();
   programmaticAreaRef.value.validate();
-  codeRef.value.validate();
+  // codeRef.value.validate();
   nameRef.value.validate();
   targetPatientRef.value.validate();
   targetFileRef.value.validate();
@@ -497,7 +471,7 @@ const goToFormQuestions = (form) => {
   if (
     !programRef.value.hasError &&
     !programmaticAreaRef.value.hasError &&
-    !codeRef.value.hasError &&
+    // !codeRef.value.hasError &&
     !nameRef.value.hasError &&
     !targetPatientRef.value.hasError &&
     !targetFileRef.value.hasError

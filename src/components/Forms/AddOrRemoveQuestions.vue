@@ -1,250 +1,221 @@
 <template>
   <q-card style="width: 85vw; max-width: 90vw;">
-        <div class="page-container">
-                <div class="">
-                  <q-banner dense inline-actions class="text-white bg-primary q-px-md">
-                    Pesquisa de Competências
-                    <template v-slot:action>
-                      <q-btn
-                        flat
-                        round
-                        class="q-ml-md"
-                        color="red"
-                        icon="close"
-                        @click="showAddOrRemoveQuestions = false"
-                        >
-                        <q-tooltip class="bg-green-5">Pesquisa de Competências</q-tooltip>
-                        </q-btn>
-                    </template>
-                  </q-banner>
-                    <div class="row q-pa-md q-mt-lg">
-                      <q-input
-                          outlined
-                          label="Código"
-                          dense
-                          ref="codeRef"
-                          class="col"
-                          v-model="searchParams.question.code"
-                          @update:model-value="(value) => (filter = value)"
-                      >
-                          <template
-                          v-slot:append
-                          >
-                          <q-icon
-                              name="close"
-                              @click="searchParams.question.code = ''"
-                              class="cursor-pointer"
-                          />
-                          </template>
-                      </q-input>
+    <div class="page-container">
+      <div class="">
+        <q-banner dense inline-actions class="text-white bg-primary q-px-md">
+          Pesquisa de Competências
+          <template v-slot:action>
+            <q-btn
+                flat
+                round
+                class="q-ml-md"
+                color="red"
+                icon="close"
+                @click="showAddOrRemoveQuestions = false"
+            >
+              <q-tooltip class="bg-green-5">Pesquisa de Competências</q-tooltip>
+            </q-btn>
+          </template>
+        </q-banner>
+        <div class="row q-pa-md q-mt-lg">
+          <q-input
+              outlined
+              label="Código da Competência"
+              dense
+              ref="recordCodeRef"
+              class="col"
+              v-model="searchParams.sequence"
+              @update:model-value="(value) => (filter = value)"
+          >
+            <template v-slot:append>
+              <q-icon
+                  name="close"
+                  @click="searchParams.sequence = ''"
+                  class="cursor-pointer"
+              />
+            </template>
+          </q-input>
 
-                      <q-input
-                          outlined
-                          label="Código da Ficha"
-                          dense
-                          ref="recordCodeRef"
-                          class="col q-ml-md"
-                          v-model="searchParams.sequence"
-                          @update:model-value="(value) => (filter = value)"
-                      >
-                          <template
-                          v-slot:append
-                          >
-                          <q-icon
-                              name="close"
-                              @click="searchParams.sequence = ''"
-                              class="cursor-pointer"
-                          />
-                          </template>
-                      </q-input>
+          <q-input
+              outlined
+              label="Descrição"
+              dense
+              ref="descriptionRef"
+              class="col q-ml-md"
+              v-model="searchParams.question.question"
+              @update:model-value="(value) => (filter = value)"
+          >
+            <template v-slot:append>
+              <q-icon
+                  name="close"
+                  @click="searchParams.question.question = ''"
+                  class="cursor-pointer"
+              />
+            </template>
+          </q-input>
 
-                      <q-input
-                          outlined
-                          label="Descrição"
-                          dense
-                          ref="descriptionRef"
-                          class="col q-ml-md"
-                          v-model="searchParams.question.question"
-                          @update:model-value="(value) => (filter = value)"
-                      >
-                          <template
-                          v-slot:append
-                          >
-                          <q-icon
-                              name="close"
-                              @click="searchParams.question.question = ''"
-                              class="cursor-pointer"
-                          />
-                          </template>
-                      </q-input>
+          <q-select
+              class="col q-ml-md"
+              use-input
+              hide-selected
+              fill-input
+              input-debounce="0"
+              v-model="searchParams.question.questionCategory"
+              dense
+              outlined
+              ref="questionCategoryRef"
+              :options="filterRedCategories"
+              option-value="id"
+              option-label="category"
+              @filter="filterCategories"
+              label="Categoria"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Sem Resultados
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
-                   <q-select
-                      class="col q-ml-md"
-                      use-input
-                      hide-selected
-                      fill-input
-                      input-debounce="0"
-                      v-model="searchParams.question.questionCategory"
+          <q-space />
+          <q-btn
+              @click="searchQuestions()"
+              class="q-ml-md q-mb-xs float-right"
+              square
+              color="primary"
+              icon="search"
+          >
+            <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
+          </q-btn>
+          <q-btn
+              @click="clearSearchParams"
+              class="q-ml-md q-mb-xs float-right"
+              square
+              color="amber"
+              icon="clear"
+          >
+            <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
+          </q-btn>
+        </div>
+
+        <div class="q-mx-md">
+          <q-table
+              class="col"
+              flat
+              dense
+              wrap-cells
+              :rows="searchResults"
+              :columns="columns"
+              row-key="id"
+          >
+            <template v-slot:no-data="{ icon, filter }">
+              <div class="full-width row flex-center text-primary q-gutter-sm text-body2">
+                <span> Sem resultados para visualizar </span>
+                <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
+              </div>
+            </template>
+
+            <template #header="props">
+              <q-tr class="text-left bg-grey-3" :props="props">
+                <q-th style="width: 110px">{{ columns[0].label }}</q-th>
+                <q-th class="col">{{ columns[1].label }}</q-th>
+                <q-th style="width: 190px">{{ columns[2].label }}</q-th>
+                <q-th style="width: 190px">{{ columns[3].label }}</q-th>
+                <q-th style="width: 190px">{{ columns[4].label }}</q-th>
+                <q-th style="width: 70px">{{ columns[5].label }}</q-th>
+              </q-tr>
+            </template>
+            <template #body="props">
+              <q-tr :props="props">
+                <q-td key="questionCategory" :props="props">{{ props.row.question.questionCategory.category }}</q-td>
+                <q-td key="question" :props="props">{{ props.row.question.question }}</q-td>
+                <q-td key="sequence" :props="props">
+                  <q-input
+                      ref="recodeCodeRef"
+                      class="vertical-middle"
                       dense
                       outlined
-                      ref="questionCategoryRef"
-                      :options="filterRedCategories"
+                      disable
+                      v-model="props.row.question.code"
+                      :rules="[
+                      (val) => !!val || 'Por favor indicar a Sequência/codigo na Ficha',
+                    ]"
+                      lazy-rules
+                      :min="1"
+                  >
+                  </q-input>
+                </q-td>
+                <q-td key="evaluationType">
+                  <q-select
+                      class="vertical-middle"
+                      fill-input
+                      input-debounce="0"
+                      :disable="!props.row.selected"
+                      dense
+                      outlined
+                      ref="evaluationTypeRef"
+                      v-model="props.row.evaluationType"
+                      :rules="[
+                      (val) => !!val || 'Por favor indicar o Tipo de Avaliação',
+                    ]"
+                      lazy-rules
                       option-value="id"
-                      option-label="category"
-                      @filter="filterCategories"
-                      label="Categoria"
-                    >
-                      <template v-slot:no-option>
-                        <q-item>
-                          <q-item-section class="text-grey">
-                            Sem Resultados
-                          </q-item-section>
-                        </q-item>
-                      </template>
-                    </q-select>
+                      option-label="description"
+                      :options="evaluationTypes"
+                  />
+                </q-td>
+                <q-td key="responseType">
+                  <q-select
+                      class="vertical-middle"
+                      fill-input
+                      input-debounce="0"
+                      dense
+                      outlined
+                      :disable="!props.row.selected"
+                      ref="responseTypeRef"
+                      v-model="props.row.responseType"
+                      :rules="[
+                      (val) => !!val || 'Por favor indicar o Tipo de Resposta',
+                    ]"
+                      lazy-rules
+                      option-value="id"
+                      option-label="description"
+                      :options="responseTypes"
+                  />
+                </q-td>
+                <q-td key="options" :props="props">
+                  <div class="col">
+                    <q-checkbox v-model="props.row.selected" @click="val => addQuestion(props.row)" />
+                  </div>
+                </q-td>
+              </q-tr>
+            </template>
+          </q-table>
+        </div>
 
-                      <q-space />
-                      <q-btn
-
-                          @click="searchQuestions()"
-                          class="q-ml-md q-mb-xs float-right"
-                          square
-                          color="primary"
-                          icon="search"
-                      >
-                          <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
-                      </q-btn>
-                      <q-btn
-
-                          @click="clearSearchParams"
-                          class="q-ml-md q-mb-xs float-right"
-                          square
-                          color="amber"
-                          icon="clear"
-                      >
-                          <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
-                      </q-btn>
-                </div>
-
-                <div class="q-mx-md">
-                <q-table
-                  class="col"
-                  flat
-                  dense
-                  wrap-cells
-                  :rows="searchResults"
-                  :columns="columns"
-                  row-key="id">
-                  <template v-slot:no-data="{ icon, filter }">
-                    <div  class="full-width row flex-center text-primary q-gutter-sm text-body2">
-                        <span> Sem resultados para visualizar </span>
-                        <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
-                    </div>
-                  </template>
-
-                  <template #header="props">
-                    <q-tr class="text-left bg-grey-3" :props="props">
-                      <q-th style="width: 70px">{{ columns[0].label }}</q-th>
-                      <q-th style="width: 110px">{{ columns[1].label }}</q-th>
-                      <q-th class="col">{{ columns[2].label }}</q-th>
-                      <q-th style="width: 190px">{{ columns[3].label }}</q-th>
-                      <q-th style="width: 190px">{{ columns[4].label }}</q-th>
-                      <q-th style="width: 190px">{{ columns[5].label }}</q-th>
-                      <q-th style="width: 70px">{{ columns[6].label }}</q-th>
-                    </q-tr>
-                  </template>
-                  <template #body="props">
-                    <q-tr :props="props">
-                      <q-td key="code" :props="props"> {{ props.row.question.code }}</q-td>
-                      <q-td key="questionCategory" :props="props">{{ props.row.question.questionCategory.category }}</q-td>
-                      <q-td key="question" :props="props">{{ props.row.question.question }}</q-td>
-                      <q-td key="sequence" :props="props">
-                        <q-input
-                          ref="recodeCodeRef"
-                          class="vertical-middle"
-                          dense
-                          outlined
-                          :disable="!props.row.selected"
-                          v-model="props.row.sequence"
-                          :rules="[
-                              (val) =>
-                                !!val || 'Por favor indicar a Sequência/codigo na Ficha',
-                            ]"
-                          lazy-rules
-                          type="number"
-                          :min="1">
-                        </q-input>
-                      </q-td>
-                      <q-td key="evaluationType">
-                        <q-select
-                          class="vertical-middle"
-                          fill-input
-                          input-debounce="0"
-                          :disable="!props.row.selected"
-                          dense
-                          outlined
-                          ref="evaluationTypeRef"
-                          v-model="props.row.evaluationType"
-                          :rules="[
-                            (val) =>
-                              !!val || 'Por favor indicar o Tipo de Avaliação',
-                          ]"
-                          lazy-rules
-                          option-value="id"
-                          option-label="description"
-                          :options="evaluationTypes"
-                        />
-                      </q-td>
-                      <q-td key="responseType">
-                        <q-select
-                          class="vertical-middle"
-                          fill-input
-                          input-debounce="0"
-                          dense
-                          outlined
-                          :disable="!props.row.selected"
-                          ref="responseTypeRef"
-                          v-model="props.row.responseType"
-                          :rules="[
-                            (val) =>
-                              !!val || 'Por favor indicar o Tipo de Resposta',
-                          ]"
-                          lazy-rules
-                          option-value="id"
-                          option-label="description"
-                          :options="responseTypes"
-                        />
-                      </q-td>
-                      <q-td key="options" :props="props">
-                        <div class="col">
-                        <q-checkbox  v-model="props.row.selected"  @click="val => addQuestion(props.row)"/>
-                        </div>
-                    </q-td>
-                    </q-tr>
-                  </template>
-                  </q-table>
-              </div>
-
-           <div class="row q-ma-md">
-                <q-space />
-                <q-btn
-                  label="Cancelar"
-                  class="float-right"
-                  color="red"
-                  @click="showAddOrRemoveQuestions = false"
-                />
-                <q-btn
-                  class="float-right q-ml-md"
-                  type="submit"
-                  label="Adicionar Seleccionadas"
-                  color="primary"
-                  @click="addSelectedQuestions()"
-                />
-              </div>
-          </div>
+        <div class="row q-ma-md">
+          <q-space />
+          <q-btn
+              label="Cancelar"
+              class="float-right"
+              color="red"
+              @click="showAddOrRemoveQuestions = false"
+          />
+          <q-btn
+              class="float-right q-ml-md"
+              type="submit"
+              label="Adicionar Seleccionadas"
+              color="primary"
+              @click="addSelectedQuestions()"
+          />
+        </div>
+      </div>
     </div>
   </q-card>
 </template>
+
 <script setup>
 import { inject, ref, computed, onMounted, provide } from 'vue';
 import FormQuestion from 'src/stores/model/form/FormQuestion';
@@ -270,21 +241,21 @@ const filterRedCategories = ref([]);
 const { alertError } = useSwal();
 
 const formQuestion = ref(
-  new FormQuestion({
-    question: new Question({
-      questionCategory: new QuestionCategory(),
-    }),
-    evaluationType: new EvaluationType(),
-    responseType: new ResponseType(),
-  })
+    new FormQuestion({
+      question: new Question({
+        questionCategory: new QuestionCategory(),
+      }),
+      evaluationType: new EvaluationType(),
+      responseType: new ResponseType(),
+    })
 );
 
 const searchParams = ref(new FormQuestion({
-                              question: new Question({
-                              questionCategory: new QuestionCategory(),
-                         }),
-                         evaluationType: new EvaluationType(),
-                        }));
+  question: new Question({
+    questionCategory: new QuestionCategory(),
+  }),
+  evaluationType: new EvaluationType(),
+}));
 
 const searchResults = ref([]);
 
@@ -307,7 +278,7 @@ const filterCategories = (val, update, abort) => {
   if (val === '') {
     update(() => {
       filterRedCategories.value = stringOptions.value.map(
-        (questionCategory) => questionCategory
+          (questionCategory) => questionCategory
       );
     });
   } else if (stringOptions.value.length === 0) {
@@ -317,44 +288,37 @@ const filterCategories = (val, update, abort) => {
   } else {
     update(() => {
       filterRedCategories.value = stringOptions.value
-        .map((questionCategory) => questionCategory)
-        .filter((questionCategory) => {
-          return (
-            questionCategory &&
-            questionCategory.category.toLowerCase().indexOf(val.toLowerCase()) !== -1
-          );
-        });
+          .map((questionCategory) => questionCategory)
+          .filter((questionCategory) => {
+            return (
+                questionCategory &&
+                questionCategory.category.toLowerCase().indexOf(val.toLowerCase()) !== -1
+            );
+          });
     });
   }
 };
 
 const searchQuestions = () => {
   Loading.show({
-        spinner: QSpinnerRings,
-      });
+    spinner: QSpinnerRings,
+  });
   const params = {
-        code: searchParams.value.question.code,
-        description: searchParams.value.question.question,
-        categoryId: searchParams.value.question.questionCategory.id === undefined? undefined: searchParams.value.question.questionCategory.id
-    }
-    Object.keys(params).forEach( (key) => (params[key] === '') && delete params[key]);
-    questionService.search(params).then((response) => {
+    code: null,
+    description: searchParams.value.question.question,
+    categoryId: searchParams.value.question.questionCategory.id === undefined ? undefined : searchParams.value.question.questionCategory.id
+  }
+  Object.keys(params).forEach((key) => (params[key] === '') && delete params[key]);
+  questionService.search(params).then((response) => {
     composeFormQuestions(response.data);
     Loading.hide()
-    }).catch((error) => {
-      Loading.hide()
-        console.error(error);
-      });
+  }).catch((error) => {
+    Loading.hide()
+    console.error(error);
+  });
 }
 
 const columns = [
-  {
-    name: 'code',
-    align: 'left',
-    label: 'Código',
-    field: (row) => (row.question.code),
-    sortable: false,
-  },
   {
     name: 'questionCategory',
     align: 'left',
@@ -372,7 +336,7 @@ const columns = [
   {
     name: 'sequence',
     align: 'left',
-    label: 'Sequência/Código na Ficha',
+    label: 'Código da Competência',
     field: (row) => (row.sequence),
     sortable: false,
   },
@@ -398,18 +362,18 @@ const composeFormQuestions = (questions) => {
   questions.forEach((question) => {
     let myUUID = uuid();
     const fQuestion = ref(new FormQuestion({
-                              question: new Question({
-                              questionCategory: new QuestionCategory(),
-                                                     }),
-                              evaluationType: new EvaluationType(),
-                              responseType: new ResponseType(),
-                                           })
-                         );
-       fQuestion.value.uuid = myUUID;
-       fQuestion.value.question = question;
-       fQuestion.value.question.questionCategory = question.questionCategory;
-       fQuestion.value.lifeCycleStatus = 'ACTIVE';
-       searchResults.value.push(fQuestion.value);
+          question: new Question({
+            questionCategory: new QuestionCategory(),
+          }),
+          evaluationType: new EvaluationType(),
+          responseType: new ResponseType(),
+        })
+    );
+    fQuestion.value.uuid = myUUID;
+    fQuestion.value.question = question;
+    fQuestion.value.question.questionCategory = question.questionCategory;
+    fQuestion.value.lifeCycleStatus = 'ACTIVE';
+    searchResults.value.push(fQuestion.value);
   });
 };
 
@@ -427,7 +391,7 @@ const updateResponseType = (formQuestion, selectedValue) => {
 
 const addQuestion = (formQuestion) => {
   const exists = addedFormQuestions.value.filter(val => val === formQuestion).length > 0;
-  if(exists) {
+  if (exists) {
     addedFormQuestions.value.pop(formQuestion);
     selectedForm.value.formQuestions.pop(formQuestion);
   } else {
@@ -438,31 +402,25 @@ const addQuestion = (formQuestion) => {
 
 const addSelectedQuestions = () => {
   addedFormQuestions.value.forEach((formQuestion) => {
-    if(formQuestion.sequence===undefined || formQuestion.sequence==='') {
-      alertError(
-          'Indique a Sequência!'
-        );
-        return;
-  }
-  if(formQuestion.evaluationType === undefined || formQuestion.evaluationType === null) {
+    if (formQuestion.evaluationType === undefined || formQuestion.evaluationType === null) {
       alertError(
           'Indique o Tipo de Avaliação!'
-        );
-        return;
-  }
-  if(formQuestion.responseType === undefined || formQuestion.responseType === null) {
+      );
+      return;
+    }
+    if (formQuestion.responseType === undefined || formQuestion.responseType === null) {
       alertError(
           'Indique o Tipo de Resposta!'
-        );
-        return;
-  }
+      );
+      return;
+    }
   });
   showAddOrRemoveQuestions.value = false;
 }
-
 </script>
+
 <style lang="scss">
-    .title {
-        background-color: $primary;
-    }
+.title {
+  background-color: $primary;
+}
 </style>
