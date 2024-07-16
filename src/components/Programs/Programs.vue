@@ -217,6 +217,7 @@ const submitForm = () => {
   };
   programService.saveProgram(program).then((res) => {
     closeForm;
+    newRowAdded.value = false
     searchResults.value = programService.piniaGetAll();
   });
 };
