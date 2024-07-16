@@ -537,7 +537,7 @@ const submitForm = () => {
                 }
             });
           } else {
-            alertError(resp.message);
+            alertError(resp.response.data.message);
           }
           Loading.hide();
         })

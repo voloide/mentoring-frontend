@@ -9,7 +9,7 @@ const { notifyError } = useNotify()
 
 
 const instance = axios.create({
-    baseURL: process.env.API_URL,
+    baseURL: 'http://localhost:8087',
     responseType: 'json',
     validateStatus(status) {
       return status >= 200 && status < 300;
