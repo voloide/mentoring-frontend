@@ -50,6 +50,8 @@ export default {
       );
       await api().delete(`/professionalCategories/${professionalCategoryId}`);
       repo.save(createProfessionalCategoryFromDTO(resp.data));
+      repo.delete(professionalCategoryId);
+
       return resp;
     } catch (error: any) {
       console.error('Error', error.message);

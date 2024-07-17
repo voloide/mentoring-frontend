@@ -76,6 +76,7 @@ export default {
       const resp = await api().patch(`/questions/${questionId}`);
       await api().delete(`/questions/${questionId}`);
       repo.save(createQuestionFromDTO(resp.data));
+      repo.delete(questionId);
       return resp;
     } catch (error: any) {
       console.error('Error', error.message);
@@ -84,9 +85,10 @@ export default {
     }
   },
 
-  async updateQuestion(program: any) {
+  async updateQuestion(question: any) {
+    console.log(question)
     return await api()
-      .patch('/questions/update', program)
+      .patch('/questions/update', question)
       .then((resp) => {
         repo.save(createQuestionFromDTO(resp.data));
         return resp;
