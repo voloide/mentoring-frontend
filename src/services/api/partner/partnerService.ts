@@ -64,6 +64,7 @@ export default {
       const resp = await api().patch(`/partner/${partnerId}`);
       await api().delete(`/partner/${partnerId}`);
       repo.save(createPartnerFromDTO(resp.data));
+      repo.delete(partnerId);
       return resp;
     } catch (error: any) {
       console.error('Error', error.message);

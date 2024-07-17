@@ -18,8 +18,8 @@ export default {
         return { error: error.message };
       });
   },
-  generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto: any) => {
+  generateAndSaveEntityFromDTO(dtoList: any[]) {
+    dtoList?.forEach((dto: any) => {
       const entity = createUserRoleFromDTO(dto);
       userRoleRepo.save(entity);
     });

@@ -14,7 +14,7 @@ export default function useRole() {
     });
   }
 
-  function createRoleAuthorities(roleAuthorityDTOS: any) {
+  function createRoleAuthorities(roleAuthorityDTOS: any[]) {
     const { createRoleAuthorityFromDTO } = useAuthorityRole();
     const generatedRoleAuths: any = [];
     roleAuthorityDTOS?.forEach((roleAuth: any) => {

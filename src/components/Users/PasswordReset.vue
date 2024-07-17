@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="q-ma-md page-container">
-      <form @submit.prevent="submitForm" ref="myForm">
+      <form ref="myForm">
         <div class="q-ma-md">
           <q-banner dense inline-actions class="text-white bg-primary q-px-md">
             Dados do User
@@ -214,7 +214,7 @@ const submitForm = () => {
       .then((resp) => {
         if (resp.status === 200 || resp.status === 201) {
           alertSucess('Password actualizada.').then(() => {
-            emit('close');
+            emit('cancel');
           });
         } else {
           alertError(resp?.message);

@@ -129,22 +129,7 @@
       </div>
 
       <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
-        <q-fab
-          v-model="fabRight"
-          vertical-actions-align="right"
-          color="primary"
-          glossy
-          icon="add"
-          direction="left"
-        >
-          <q-fab-action
-            label-position="left"
-            color="primary"
-            @click="addNewRow"
-            icon="edit_square"
-            label="Criar"
-          />
-        </q-fab>
+        <q-fab color="primary" glossy icon="add" @click="addNewRow" />
       </q-page-sticky>
     </div>
   </div>
@@ -157,6 +142,8 @@ import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import partnerService from 'src/services/api/partner/partnerService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import healthFacilityService from "src/services/api/healthfacility/healthFacilityService";
+import usePartner from "src/composables/partner/partnerMethods";
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
@@ -195,7 +182,14 @@ const submitForm = () => {
     name: data.value.name,
     description: data.value.description,
   };
-  partnerService.savePartner(partner).then(closeForm);
+
+  partnerService.savePartner(partner).then((res) => {
+    closeForm();
+    newRowAdded.value = false;
+    partnerService.getAll().then(results => {
+      searchResults.value = partnerService.piniaGetAll();;
+    });
+  });
 };
 
 const closeForm = () => {
@@ -217,8 +211,14 @@ const saveUpdate = () => {
     name: data.value.name,
     description: data.value.description,
   };
-  partnerService.updatePartner(partner);
-  resetFields()
+  partnerService.updatePartner(usePartner().createDTOFromPartner(partner)).then(() => {
+    partnerService.getAll().then(() => {
+      searchResults.value = partnerService.piniaGetAll();
+      resetFields();
+    })
+  })
+
+
 };
 
 const resetFields = () => {
@@ -234,10 +234,10 @@ const deletePartner = (partner) => {
       partnerService.deletePartner(partner).then((response) => {
         if (response.status === 200 || esponse.status === 201) {
           alertSucess('Parceiro apagado com sucesso!').then((result) => {
-            if (result) {
-              emit('close');
-            }
-          });
+            partnerService.getAll().then((res) => {
+              searchResults.value = partnerService.piniaGetAll();
+            })
+          })
         } else {
           alertError('Não foi possivel apagar o Parceiro.')
         }

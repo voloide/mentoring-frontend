@@ -218,21 +218,11 @@
 
       <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
         <q-fab
-          v-model="fabRight"
-          vertical-actions-align="right"
-          color="primary"
-          glossy
-          icon="add"
-          direction="left"
-        >
-          <q-fab-action
-            label-position="left"
             color="primary"
+            glossy
+            icon="add"
             @click="addNewRow()"
-            icon="edit_square"
-            label="Criar"
-          />
-        </q-fab>
+        />
       </q-page-sticky>
     </div>
   </div>
@@ -304,7 +294,11 @@ const submitForm = () => {
     description: data.value.description,
     program: data.value.program,
   };
-  programmaticAreaService.saveProgrammaticArea(pogrammaticArea).then(closeForm);
+  programmaticAreaService.saveProgrammaticArea(pogrammaticArea).then((res) => {
+    closeForm
+    searchResults.value = programmaticAreaService.piniaGetAll();
+    newRowAdded.value = false
+  });
 };
 
 const closeForm = () => {
@@ -328,8 +322,10 @@ const saveUpdate = () => {
     description: data.value.description,
     program: data.value.program,
   };
-  programmaticAreaService.updateProgrammaticArea(programmaticArea);
-  resetFields();
+  programmaticAreaService.updateProgrammaticArea(programmaticArea).then((res) => {
+    searchResults.value = programmaticAreaService.piniaGetAll();
+    resetFields();
+  });
 };
 
 const resetFields = () => {
@@ -347,9 +343,12 @@ const deleteProgrammaticArea = (ProgrammaticArea) => {
             if (response.status === 200 || esponse.status === 201) {
               alertSucess('ProgrammaticArea apagado com sucesso!').then(
                 (result) => {
-                  if (result) {
-                    emit('close');
-                  }
+                  programmaticAreaService.getAll().then((res) => {
+                    searchResults.value = programmaticAreaService.piniaGetAll();
+                  })
+                  // if (result) {
+                  //   emit('close');
+                  // }
                 }
               );
             } else {

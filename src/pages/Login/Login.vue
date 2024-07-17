@@ -124,12 +124,15 @@
                 .then((response) => {
 
                   submitting.value = false;
+
                   if (response !== undefined && response.status === 200) {
                       localStorage.setItem('access_token', response.data.access_token);
                       localStorage.setItem('refresh_token', response.data.refresh_token);
                       localStorage.setItem('username', response.data.username);
                       localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo));
-                      localStorage.setItem('tokenExpiration', String(Date.now() + 6000));
+                      localStorage.setItem('tokenExpiration', String(Date.now() + 600000));
+                      localStorage.setItem('userData', JSON.stringify(response.data));
+
 
                       router.push({ path: '/' });
                   } else {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="q-ma-md page-container">
-      <form @submit.prevent="submitForm" ref="myForm">
+      <form ref="myForm">
         <div class="q-ma-md">
           <q-banner dense inline-actions class="text-white bg-primary q-px-md">
             Dados do User
@@ -499,11 +499,11 @@ const roles = computed(() => {
   return roles.filter((item) => item.code !== 'ROOT');
 });
 
-const roleId = computed(()=>{
+const roleId = computed(() => {
   const userRoles = userRolesService.piniaGetAll();
-  const filterred = userRoles.filter(item =>item?.user_id == user.value.id)
-  return filterred[0]?.role_id
-})
+  const filterred = userRoles.filter((item) => item?.user_id == user.value.id);
+  return filterred[0]?.role_id;
+});
 
 const init = () => {
   if (isEditStep.value) {
@@ -511,7 +511,7 @@ const init = () => {
     selectedUserLaborInfo.value =
       user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
   }
-  user.value.role = roles.value.filter(item =>item.id ===roleId.value)[0];
+  user.value.role = roles.value.filter((item) => item.id === roleId.value)[0];
 };
 onMounted(() => {
   init();
@@ -580,41 +580,47 @@ const submitForm = () => {
       spinner: QSpinnerRings,
     });
     const target_copy = Object.assign({}, user.value);
+    const userDTO = createDTOFromUser(new User(target_copy));
+
     if (isEditStep.value) {
       userService
-        .updateUser(createDTOFromUser(new User(target_copy)))
-        .then((resp) => {
-          if (resp.status === 200 || resp.status === 201) {
-            userRolesService
-              .mergeUserRole(resp.data.id, user.value.role.id)
-              .then(() => {
-                alertSucess('User actualizado.').then((result) => {
-                  emit('close');
-                });
-              });
-          } else {
-            alertError(resp?.message);
-          }
-          Loading.hide();
-        })
-        .catch((error) => {
-          Loading.hide();
-          console.error('Error', error);
-        });
+        .updateUser(userDTO)
+        .then((resp) => handleResponse(resp, 'User actualizado.', 'close'))
+        .catch((error) => handleError(error, 'Erro ao atualizar o User'));
     } else {
-      try {
-        const userDTO = createDTOFromUser(new User(target_copy));
-        userService.saveUser(userDTO);
-        alertSucess('User criado com sucesso');
-        Loading.hide();
-        emit('cancel');
-      } catch (error) {
-        console.error('Error', error);
-        alertError(resp?.message);
-      }
+      userService
+        .saveUser(userDTO)
+        .then((resp) =>
+          handleResponse(resp, 'User criado com sucesso', 'cancel')
+        )
+        .catch((error) =>
+          handleError(error, 'Ocorreu um erro ao tentar criar User')
+        );
     }
   }
 };
+
+const handleResponse = (resp, successMessage, emitAction) => {
+  if (resp.status === 200 || resp.status === 201) {
+    userRolesService
+      .mergeUserRole(resp.data.id, user.value.role.id)
+      .then(() => {
+        alertSucess(successMessage).then(() => {
+          emit(emitAction);
+        });
+      });
+  } else {
+    alertError(resp?.message);
+  }
+  Loading.hide();
+};
+
+const handleError = (error, errorMessage) => {
+  Loading.hide();
+  console.error('Error', error);
+  alertError(errorMessage);
+};
+
 const isValidEmail = (email) => {
   const regex = /^[A-Za-z0-9+_.-]+@(.+)$/;
   return regex.test(email);
