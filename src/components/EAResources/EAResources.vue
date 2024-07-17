@@ -281,6 +281,9 @@ const resourceRequest = (node) => {
       }
     })
   }
+  else if(doesUserHavePermissions()) {
+    alertError('Não tem permissoes para adicionar um Recurso de EA.')
+  }
 };
 
 const resetFilter = () => {
