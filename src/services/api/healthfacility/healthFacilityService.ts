@@ -53,7 +53,7 @@ export default {
   piniaGetAll() {
     return healthFacilityRepo
       .query()
-      .withAllRecursive(2)
+      .withAllRecursive(3)
       .orderBy('healthFacility', 'asc')
       .get();
   },
@@ -87,6 +87,7 @@ export default {
       const resp = await api().patch(`/healthFacilities/${healthFacilityId}`);
       await api().delete(`/healthFacilities/${healthFacilityId}`);
       healthFacilityRepo.save(createHealthFacilityFromDTO(resp.data));
+      healthFacilityRepo.delete(healthFacilityId);
       return resp;
     } catch (error: any) {
       console.error('Error', error.message);

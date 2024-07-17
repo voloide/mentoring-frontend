@@ -161,21 +161,11 @@
 
       <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
         <q-fab
-          v-model="fabRight"
-          vertical-actions-align="right"
-          color="primary"
-          glossy
-          icon="add"
-          direction="left"
-        >
-          <q-fab-action
-            label-position="left"
             color="primary"
+            glossy
+            icon="add"
             @click="addNewRow()"
-            icon="edit_square"
-            label="Criar"
-          />
-        </q-fab>
+        />
       </q-page-sticky>
     </div>
   </div>
@@ -190,6 +180,8 @@ import UsersService from 'src/services/api/user/UsersService';
 import questionCategoryService from 'src/services/api/question/questionCategoryService';
 import { computed } from 'vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import programService from "src/services/api/program/programService";
+import programmaticAreaService from "src/services/api/programmaticArea/programmaticAreaService";
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const { fullName } = useEmployee();
@@ -243,7 +235,14 @@ const submitForm = () => {
     question: data.value.question,
     questionCategory: data.value.questionCategory,
   };
-  questionService.saveQuestion(question).then(closeForm);
+  questionService.saveQuestion(question).then((res) => {
+    closeForm
+    newRowAdded.value = false
+    questionService.getAll().then(() => {
+      searchResults.value = questionService.piniaGetAll()
+    })
+
+  });
 };
 
 const closeForm = () => {
@@ -266,8 +265,11 @@ const saveUpdate = () => {
     question: data.value.question,
     questionCategory: data.value.questionCategory,
   };
-  questionService.updateQuestion(question);
-  resetFields()
+
+  questionService.updateQuestion(question).then((res) => {
+    searchResults.value = questionService.piniaGetAll();
+    resetFields();
+  });
 };
 
 const resetFields = () => {
@@ -281,11 +283,14 @@ const deleteQuestion = (question) => {
   ).then((result) => {
     if (result) {
       questionService.deleteQuestion(question).then((response) => {
-        if (response.status === 200 || esponse.status === 201) {
-          alertSucess('Question apagado com sucesso!').then((result) => {
-            if (result) {
-              emit('close');
-            }
+        if (response.status === 200 || response.status === 201) {
+          alertSucess('Question apagada com sucesso!').then((result) => {
+            questionService.getAll().then((res) => {
+              searchResults.value = questionService.piniaGetAll();
+            })
+            // if (result) {
+            //   emit('close');
+            // }
           });
         } else {
           alertError('Não foi possivel apagar o questiona.')

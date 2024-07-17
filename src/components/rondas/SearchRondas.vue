@@ -206,12 +206,6 @@
                     </template>
                 </q-table>
             </div>
-            <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
-                <q-fab vertical-actions-align="right" color="primary" glossy icon="add" direction="left">
-                    <q-fab-action label-position="left" color="primary" @click="$emit('create')" icon="edit_square" label="Criar" />
-                    <q-fab-action label-position="left" color="secondary" @click="$emit('import')" icon="cloud_upload" label="Importar" />
-                </q-fab>
-            </q-page-sticky>
         </div>
     </div>
 
@@ -381,7 +375,7 @@ const formattedResult = computed(() => {
     let res = []
     searchResults.value.forEach((ronda) => {
       ronda.rondaMentors.forEach((rm) => {
-        if(!rm.endDate)
+        if(!ronda.endDate && ronda.rondaType.code !== 'SESSAO_ZERO')
         res.push({
           description: ronda.description,
           startDate: rm.startDate,
