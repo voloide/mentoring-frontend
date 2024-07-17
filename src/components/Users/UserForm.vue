@@ -435,6 +435,7 @@ import { useStringUtils } from 'src/composables/shared/stringutils/stringUtils';
 import partnerService from 'src/services/api/partner/partnerService';
 import useUser from 'src/composables/user/userMethods';
 import userService from 'src/services/api/user/UsersService';
+import userRolesService from 'src/services/api/user/UserRolesService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { Loading, QSpinnerRings } from 'quasar';
 import roleService from 'src/services/api/role/roleService';
@@ -498,13 +499,19 @@ const roles = computed(() => {
   return roles.filter((item) => item.code !== 'ROOT');
 });
 
+const roleId = computed(()=>{
+  const userRoles = userRolesService.piniaGetAll();
+  const filterred = userRoles.filter(item =>item?.user_id == user.value.id)
+  return filterred[0]?.role_id
+})
+
 const init = () => {
   if (isEditStep.value) {
     user.value = Object.assign({}, selectedUser.value);
     selectedUserLaborInfo.value =
       user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
   }
-  user.value.role = roles.value[0];
+  user.value.role = roles.value.filter(item =>item.id ===roleId.value)[0];
 };
 onMounted(() => {
   init();
@@ -578,9 +585,13 @@ const submitForm = () => {
         .updateUser(createDTOFromUser(new User(target_copy)))
         .then((resp) => {
           if (resp.status === 200 || resp.status === 201) {
-            alertSucess('User actualizado.').then((result) => {
-              emit('close');
-            });
+            userRolesService
+              .mergeUserRole(resp.data.id, user.value.role.id)
+              .then(() => {
+                alertSucess('User actualizado.').then((result) => {
+                  emit('close');
+                });
+              });
           } else {
             alertError(resp?.message);
           }
