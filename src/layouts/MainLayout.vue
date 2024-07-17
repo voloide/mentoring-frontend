@@ -38,6 +38,7 @@
             :active="link === 'tables'"
             @click="link = 'tables'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/tables')"
             to="/tables"
           >
             <q-item-section avatar>
@@ -52,6 +53,7 @@
             :active="link === 'mentores'"
             @click="link = 'mentores'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/mentors')"
             to="/mentors"
             exact
           >
@@ -68,6 +70,7 @@
             :active="link === 'mentorandos'"
             @click="link = 'mentorandos'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/mentees')"
             to="/mentees"
             exact
           >
@@ -84,6 +87,7 @@
             :active="link === 'earesources'"
             @click="link = 'earesources'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/resources')"
             to="/resources"
             exact
           >
@@ -100,6 +104,7 @@
               :active="link === 'rondas'"
               @click="link = 'rondas'"
               active-class="my-menu-link"
+              v-if="isMenuOptionVisible('/rondas')"
               to="/rondas"
               exact
           >
@@ -116,6 +121,7 @@
             :active="link === 'reports'"
             @click="link = 'reports'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/reports')"
             style="margin-bottom: 50%"
           >
             <q-item-section avatar>
@@ -133,6 +139,7 @@
             :active="link === 'settings'"
             @click="link = 'settings'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/settings')"
             to="/settings"
             exact
           >
@@ -189,12 +196,15 @@ const router = useRouter();
 const { fullName } = useEmployee();
 const { createUserFromDTO } = useUser();
 
+const menuOptions = ["/tables", "/mentors", "/mentees", "/resources", "/rondas", "/settings", "/reports"];
+
 const currUser = computed(() => {
   return UsersService.getLogedUser();
 });
 
 onBeforeMount(() => {
       initUserInfo();
+      console.log(isMenuOptionVisible('/tables'));
     });
 
 
@@ -209,6 +219,64 @@ const initUserInfo =()=> {
   } else {
     UsersService.logout();
   }
+};
+
+const isMenuOptionVisible = (menuOptionValue) => {
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const roles = userData.roles;
+  for(let i=0; i<roles.length; i++) {
+      if(roles[i] === "NATIONAL_ADMINISTRATOR") {
+
+if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
+    || menuOptions[2]===menuOptionValue || menuOptions[3]===menuOptionValue 
+    || menuOptions[4]===menuOptionValue || menuOptions[5]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "PROVINCIAL_ADMINISTRATOR") {
+
+if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
+    || menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
+    || menuOptions[5]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "DISTRICT_ADMINISTRATOR") {
+
+if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
+    || menuOptions[5]===menuOptionValue
+) {
+  return true;
+}
+
+}
+if(roles[i] === "NATIONAL_MENTOR" || roles[i] === "PROVINCIAL_MENTOR" || roles[i] === "DISTRICT_MENTOR") {
+
+if (menuOptions[6]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "HEALTH_FACILITY_MENTOR") {
+
+if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
+    || menuOptions[3]===menuOptionValue || menuOptions[6]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "MENTEE") {
+
+if (menuOptions[3]===menuOptionValue) {
+  return true;
+}
+
+}
+    }
+  
+  return false;
 };
 
 const logout = () => {
