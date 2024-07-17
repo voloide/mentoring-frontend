@@ -99,15 +99,15 @@
                 label="Numero de Telefone"
                 dense
                 ref="phoneNumberRef"
-                mask="+2588#######"
-                hint="Formato: +2588#######"
+                mask="#########"
+                hint="Formato: #########"
                 lazy-rules
                 :rules="[
                   (val) =>
                     isValidPhoneNumber(val) ||
                     'Por favor indicar um contacto válido.',
                 ]"
-                fill-mask="_"
+                fill-mask="#"
                 class="col"
                 v-model="user.employee.phoneNumber"
                 @update:model-value="(value) => (filter = value)"
