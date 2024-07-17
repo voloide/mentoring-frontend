@@ -130,7 +130,7 @@
                       localStorage.setItem('refresh_token', response.data.refresh_token);
                       localStorage.setItem('username', response.data.username);
                       localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo));
-                      localStorage.setItem('tokenExpiration', String(Date.now() + 6000));
+                      localStorage.setItem('tokenExpiration', String(Date.now() + 60000));
                       localStorage.setItem('userData', JSON.stringify(response.data));
 
 

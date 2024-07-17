@@ -54,6 +54,8 @@
                       props.row.lifeCycleStatus == 'DELETED'
                     "
                     round
+                    dense
+                    size="sm"
                     class="q-ml-md"
                     color="red-5"
                     @click="activateUser(props.row.id)"
