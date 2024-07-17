@@ -99,14 +99,14 @@
           </q-item>
 
           <q-item
-              clickable
-              v-ripple
-              :active="link === 'rondas'"
-              @click="link = 'rondas'"
-              active-class="my-menu-link"
-              v-if="isMenuOptionVisible('/rondas')"
-              to="/rondas"
-              exact
+            clickable
+            v-ripple
+            :active="link === 'rondas'"
+            @click="link = 'rondas'"
+            active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/rondas')"
+            to="/rondas"
+            exact
           >
             <q-item-section avatar>
               <q-icon name="playlist_add_check_circle" />
@@ -183,12 +183,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount} from 'vue';
+import { ref, computed, onBeforeMount } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import { Loading, QSpinnerRings } from 'quasar';
 import { useRouter } from 'vue-router';
 import useEmployee from 'src/composables/employee/employeeMethods';
-import useUser from "src/composables/user/userMethods";
+import useUser from 'src/composables/user/userMethods';
 
 const leftDrawerOpen = ref(false);
 const link = ref('home');
@@ -196,19 +196,26 @@ const router = useRouter();
 const { fullName } = useEmployee();
 const { createUserFromDTO } = useUser();
 
-const menuOptions = ["/tables", "/mentors", "/mentees", "/resources", "/rondas", "/settings", "/reports"];
+const menuOptions = [
+  '/tables',
+  '/mentors',
+  '/mentees',
+  '/resources',
+  '/rondas',
+  '/settings',
+  '/reports',
+];
 
 const currUser = computed(() => {
   return UsersService.getLogedUser();
 });
 
 onBeforeMount(() => {
-      initUserInfo();
-      console.log(isMenuOptionVisible('/tables'));
-    });
+  initUserInfo();
+  console.log(isMenuOptionVisible('/tables'));
+});
 
-
-const initUserInfo =()=> {
+const initUserInfo = () => {
   const currentTimestamp = Date.now();
   const tokenExpiration = localStorage.getItem('tokenExpiration');
 
@@ -224,58 +231,64 @@ const initUserInfo =()=> {
 const isMenuOptionVisible = (menuOptionValue) => {
   const userData = JSON.parse(localStorage.getItem('userData'));
   const roles = userData.roles;
-  for(let i=0; i<roles.length; i++) {
-      if(roles[i] === "NATIONAL_ADMINISTRATOR") {
-
-if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
-    || menuOptions[2]===menuOptionValue || menuOptions[3]===menuOptionValue 
-    || menuOptions[4]===menuOptionValue || menuOptions[5]===menuOptionValue) {
-  return true;
-}
-
-}
-if(roles[i] === "PROVINCIAL_ADMINISTRATOR") {
-
-if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
-    || menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
-    || menuOptions[5]===menuOptionValue) {
-  return true;
-}
-
-}
-if(roles[i] === "DISTRICT_ADMINISTRATOR") {
-
-if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
-    || menuOptions[5]===menuOptionValue
-) {
-  return true;
-}
-
-}
-if(roles[i] === "NATIONAL_MENTOR" || roles[i] === "PROVINCIAL_MENTOR" || roles[i] === "DISTRICT_MENTOR") {
-
-if (menuOptions[6]===menuOptionValue) {
-  return true;
-}
-
-}
-if(roles[i] === "HEALTH_FACILITY_MENTOR") {
-
-if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
-    || menuOptions[3]===menuOptionValue || menuOptions[6]===menuOptionValue) {
-  return true;
-}
-
-}
-if(roles[i] === "MENTEE") {
-
-if (menuOptions[3]===menuOptionValue) {
-  return true;
-}
-
-}
+  for (let i = 0; i < roles.length; i++) {
+    if (roles[i] === 'NATIONAL_ADMINISTRATOR') {
+      if (
+        menuOptions[0] === menuOptionValue ||
+        menuOptions[1] === menuOptionValue ||
+        menuOptions[2] === menuOptionValue ||
+        menuOptions[3] === menuOptionValue ||
+        menuOptions[4] === menuOptionValue ||
+        menuOptions[5] === menuOptionValue
+      ) {
+        return true;
+      }
     }
-  
+    if (roles[i] === 'PROVINCIAL_ADMINISTRATOR') {
+      if (
+        menuOptions[0] === menuOptionValue ||
+        menuOptions[1] === menuOptionValue ||
+        menuOptions[2] === menuOptionValue ||
+        menuOptions[4] === menuOptionValue ||
+        menuOptions[5] === menuOptionValue
+      ) {
+        return true;
+      }
+    }
+    if (roles[i] === 'DISTRICT_ADMINISTRATOR') {
+      if (
+        menuOptions[2] === menuOptionValue ||
+        menuOptions[4] === menuOptionValue ||
+        menuOptions[5] === menuOptionValue
+      ) {
+        return true;
+      }
+    }
+    if (
+      roles[i] === 'NATIONAL_MENTOR' ||
+      roles[i] === 'PROVINCIAL_MENTOR' ||
+      roles[i] === 'DISTRICT_MENTOR'
+    ) {
+      if (menuOptions[6] === menuOptionValue) {
+        return true;
+      }
+    }
+    if (roles[i] === 'HEALTH_FACILITY_MENTOR') {
+      if (
+        menuOptions[2] === menuOptionValue ||
+        menuOptions[3] === menuOptionValue ||
+        menuOptions[6] === menuOptionValue
+      ) {
+        return true;
+      }
+    }
+    if (roles[i] === 'MENTEE') {
+      if (menuOptions[3] === menuOptionValue) {
+        return true;
+      }
+    }
+  }
+
   return false;
 };
 
