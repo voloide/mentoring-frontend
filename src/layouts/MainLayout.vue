@@ -261,8 +261,8 @@ if (menuOptions[6]===menuOptionValue) {
 }
 if(roles[i] === "HEALTH_FACILITY_MENTOR") {
 
-if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
-    || menuOptions[3]===menuOptionValue || menuOptions[6]===menuOptionValue) {
+if (menuOptions[2]===menuOptionValue || menuOptions[3]===menuOptionValue
+    || menuOptions[6]===menuOptionValue) {
   return true;
 }
 
