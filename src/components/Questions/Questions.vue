@@ -238,7 +238,10 @@ const submitForm = () => {
   questionService.saveQuestion(question).then((res) => {
     closeForm
     newRowAdded.value = false
-    searchResults.value = questionService.getAll()
+    questionService.getAll().then(() => {
+      searchResults.value = questionService.piniaGetAll()
+    })
+
   });
 };
 
