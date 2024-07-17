@@ -32,9 +32,9 @@ export default {
       .get();
     return res;
   },
-  async saveQuestion(question: any) {
+  async saveRole(role: any) {
     return await api()
-      .post('/roles/save', question)
+      .post('/roles/save', role)
       .then((resp) => {
         repo.save(createRoleFromDTO(resp.data));
         return resp;

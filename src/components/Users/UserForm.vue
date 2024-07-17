@@ -186,7 +186,7 @@
                 v-model="user.role"
                 :options="roles"
                 option-value="id"
-                option-label="code"
+                option-label="label"
                 label="Perfil de Acesso"
               />
             </div>
@@ -319,8 +319,6 @@
                 dense
                 outlined
                 ref="provinceRef"
-                lazy-rules
-                :rules="[(val) => !!val || 'Por favor indicar a Província']"
                 v-model="user.employee.locations[0].province"
                 :options="provinces"
                 option-value="id"
@@ -437,6 +435,7 @@ import { useStringUtils } from 'src/composables/shared/stringutils/stringUtils';
 import partnerService from 'src/services/api/partner/partnerService';
 import useUser from 'src/composables/user/userMethods';
 import userService from 'src/services/api/user/UsersService';
+import userRolesService from 'src/services/api/user/UserRolesService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { Loading, QSpinnerRings } from 'quasar';
 import roleService from 'src/services/api/role/roleService';
@@ -492,8 +491,19 @@ const isEditStep = computed(() => {
 });
 
 const roles = computed(() => {
-  return roleService.piniaGetAll();
+  const roles = roleService.piniaGetAll().map((role) => ({
+    ...role,
+    label: `${role.description} ${role.level}`,
+  }));
+
+  return roles.filter((item) => item.code !== 'ROOT');
 });
+
+const roleId = computed(()=>{
+  const userRoles = userRolesService.piniaGetAll();
+  const filterred = userRoles.filter(item =>item?.user_id == user.value.id)
+  return filterred[0]?.role_id
+})
 
 const init = () => {
   if (isEditStep.value) {
@@ -501,7 +511,7 @@ const init = () => {
     selectedUserLaborInfo.value =
       user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
   }
-  user.value.role = roles.value[0];
+  user.value.role = roles.value.filter(item =>item.id ===roleId.value)[0];
 };
 onMounted(() => {
   init();
@@ -575,9 +585,13 @@ const submitForm = () => {
         .updateUser(createDTOFromUser(new User(target_copy)))
         .then((resp) => {
           if (resp.status === 200 || resp.status === 201) {
-            alertSucess('User actualizado.').then((result) => {
-              emit('close');
-            });
+            userRolesService
+              .mergeUserRole(resp.data.id, user.value.role.id)
+              .then(() => {
+                alertSucess('User actualizado.').then((result) => {
+                  emit('close');
+                });
+              });
           } else {
             alertError(resp?.message);
           }
@@ -591,9 +605,7 @@ const submitForm = () => {
       try {
         const userDTO = createDTOFromUser(new User(target_copy));
         userService.saveUser(userDTO);
-        alertSucess(
-          'User criado com sucesso'
-        );
+        alertSucess('User criado com sucesso');
         Loading.hide();
         emit('cancel');
       } catch (error) {

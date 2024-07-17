@@ -42,7 +42,7 @@ export default function useLocation() {
         ? createDTOFromHealthFacility(location.healthFacility)
         : undefined,
       provinceDTO: location.province
-        ? createDTOFromProvince(location.province)
+        ? createDTOFromProvince(location?.province)
         : undefined,
     };
     return locationDTO;
