@@ -38,8 +38,8 @@
             :active="link === 'tables'"
             @click="link = 'tables'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/tables')"
             to="/tables"
-            v-if="defineVisibleMenuOptions('/tables')"
           >
             <q-item-section avatar>
               <q-icon name="fact_check" />
@@ -53,8 +53,8 @@
             :active="link === 'mentores'"
             @click="link = 'mentores'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/mentors')"
             to="/mentors"
-            v-if="defineVisibleMenuOptions('/mentors')"
             exact
           >
             <q-item-section avatar>
@@ -70,8 +70,8 @@
             :active="link === 'mentorandos'"
             @click="link = 'mentorandos'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/mentees')"
             to="/mentees"
-            v-if="defineVisibleMenuOptions('/mentees')"
             exact
           >
             <q-item-section avatar>
@@ -87,8 +87,8 @@
             :active="link === 'earesources'"
             @click="link = 'earesources'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/resources')"
             to="/resources"
-            v-if="defineVisibleMenuOptions('/resources')"
             exact
           >
             <q-item-section avatar>
@@ -104,8 +104,8 @@
               :active="link === 'rondas'"
               @click="link = 'rondas'"
               active-class="my-menu-link"
+              v-if="isMenuOptionVisible('/rondas')"
               to="/rondas"
-              v-if="defineVisibleMenuOptions('/rondas')"
               exact
           >
             <q-item-section avatar>
@@ -121,8 +121,8 @@
             :active="link === 'reports'"
             @click="link = 'reports'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/reports')"
             style="margin-bottom: 50%"
-            v-if="defineVisibleMenuOptions('/reports')"
           >
             <q-item-section avatar>
               <q-icon name="legend_toggle" />
@@ -139,8 +139,8 @@
             :active="link === 'settings'"
             @click="link = 'settings'"
             active-class="my-menu-link"
+            v-if="isMenuOptionVisible('/settings')"
             to="/settings"
-            v-if="defineVisibleMenuOptions('/settings')"
             exact
           >
             <q-item-section avatar>
@@ -204,6 +204,7 @@ const currUser = computed(() => {
 
 onBeforeMount(() => {
       initUserInfo();
+      console.log(isMenuOptionVisible('/tables'));
     });
 
 
@@ -220,6 +221,64 @@ const initUserInfo =()=> {
   }
 };
 
+const isMenuOptionVisible = (menuOptionValue) => {
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const roles = userData.roles;
+  for(let i=0; i<roles.length; i++) {
+      if(roles[i] === "ROOT") {
+
+if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
+    || menuOptions[2]===menuOptionValue || menuOptions[3]===menuOptionValue 
+    || menuOptions[4]===menuOptionValue || menuOptions[5]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "PROVINCIAL_ADMINISTRATOR") {
+
+if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
+    || menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
+    || menuOptions[5]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "DISTRICT_ADMINISTRATOR") {
+
+if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
+    || menuOptions[5]===menuOptionValue
+) {
+  return true;
+}
+
+}
+if(roles[i] === "NATIONAL_MENTOR" || roles[i] === "PROVINCIAL_MENTOR" || roles[i] === "DISTRICT_MENTOR") {
+
+if (menuOptions[6]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "HEALTH_FACILITY_MENTOR") {
+
+if (menuOptions[1]===menuOptionValue || menuOptions[4]===menuOptionValue 
+    || menuOptions[3]===menuOptionValue || menuOptions[6]===menuOptionValue) {
+  return true;
+}
+
+}
+if(roles[i] === "MENTEE") {
+
+if (menuOptions[5]===menuOptionValue || menuOptions[6]===menuOptionValue) {
+  return true;
+}
+
+}
+    }
+  
+  return false;
+};
+
 const logout = () => {
   Loading.show({
     spinner: QSpinnerRings,
@@ -228,69 +287,6 @@ const logout = () => {
   Loading.hide();
   router.push({ path: '/login' });
 };
-
-const defineVisibleMenuOptions = (menuOptionValue: any) => {
-
-  const userData = localStorage.getItem('userData');
-  const roles = userData.roles;
-  roles.forEach(role => {
-
-    if(role === "NATIONAL_ADMINISTRATOR") {
-
-      if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
-          || menuOptions[2]===menuOptionValue || menuOptions[3]===menuOptionValue 
-          || menuOptions[4]===menuOptionValue || menuOptions[5]===menuOptionValue) {
-        return true;
-      }
-
-    }
-    if(role === "PROVINCIAL_ADMINISTRATOR") {
-
-      if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
-          || menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
-          || menuOptions[5]===menuOptionValue) {
-        return true;
-      }
-
-    }
-    if(role === "DISTRICT_ADMINISTRATOR") {
-
-      if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
-          || menuOptions[5]===menuOptionValue
-      ) {
-        return true;
-      }
-
-    }
-    if(role === "NATIONAL_MENTOR" || role === "PROVINCIAL_MENTOR" || role === "DISTRICT_MENTOR") {
-
-      if (menuOptions[6]===menuOptionValue) {
-        return true;
-      }
-
-    }
-    if(role === "HEALTH_FACILITY_MENTOR") {
-
-      if (menuOptions[1]===menuOptionValue || menuOptions[4]===menuOptionValue 
-          || menuOptions[3]===menuOptionValue || menuOptions[6]===menuOptionValue) {
-        return true;
-      }
-
-    }
-    if(role === "MENTEE") {
-
-      if (menuOptions[5]===menuOptionValue || menuOptions[6]===menuOptionValue) {
-        return true;
-      }
-      
-    }
-
-    return false;
-    
-  });
-
-}
-
 </script>
 <style lang="scss">
 .menu {
