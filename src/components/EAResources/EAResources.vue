@@ -157,7 +157,7 @@
         </div>
       </q-card-section>
 
-      <q-card-actions align="right">
+      <q-card-actions v-if="doesUserHavePermissions()" align="right">
         <q-btn dense label="Cancelar" color="red" v-close-popup></q-btn>
         <q-btn dense class="q-mr-sm" type="submit" color="primary" label="Gravar" @click="gravar(actualNode)" :disable="isSaveDisabled" v-close-popup></q-btn>
       </q-card-actions>
@@ -245,7 +245,7 @@ const resourceRequest = (node) => {
   programBeingRegistered.value  = false
   actualNode.value = node
   resetAddingViewForm()
-  if(node.clickable === 1) { // Algo sera adicionado [Program/Categoria/Subcategoria/Recurso]
+  if(node.clickable === 1 && doesUserHavePermissions()) { // Algo sera adicionado [Program/Categoria/Subcategoria/Recurso]
     if(node.type === 'resource') { // Vamos adicionar recurso
       fileBeingUploaded.value = true
       categoryLabel.value = 'Sub Categoria'
@@ -416,7 +416,19 @@ const loadResources = () => {
     resourceObj.value = resourceService.piniaGetAll()[0]
     nodes.value = JSON.parse(resourceObj.value.resource)
   })
-}
+};
+
+const doesUserHavePermissions = () => {
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const roles = userData.roles;
+  for(let i=0; i<roles.length; i++) {
+      if(roles[i] === "MENTEE" || roles[i] === "HEALTH_FACILITY_MENTOR") {
+         return false;
+      }
+      return true;
+    }
+    return false;
+};
 
 onMounted(() => {
   loadResources()

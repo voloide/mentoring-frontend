@@ -225,7 +225,7 @@ const isMenuOptionVisible = (menuOptionValue) => {
   const userData = JSON.parse(localStorage.getItem('userData'));
   const roles = userData.roles;
   for(let i=0; i<roles.length; i++) {
-      if(roles[i] === "ROOT") {
+      if(roles[i] === "NATIONAL_ADMINISTRATOR") {
 
 if (menuOptions[0]===menuOptionValue || menuOptions[1]===menuOptionValue 
     || menuOptions[2]===menuOptionValue || menuOptions[3]===menuOptionValue 
@@ -261,7 +261,7 @@ if (menuOptions[6]===menuOptionValue) {
 }
 if(roles[i] === "HEALTH_FACILITY_MENTOR") {
 
-if (menuOptions[1]===menuOptionValue || menuOptions[4]===menuOptionValue 
+if (menuOptions[2]===menuOptionValue || menuOptions[4]===menuOptionValue 
     || menuOptions[3]===menuOptionValue || menuOptions[6]===menuOptionValue) {
   return true;
 }
@@ -269,7 +269,7 @@ if (menuOptions[1]===menuOptionValue || menuOptions[4]===menuOptionValue
 }
 if(roles[i] === "MENTEE") {
 
-if (menuOptions[5]===menuOptionValue || menuOptions[6]===menuOptionValue) {
+if (menuOptions[3]===menuOptionValue) {
   return true;
 }
 
