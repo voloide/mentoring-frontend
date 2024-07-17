@@ -1,4 +1,4 @@
-import TutorProgrammaticArea from "src/stores/model/TutorProgrammaticArea/TutorProgrammaticArea";
+import TutorProgrammaticArea from "stores/model/tutorProgrammaticArea/TutorProgrammaticArea";
 import useProgrammaticArea from '../programmaticArea/programmaticAreaMethods';
 import useProgram from "src/composables/program/programMethods";
 import useMentor from '../mentor/mentorMethods';

@@ -1,7 +1,7 @@
 import { Model } from 'pinia-orm';
 import Employee from '../employee/Employee';
 import ProgrammaticArea from '../programmaticArea/ProgrammaticArea';
-import TutorProgrammaticArea from '../TutorProgrammaticArea/TutorProgrammaticArea';
+import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea';
 
 export default class Mentor extends Model {
   static entity = 'mentores';

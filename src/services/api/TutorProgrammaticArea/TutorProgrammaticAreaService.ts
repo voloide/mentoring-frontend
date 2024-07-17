@@ -1,6 +1,6 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import TutorProgrammaticArea from 'src/stores/model/TutorProgrammaticArea/TutorProgrammaticArea';
+import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea';
 import useTutorProgrammaticArea from 'src/composables/tutorProgrammaticArea/tutorProgrammaticAreaMethods';
 import mentorService from '../mentor/mentorService';
 import programmaticAreaService from '../programmaticArea/programmaticAreaService';

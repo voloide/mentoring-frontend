@@ -186,10 +186,16 @@
                 :rules="[
                   (val) =>
                     isValidTrainingYear(val) || 'Ano de formação inválido',
+                  (val) => isMinYear(val) || 'Ano tem que ser superior a 1960',
+                  (val) =>
+                    isMaxYear(val) ||
+                    'Ano nao pode ser superior ao Ano Atual ' +
+                      new Date().getFullYear(),
                 ]"
                 lazy-rules
                 mask="####"
                 fill-mask="#"
+                min="1960"
                 class="col q-ml-md"
                 v-model="mentee.employee.trainingYear"
                 @update:model-value="(value) => (filter = value)"
@@ -413,14 +419,13 @@ const hfRef = ref(null);
 
 const router = useRouter();
 
-
 const selectedMentee = inject('selectedMentee');
 const step = inject('step');
 mentee.value = menteesService.getById(selectedMentee.value.id);
 
-
 onMounted(() => {
-  selectedMenteeLaborInfo.value = (selectedMentee.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG');
+  selectedMenteeLaborInfo.value =
+    selectedMentee.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
 });
 
 const provinces = computed(() => {
@@ -481,26 +486,24 @@ const submitForm = () => {
     !hfRef.value.hasError
   ) {
     Loading.show({
-        spinner: QSpinnerRings,
-      })
+      spinner: QSpinnerRings,
+    });
 
     const target_copy = Object.assign({}, mentee.value);
     menteesService
       .update(createDTOFromMentees(new Mentees(target_copy)))
       .then((resp) => {
-        if (resp.status ===200 || resp.status ===201) {
-          alertSucess(
-            'Mentorando actualizado.'
-          ).then((result) => {
+        if (resp.status === 200 || resp.status === 201) {
+          alertSucess('Mentorando actualizado.').then((result) => {
             cancel();
           });
         } else {
           alertError(resp.message);
         }
-        Loading.hide()
+        Loading.hide();
       })
       .catch((error) => {
-        Loading.hide()
+        Loading.hide();
         console.error('Error', error.message);
         alertError('Ocorreu um erro inesperado nesta operação.');
       });
@@ -516,6 +519,14 @@ const isValidNuit = (nuit) => {
 
 const isValidTrainingYear = (year) => {
   return year !== '' && !stringContains(year, '#');
+};
+
+const isMinYear = (year) => {
+  return year >= 1960;
+};
+
+const isMaxYear = (year) => {
+  return year <= new Date().getFullYear();
 };
 
 const isValidPhoneNumber = (phoneNumber) => {

@@ -63,6 +63,8 @@
                   <q-btn
                     v-if="props.row.lifeCycleStatus == 'ACTIVE'"
                     round
+                    dense
+                    size="sm"
                     class="q-ml-md"
                     color="green-5"
                     @click="activateUser(props.row.id)"
@@ -72,13 +74,14 @@
                   <q-btn
                     flat
                     round
+                    size="sm"
                     class="q-ml-md"
                     color="yellow-8"
                     icon="edit"
                     @click="editUser(props.row)"
                   >
                     <q-tooltip class="bg-green-5"
-                      >Detalhar/Editar Program</q-tooltip
+                      >Detalhar/Editar</q-tooltip
                     >
                   </q-btn>
                   <q-btn
