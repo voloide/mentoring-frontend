@@ -16,10 +16,10 @@ export default function useDistrict() {
     function createDTOFromDistrict(district: any) {
         const { createDTOFromProvince } = useProvince();
         const districtDTO = {
-            id: district.id,
-            uuid: district.uuid,
-            description: district.description,
-            provinceDTO: (district.province !== undefined && district.province !== null) ? createDTOFromProvince(district.province) : null
+            id: district?.id,
+            uuid: district?.uuid,
+            description: district?.description,
+            provinceDTO: (district?.province !== undefined && district?.province !== null) ? createDTOFromProvince(district?.province) : null
 
         }
         return  districtDTO;
