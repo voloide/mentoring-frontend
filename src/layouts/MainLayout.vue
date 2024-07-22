@@ -118,10 +118,11 @@
           <q-item
             clickable
             v-ripple
-            :active="link === 'reports'"
-            @click="link = 'reports'"
+            :active="link === 'relatorios'"
+            @click="link = 'relatorios'"
             active-class="my-menu-link"
             v-if="isMenuOptionVisible('/reports')"
+            to="/rondas"
             style="margin-bottom: 50%"
           >
             <q-item-section avatar>

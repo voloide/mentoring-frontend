@@ -157,8 +157,8 @@
             </div>
             <div class="q-mt-lg q-mb-md">
                 <div class="row items-center q-mb-md">
-                    <q-icon name="search" size="sm" />
-                    <span class="q-pl-sm text-subtitle2">Resultado da Pesquisa</span>
+                  <q-icon name="search" size="sm" />
+                  <span class="q-pl-sm text-subtitle2">Resultado da Pesquisa</span>
                 </div>
                 <q-separator color="grey-13" size="1px" />
             </div>
@@ -201,6 +201,18 @@
                                     >Editar Ronda</q-tooltip
                                     >
                                 </q-btn>
+                              <q-btn
+                                  flat
+                                  v-if="formattedResult.length > 0 && reportMode"
+                                  dense
+                                  color="primary"
+                                  icon="print"
+                                  @click="printReport(props.row.ronda.uuid)"
+                              >
+                                <q-tooltip class="bg-green-5"
+                                >Imprimir Relatorio</q-tooltip
+                                >
+                              </q-btn>
                             </q-td>
                         </q-tr>
                     </template>
@@ -254,6 +266,7 @@ import healthFacilityService from 'src/services/api/healthfacility/healthFacilit
 import rondaService from "src/services/api/ronda/rondaService";
 import useRonda from "src/composables/ronda/rondaMethods";
 import {useSwal} from "src/composables/shared/dialog/dialog";
+import rondasReport from "src/printables/rondasReport/rondasReport";
 
 const { createMentorFromDTO } = useMentor();
 const searchParams = ref(new Mentor({
@@ -275,6 +288,8 @@ const unidadesSanitarias = ref([]);
 const filteredMentors = ref([]);
 const startDate = ref(null);
 const endDate = ref(null);
+const userData = JSON.parse(localStorage.getItem('userData'));
+const roles = userData.roles;
 
 // Defina as colunas da tabela
 const columns = [
@@ -296,9 +311,22 @@ const columns = [
 
 // Formate a data para exibição
 const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  console.log(dateStr)
+
+  if (!dateStr) return '-';
+
+  // Criando uma data a partir da string
+  const date = new Date(dateStr);
+
+  // Ajustando para UTC
+  const day = date.getUTCDate();
+  const month = date.getUTCMonth() + 1; // getUTCMonth() é zero-indexado
+  const year = date.getUTCFullYear();
+
+  // Formatando a data no formato pt-BR
+  const res = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+  console.log(res)
+  return res;
 };
 
 const editRonda = async (ronda) => {
@@ -324,8 +352,20 @@ const gravar = async () => {
   search()
 };
 
+const printReport = async (uuid) => {
+  console.log('Printing Report... ', uuid)
+  rondaService.generateReport(uuid).then((res) => {
+    if(res.status === 200 || res.status === 201){
+      const jsonResult = res.data
+      rondasReport.processReport(jsonResult)
+    } else {
+      useSwal().alertError('Ocorreu algum erro...')
+    }
+  })
+}
+
 const emit = defineEmits(['goToMentoringAreas', 'import', 'edit']);
-const currUser = ref(new User());
+// const currUser = ref(new User());
 
 const onChangeProvincia = () => {
     selectedDistrict.value = null;
@@ -375,15 +415,30 @@ const formattedResult = computed(() => {
     let res = []
     searchResults.value.forEach((ronda) => {
       ronda.rondaMentors.forEach((rm) => {
-        if(!ronda.endDate && ronda.rondaType.code !== 'SESSAO_ZERO')
-        res.push({
-          description: ronda.description,
-          startDate: rm.startDate,
-          endDate: rm.endDate,
-          healthFacility: ronda.healthFacility.healthFacility,
-          employee: rm.mentor.employee,
-          ronda: ronda
-        })
+        if (reportMode.value) {
+          if (ronda.endDate){
+            console.log(ronda)
+            res.push({
+              description: ronda.description,
+              startDate: ronda.startDate,
+              endDate: ronda.endDate,
+              healthFacility: ronda.healthFacility.healthFacility,
+              employee: rm.mentor.employee,
+              ronda: ronda
+            })
+          }
+
+        } else {
+          if (!ronda.endDate && ronda.rondaType.code !== 'SESSAO_ZERO')
+            res.push({
+              description: ronda.description,
+              startDate: rm.startDate,
+              endDate: rm.endDate,
+              healthFacility: ronda.healthFacility.healthFacility,
+              employee: rm.mentor.employee,
+              ronda: ronda
+            })
+        }
       })
     })
     return  res
@@ -444,8 +499,16 @@ const provinces = computed(() => {
     return provinceService.piniaGetAll();
 });
 
+const reportMode = computed(() => {
+  return  userData.roles.includes('HEALTH_FACILITY_MENTOR');
+});
+
+const currUser = computed(() => {
+  return UsersService.getLogedUser();
+});
+
 onMounted(() => {
-    currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
+  // currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });
 
 const editMentor = (mentor) => {
