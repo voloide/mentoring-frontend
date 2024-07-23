@@ -272,6 +272,7 @@ const { createMentorFromDTO } = useMentor();
 const searchParams = ref(new Mentor({
     employee: new Employee()
 }));
+const reportMode = inject('reportMode');
 const showAditDialog = ref(false)
 const selectedRonda = ref(null)
 const selectedMentor = ref(null);
@@ -288,8 +289,11 @@ const unidadesSanitarias = ref([]);
 const filteredMentors = ref([]);
 const startDate = ref(null);
 const endDate = ref(null);
+const startDateParam = ref(null);
+const endDateParam = ref(null);
 const userData = JSON.parse(localStorage.getItem('userData'));
 const roles = userData.roles;
+const healthFacility = ref('')
 
 // Defina as colunas da tabela
 const columns = [
@@ -311,8 +315,6 @@ const columns = [
 
 // Formate a data para exibição
 const formatDate = (dateStr) => {
-  console.log(dateStr)
-
   if (!dateStr) return '-';
 
   // Criando uma data a partir da string
@@ -325,7 +327,6 @@ const formatDate = (dateStr) => {
 
   // Formatando a data no formato pt-BR
   const res = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
-  console.log(res)
   return res;
 };
 
@@ -353,11 +354,10 @@ const gravar = async () => {
 };
 
 const printReport = async (uuid) => {
-  console.log('Printing Report... ', uuid)
   rondaService.generateReport(uuid).then((res) => {
     if(res.status === 200 || res.status === 201){
       const jsonResult = res.data
-      rondasReport.processReport(jsonResult)
+      rondasReport.processAndDownloadReport(jsonResult, healthFacility.value, startDateParam.value, endDateParam.value)
     } else {
       useSwal().alertError('Ocorreu algum erro...')
     }
@@ -365,7 +365,7 @@ const printReport = async (uuid) => {
 }
 
 const emit = defineEmits(['goToMentoringAreas', 'import', 'edit']);
-// const currUser = ref(new User());
+const currUser = ref(new User());
 
 const onChangeProvincia = () => {
     selectedDistrict.value = null;
@@ -417,7 +417,9 @@ const formattedResult = computed(() => {
       ronda.rondaMentors.forEach((rm) => {
         if (reportMode.value) {
           if (ronda.endDate){
-            console.log(ronda)
+            startDateParam.value = ronda.startDate
+            endDateParam.value = ronda.endDate
+            healthFacility.value = ronda.healthFacility.healthFacility
             res.push({
               description: ronda.description,
               startDate: ronda.startDate,
@@ -499,16 +501,8 @@ const provinces = computed(() => {
     return provinceService.piniaGetAll();
 });
 
-const reportMode = computed(() => {
-  return  userData.roles.includes('HEALTH_FACILITY_MENTOR');
-});
-
-const currUser = computed(() => {
-  return UsersService.getLogedUser();
-});
-
 onMounted(() => {
-  // currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
+  currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });
 
 const editMentor = (mentor) => {

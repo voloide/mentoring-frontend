@@ -118,11 +118,11 @@
           <q-item
             clickable
             v-ripple
-            :active="link === 'relatorios'"
-            @click="link = 'relatorios'"
+            :active="link === 'reports'"
+            @click="link = 'reports'"
             active-class="my-menu-link"
             v-if="isMenuOptionVisible('/reports')"
-            to="/rondas"
+            to="/reports"
             style="margin-bottom: 50%"
           >
             <q-item-section avatar>
@@ -184,7 +184,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from 'vue';
+import { ref, computed, onBeforeMount, provide } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import { Loading, QSpinnerRings } from 'quasar';
 import { useRouter } from 'vue-router';
@@ -212,6 +212,8 @@ const currUser = computed(() => {
 });
 
 onBeforeMount(() => {
+    const userData = JSON.parse(localStorage.getItem('userData'));
+  console.log(userData.roles)
   initUserInfo();
   console.log(isMenuOptionVisible('/tables'));
 });
@@ -229,7 +231,16 @@ const initUserInfo = () => {
   }
 };
 
+const reportMode = ref(false)
+
 const isMenuOptionVisible = (menuOptionValue) => {
+    // if(menuOptionValue === '/reports') {
+    //     reportMode.value = true
+    // } else {
+    //     reportMode.value = false
+    //
+    // }
+    // console.log(reportMode.value)
   const userData = JSON.parse(localStorage.getItem('userData'));
   const roles = userData.roles;
   for (let i = 0; i < roles.length; i++) {
@@ -292,6 +303,8 @@ const isMenuOptionVisible = (menuOptionValue) => {
 
   return false;
 };
+
+provide('reportMode', reportMode)
 
 const logout = () => {
   Loading.show({
