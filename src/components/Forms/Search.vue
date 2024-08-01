@@ -137,9 +137,6 @@
                     </template>
                     <template #body="props">
                         <q-tr :props="props">
-                            <q-td key="code" :props="props">
-                                {{ props.row.code }}
-                            </q-td>
                             <q-td key="name" :props="props">
                                 {{ props.row.name }}
                             </q-td>
@@ -212,12 +209,6 @@ const { alertError, alertSucess, alertWarningAction } = useSwal();
 const { createDTOFromForm } = useForm();
 
 const columns = [
-  {
-    name: 'code',
-    align: 'left',
-    label: 'Código',
-    sortable: false,
-  },
   {
     name: 'name',
     align: 'left',

@@ -24,7 +24,7 @@
               dense
               ref="recordCodeRef"
               class="col"
-              v-model="searchParams.sequence"
+              v-model="searchParams.code"
               @update:model-value="(value) => (filter = value)"
           >
             <template v-slot:append>
@@ -304,7 +304,7 @@ const searchQuestions = () => {
     spinner: QSpinnerRings,
   });
   const params = {
-    code: null,
+    code: searchParams.value.code,
     description: searchParams.value.question.question,
     categoryId: searchParams.value.question.questionCategory.id === undefined ? undefined : searchParams.value.question.questionCategory.id
   }
