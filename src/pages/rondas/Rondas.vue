@@ -1,12 +1,12 @@
 <template>
   <div style="height: 100%;">
-    <search-rondas v-if="isSearchStep" @create="changeStep('create')" @edit="edit" @goToMentoringAreas="goToMentoringAreas" @import="changeStep('import')"/>
+    <search-rondas  />
   </div>
 </template>
 
 <script setup>
   import SearchRondas from 'components/rondas/SearchRondas.vue';
-  import {computed, onMounted, ref} from 'vue';
+  import {computed, inject, onMounted, ref} from 'vue';
   import districtService from 'src/services/api/district/districtService';
   import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
   import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
@@ -18,7 +18,6 @@
   import UsersService from "src/services/api/user/UsersService";
   import rondaService from "src/services/api/ronda/rondaService";
 
-  const isSearchStep = ref(true)
   const { closeLoading, showloading } = useLoading();
 
 
@@ -30,6 +29,8 @@
     await rondaService.getAll()
     closeLoading();
   }
+
+  const reportMode = inject('reportMode')
 
   const search = () => {
     const params = {
@@ -52,6 +53,7 @@
   });
 
   onMounted(() => {
+    reportMode.value = false
     showloading()
     init();
   });

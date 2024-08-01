@@ -35,6 +35,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/rondas/Rondas.vue'),
       },
       {
+        path: '/reports',
+        component: () => import('pages/rondas/Reports.vue'),
+      },
+      {
         path: '/settings',
         component: () => import('pages/Settings/Settings.vue'),
       },

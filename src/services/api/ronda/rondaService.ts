@@ -35,6 +35,18 @@ export default {
         });
     },
 
+    async generateReport(uuid: string) {
+      return await api()
+        .get(`/ronda/report/${uuid}`)
+        .then((resp) => {
+          console.log(resp.data);
+          return resp;
+        })
+        .catch((error) => {
+          console.error('Error', error.message);
+        });
+    },
+
     async getAllRondaType() {
         return await api()
             .get('/rondaTypes/getall')
@@ -73,7 +85,6 @@ export default {
     async changeMentor(rondaId: number, newMentorId: number) {
         try {
             const resp = await api().post(`ronda/changeMentor/${rondaId}/${newMentorId}`);
-            console.info('Changed Mentor:', resp.data);
             useRonda().createRondaFromDTO(resp.data);
             return resp;
         } catch (error) {
