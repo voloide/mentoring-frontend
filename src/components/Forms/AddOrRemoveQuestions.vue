@@ -304,8 +304,8 @@ const searchQuestions = () => {
     spinner: QSpinnerRings,
   });
   const params = {
-    code: searchParams.value.code,
-    description: searchParams.value.question.question,
+    code: searchParams.value.code === undefined ? '' : searchParams.value.code,
+    description: searchParams.value.question.question === undefined ? '' : searchParams.value.question.question,
     categoryId: searchParams.value.question.questionCategory.id === undefined ? undefined : searchParams.value.question.questionCategory.id
   }
   Object.keys(params).forEach((key) => (params[key] === '') && delete params[key]);

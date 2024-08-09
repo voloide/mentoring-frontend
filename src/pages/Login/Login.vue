@@ -80,6 +80,9 @@
               />
             </div>
           </q-form>
+          <div class="row">
+            <label class="col text-right">v1.0</label>
+          </div>
         </q-card-section>
       </q-card>
     </div>
