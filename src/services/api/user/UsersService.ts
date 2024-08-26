@@ -128,4 +128,17 @@ export default {
         console.error('Error', error.message);
       });
   },
+
+  async search(searchParam: string) {
+    return await api()
+      .get(`/user/search?${new URLSearchParams(searchParam).toString()}`)
+      .then((resp) => {
+        this.generateAndSaveEntityFromDTO(resp.data);
+        return resp;
+      })
+      .catch((error) => {
+        console.error(error);
+        console.error('Error', error.message);
+      });
+  },
 };
