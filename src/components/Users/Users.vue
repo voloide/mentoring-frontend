@@ -1,6 +1,84 @@
 <template>
   <div class="q-pt-sm" style="height: 100%">
     <div class="q-ma-md q-pa-md page-container" v-if="!openForm">
+      <div class="row">
+        <q-input
+          outlined
+          label="Nome"
+          dense
+          ref="nameRef"
+          class="col"
+          v-model="searchParams.employee.name"
+        >
+          <template v-slot:append>
+            <q-icon
+              name="close"
+              @click="searchParams.employee.name = ''"
+              class="cursor-pointer"
+            />
+          </template>
+        </q-input>
+
+        <q-input
+          outlined
+          label="NUIT"
+          dense
+          ref="nuitRef"
+          class="col q-ml-md"
+          v-model="searchParams.employee.nuit"
+        >
+          <template v-slot:append>
+            <q-icon
+              name="close"
+              @click="searchParams.employee.nuit = ''"
+              class="cursor-pointer"
+            />
+          </template>
+        </q-input>
+
+        <q-input
+          outlined
+          label="Utilizador"
+          dense
+          ref="nuitRef"
+          class="col q-ml-md"
+          v-model="searchParams.username"
+        >
+          <template v-slot:append>
+            <q-icon
+              name="close"
+              @click="searchParams.username = ''"
+              class="cursor-pointer"
+            />
+          </template>
+        </q-input>
+        <q-space />
+        <q-btn
+          @click="search"
+          class="q-ml-md q-mb-xs float-right"
+          square
+          color="primary"
+          icon="search"
+        >
+          <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
+        </q-btn>
+        <q-btn
+          @click="clearSearchParams"
+          class="q-ml-md q-mb-xs float-right"
+          square
+          color="amber"
+          icon="clear"
+        >
+          <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
+        </q-btn>
+      </div>
+      <div class="q-mt-lg q-mb-md">
+        <div class="row items-center q-mb-md">
+          <q-icon name="search" size="sm" />
+          <span class="q-pl-sm text-subtitle2">Resultado da Pesquisa</span>
+        </div>
+        <q-separator color="grey-13" size="1px" />
+      </div>
       <div>
         <q-table
           class="col"
@@ -8,7 +86,6 @@
           :rows="searchResults"
           :columns="columns"
           row-key="id"
-          :filter="filter"
         >
           <template v-slot:no-data="{ icon, filter }">
             <div
@@ -21,15 +98,13 @@
           <template #body="props">
             <q-tr :props="props">
               <q-td key="name" :props="props">
-                {{
-                  `${props.row?.employee.name} ${props.row?.employee.surname}`
-                }}
+                {{ props.row.employee.name }}
               </q-td>
               <q-td key="nuit" :props="props">
-                {{ props.row?.employee.nuit }}
+                {{ props.row.employee.nuit }}
               </q-td>
               <q-td key="healthFacility" :props="props">
-                {{ props.row?.employee.partner.name }}
+                {{ props.row.employee.partner.name }}
               </q-td>
               <q-td key="username" :props="props">
                 {{ props.row.username }}
@@ -82,9 +157,7 @@
                     icon="edit"
                     @click="editUser(props.row)"
                   >
-                    <q-tooltip class="bg-green-5"
-                      >Detalhar/Editar</q-tooltip
-                    >
+                    <q-tooltip class="bg-green-5">Detalhar/Editar</q-tooltip>
                   </q-btn>
                   <q-btn
                     flat
@@ -127,7 +200,15 @@ import userService from 'src/services/api/user/UsersService';
 import User from 'src/stores/model/user/User';
 import UserForm from './UserForm.vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import Employee from 'src/stores/model/employee/Employee';
+import useUser from 'src/composables/user/userMethods';
 
+const { createUserFromDTO } = useUser();
+const searchParams = ref(
+  new User({
+    employee: new Employee(),
+  })
+);
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
 const selectedUser = ref('');
@@ -171,7 +252,7 @@ const currUser = ref(new User());
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(userService.getLogedUser()));
-  searchResults.value = userService.piniaGetAll();
+  //searchResults.value = userService.piniaGetAll();
 });
 
 const editUser = (user) => {
@@ -215,5 +296,35 @@ const deleteUser = (user) => {
   });
 };
 
+const clearSearchParams = () => {
+  searchParams.value = new User({
+    employee: new Employee(),
+  });
+};
+
 provide('openForm', openForm);
+
+const search = () => {
+  const params = {
+    userId: currUser.value.id,
+    name: searchParams.value.employee.name,
+    nuit: searchParams.value.employee.nuit,
+    username: searchParams.value.username,
+  };
+  Object.keys(params).forEach(
+    (key) => params[key] === '' && delete params[key]
+  );
+
+  userService
+    .search(params)
+    .then((response) => {
+      searchResults.value = [];
+      response.data.forEach((dto) => {
+        searchResults.value.push(createUserFromDTO(dto));
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
 </script>
