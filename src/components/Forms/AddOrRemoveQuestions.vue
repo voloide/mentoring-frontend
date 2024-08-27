@@ -19,19 +19,19 @@
         </q-banner>
         <div class="row q-pa-md q-mt-lg">
           <q-input
-              outlined
-              label="Código da Competência"
-              dense
-              ref="recordCodeRef"
-              class="col"
-              v-model="searchParams.code"
-              @update:model-value="(value) => (filter = value)"
+            outlined
+            label="Código da Competência"
+            dense
+            ref="recordCodeRef"
+            class="col"
+            v-model="searchParams.question.code"
+            @update:model-value="(value) => (filter = value)"
           >
             <template v-slot:append>
               <q-icon
-                  name="close"
-                  @click="searchParams.sequence = ''"
-                  class="cursor-pointer"
+                name="close"
+                @click="searchParams.question.code = ''"
+                class="cursor-pointer"
               />
             </template>
           </q-input>
@@ -304,19 +304,27 @@ const searchQuestions = () => {
     spinner: QSpinnerRings,
   });
   const params = {
-    code: searchParams.value.code === undefined ? '' : searchParams.value.code,
-    description: searchParams.value.question.question === undefined ? '' : searchParams.value.question.question,
-    categoryId: searchParams.value.question.questionCategory.id === undefined ? undefined : searchParams.value.question.questionCategory.id
-  }
-  Object.keys(params).forEach((key) => (params[key] === '') && delete params[key]);
-  questionService.search(params).then((response) => {
-    composeFormQuestions(response.data);
-    Loading.hide()
-  }).catch((error) => {
-    Loading.hide()
-    console.error(error);
-  });
-}
+    code: searchParams.value.question.code,
+    description: searchParams.value.question.question,
+    categoryId:
+      searchParams.value.question.questionCategory.id === undefined
+        ? undefined
+        : searchParams.value.question.questionCategory.id,
+  };
+  Object.keys(params).forEach(
+    (key) => params[key] === '' && delete params[key]
+  );
+  questionService
+    .search(params)
+    .then((response) => {
+      composeFormQuestions(response.data);
+      Loading.hide();
+    })
+    .catch((error) => {
+      Loading.hide();
+      console.error(error);
+    });
+};
 
 const columns = [
   {
@@ -377,46 +385,73 @@ const composeFormQuestions = (questions) => {
   });
 };
 
-const updateSequence = (formQuestion, selectedValue) => {
-  formQuestion.sequence = selectedValue;
-}
-
-const updateEvaluationType = (formQuestion, selectedValue) => {
-  formQuestion.evaluationType = selectedValue;
-}
-
-const updateResponseType = (formQuestion, selectedValue) => {
-  formQuestion.responseType = selectedValue;
-}
-
 const addQuestion = (formQuestion) => {
-  const exists = addedFormQuestions.value.filter(val => val === formQuestion).length > 0;
-  if (exists) {
-    addedFormQuestions.value.pop(formQuestion);
-    selectedForm.value.formQuestions.pop(formQuestion);
-  } else {
+  const isAlreadyAssociatedQuestion =
+    selectedForm.value.formQuestions.filter(
+      (val) =>
+        val.question.uuid === formQuestion.question.uuid &&
+        val.question.questionCategory.uuid ===
+          formQuestion.question.questionCategory.uuid
+    ).length > 0;
+
+  if (isAlreadyAssociatedQuestion) {
+    formQuestion.selected = false;
+    alertError('Esta competência já foi associada a esta tabela!');
+    return;
+  }
+
+  const exists =
+    addedFormQuestions.value.filter(
+      (val) =>
+        val.question.uuid === formQuestion.question.uuid &&
+        val.question.questionCategory.uuid ===
+          formQuestion.question.questionCategory.uuid
+    ).length > 0;
+  if (!exists) {
+    formQuestion.selected = true;
     addedFormQuestions.value.push(formQuestion);
     selectedForm.value.formQuestions.push(formQuestion);
   }
-}
+};
 
 const addSelectedQuestions = () => {
+  if (addedFormQuestions.value.length === 0) {
+    alertError('Seleccione pelo menos uma questão que pretenda adicionar!');
+    return;
+  }
   addedFormQuestions.value.forEach((formQuestion) => {
-    if (formQuestion.evaluationType === undefined || formQuestion.evaluationType === null) {
+    if (
+      formQuestion.evaluationType === undefined ||
+      formQuestion.evaluationType === null ||
+      formQuestion.evaluationType.uuid === ''
+    ) {
       alertError(
-          'Indique o Tipo de Avaliação!'
+        'Indique o Tipo de Avaliação! Competencia - ' +
+          formQuestion.question.code
       );
+      showAddOrRemoveQuestions.value = true;
       return;
     }
-    if (formQuestion.responseType === undefined || formQuestion.responseType === null) {
+    if (
+      formQuestion.responseType.uuid === undefined ||
+      formQuestion.responseType.uuid === null ||
+      formQuestion.responseType.uuid === ''
+    ) {
       alertError(
-          'Indique o Tipo de Resposta!'
+        'Indique o Tipo de Resposta! Competencia - ' +
+          formQuestion.question.code
       );
+      showAddOrRemoveQuestions.value = true;
       return;
     }
+    selectedForm.value.formQuestions.push(formQuestion);
   });
   showAddOrRemoveQuestions.value = false;
-}
+};
+
+const clearSearchParams = () => {
+  searchResults.value.length = 0;
+};
 </script>
 
 <style lang="scss">
