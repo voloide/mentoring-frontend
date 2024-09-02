@@ -117,7 +117,6 @@ const init = () => {
   healthFacilityService.getAll();
   partnerService.getAll();
   roleService.getAll();
-  userService.getAll();
   closeLoading();
 };
 
