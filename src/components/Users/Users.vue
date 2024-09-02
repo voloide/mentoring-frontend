@@ -187,6 +187,12 @@
           @click="$emit('create')"
         />
       </q-page-sticky>
+      <div class="col">
+        <button @click="prevPage" :disabled="currentPage < 1">Anterior</button>
+        <button @click="nextPage" :disabled="currentPage === totalPages - 1">
+          Próximo
+        </button>
+      </div>
     </div>
   </div>
   <q-dialog persistent v-model="openForm">
@@ -212,12 +218,12 @@ const searchParams = ref(
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
 const selectedUser = ref('');
-const data = ref({
-  name: '',
-  nuit: '',
-  employee: '',
-  province: '',
-});
+
+const searchQuery = ref('');
+const currentPage = ref(0);
+const totalPages = ref(1);
+const limit = ref(10);
+
 const openForm = ref(false);
 const columns = [
   {
@@ -252,7 +258,7 @@ const currUser = ref(new User());
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(userService.getLogedUser()));
-  //searchResults.value = userService.piniaGetAll();
+  fetchPage(currentPage.value);
 });
 
 const editUser = (user) => {
@@ -310,6 +316,8 @@ const search = () => {
     name: searchParams.value.employee.name,
     nuit: searchParams.value.employee.nuit,
     username: searchParams.value.username,
+    page: currentPage.value,
+    size: limit.value,
   };
   Object.keys(params).forEach(
     (key) => params[key] === '' && delete params[key]
@@ -319,12 +327,44 @@ const search = () => {
     .search(params)
     .then((response) => {
       searchResults.value = [];
-      response.data.forEach((dto) => {
+      response.data.content.forEach((dto) => {
         searchResults.value.push(createUserFromDTO(dto));
       });
     })
     .catch((error) => {
       console.error(error);
     });
+};
+
+const fetchPage = (page) => {
+  const params2 = {
+    page: page,
+    size: limit.value,
+  };
+  userService
+    .fetchPage(params2)
+    .then((response) => {
+      searchResults.value = [];
+      const data = response.data;
+      totalPages.value = data.totalPages;
+      data.content.forEach((dto) => {
+        searchResults.value.push(createUserFromDTO(dto));
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    fetchPage(currentPage.value);
+  }
+};
+const prevPage = () => {
+  if (currentPage.value > 0) {
+    currentPage.value--;
+    fetchPage(currentPage.value);
+  }
 };
 </script>
