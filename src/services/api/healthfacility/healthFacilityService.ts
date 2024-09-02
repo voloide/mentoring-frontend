@@ -19,9 +19,9 @@ export default {
         console.error('Error', error.message);
       });
   },
-  async getAll() {
+  async getAll(searchParam: string) {
     return await api()
-      .get('/healthFacilities/getall')
+      .get(`/healthFacilities/getByPageAndSize?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
