@@ -133,7 +133,20 @@ export default {
     return await api()
       .get(`/user/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
+        this.generateAndSaveEntityFromDTO(resp.data.content);
+        return resp;
+      })
+      .catch((error) => {
+        console.error(error);
+        console.error('Error', error.message);
+      });
+  },
+
+  async fetchPage(page: any) {
+    return await api()
+      .get(`/user/getAll?${new URLSearchParams(page).toString()}`)
+      .then((resp) => {
+        this.generateAndSaveEntityFromDTO(resp.data.content);
         return resp;
       })
       .catch((error) => {
