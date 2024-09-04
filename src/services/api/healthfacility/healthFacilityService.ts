@@ -21,9 +21,13 @@ export default {
   },
   async getAll(searchParam: string) {
     return await api()
-      .get(`/healthFacilities/getByPageAndSize?${new URLSearchParams(searchParam).toString()}`)
+      .get(
+        `/healthFacilities/getByPageAndSize?${new URLSearchParams(
+          searchParam
+        ).toString()}`
+      )
       .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
+        this.generateAndSaveEntityFromDTO(resp.data.content);
         return resp;
       })
       .catch((error) => {

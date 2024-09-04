@@ -11,7 +11,7 @@ export default {
     return await api()
       .get(`/questions/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        //return this.generateEntityFromDTO(resp.data);
+        this.generateEntityFromDTO(resp.data.content);
         return resp;
       })
       .catch((error) => {
@@ -20,9 +20,13 @@ export default {
   },
   async getAll(searchParam: string) {
     return await api()
-      .get(`/questions/getByPageAndSize?${new URLSearchParams(searchParam).toString()}`)
+      .get(
+        `/questions/getByPageAndSize?${new URLSearchParams(
+          searchParam
+        ).toString()}`
+      )
       .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
+        this.generateAndSaveEntityFromDTO(resp.data.content);
         return resp;
       })
       .catch((error) => {
@@ -86,7 +90,7 @@ export default {
   },
 
   async updateQuestion(question: any) {
-    console.log(question)
+    console.log(question);
     return await api()
       .patch('/questions/update', question)
       .then((resp) => {
@@ -97,5 +101,4 @@ export default {
         console.error('Error', error.message);
       });
   },
-
 };

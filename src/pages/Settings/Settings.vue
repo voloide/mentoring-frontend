@@ -102,14 +102,14 @@ const step = ref(null);
 const selectedUser = ref(null);
 
 const params = {
-        page: 0,
-        size: 10
-    };
+  page: 0,
+  size: 10,
+};
 
 const paramsQuestions = {
-        page: 0,
-        size: 100
-    }
+  page: 0,
+  size: 100,
+};
 
 onMounted(() => {
   showloading();
