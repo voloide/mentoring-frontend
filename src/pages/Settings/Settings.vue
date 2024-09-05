@@ -101,6 +101,16 @@ const { closeLoading, showloading } = useLoading();
 const step = ref(null);
 const selectedUser = ref(null);
 
+const params = {
+  page: 0,
+  size: 10,
+};
+
+const paramsQuestions = {
+  page: 0,
+  size: 100,
+};
+
 onMounted(() => {
   showloading();
   init();
@@ -113,8 +123,8 @@ const init = () => {
   programmaticAreasService.getAll();
   professionalCategoryService.getAll();
   questionCategoryService.getAll();
-  questionService.getAll();
-  healthFacilityService.getAll();
+  questionService.getAll(paramsQuestions);
+  healthFacilityService.getAll(params);
   partnerService.getAll();
   roleService.getAll();
   closeLoading();
