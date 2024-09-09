@@ -182,6 +182,7 @@
           <q-pagination
             v-model="pagination.page"
             :max="pagination.rowsNumber"
+            :max-pages="5"
             boundary-numbers
             direction-links
             color="primary"
