@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mentoring</string>
+    <string name="title_activity_main">Mentoring</string>
+    <string name="package_name">mz.org.csaude.mentoring</string>
+    <string name="custom_url_scheme">mz.org.csaude.mentoring</string>
+</resources>
