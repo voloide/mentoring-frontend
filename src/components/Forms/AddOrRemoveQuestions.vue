@@ -1,19 +1,19 @@
 <template>
   <q-card style="width: 85vw; max-width: 90vw;">
     <div class="page-container">
-      <div class="">
+      <div>
         <q-banner dense inline-actions class="text-white bg-primary q-px-md">
           Pesquisa de Competências
           <template v-slot:action>
             <q-btn
-                flat
-                round
-                class="q-ml-md"
-                color="red"
-                icon="close"
-                @click="showAddOrRemoveQuestions = false"
+              flat
+              round
+              class="q-ml-md"
+              color="red"
+              icon="close"
+              @click="close"
             >
-              <q-tooltip class="bg-green-5">Pesquisa de Competências</q-tooltip>
+              <q-tooltip class="bg-green-5">Fechar</q-tooltip>
             </q-btn>
           </template>
         </q-banner>
@@ -37,38 +37,38 @@
           </q-input>
 
           <q-input
-              outlined
-              label="Descrição"
-              dense
-              ref="descriptionRef"
-              class="col q-ml-md"
-              v-model="searchParams.question.question"
-              @update:model-value="(value) => (filter = value)"
+            outlined
+            label="Descrição da Competência"
+            dense
+            ref="descriptionRef"
+            class="col-6 q-ml-md"
+            v-model="searchParams.question.question"
+            @update:model-value="(value) => (filter = value)"
           >
             <template v-slot:append>
               <q-icon
-                  name="close"
-                  @click="searchParams.question.question = ''"
-                  class="cursor-pointer"
+                name="close"
+                @click="searchParams.question.question = ''"
+                class="cursor-pointer"
               />
             </template>
           </q-input>
 
           <q-select
-              class="col q-ml-md"
-              use-input
-              hide-selected
-              fill-input
-              input-debounce="0"
-              v-model="searchParams.question.questionCategory"
-              dense
-              outlined
-              ref="questionCategoryRef"
-              :options="filterRedCategories"
-              option-value="id"
-              option-label="category"
-              @filter="filterCategories"
-              label="Categoria"
+            class="col q-ml-md"
+            use-input
+            hide-selected
+            fill-input
+            input-debounce="0"
+            v-model="searchParams.question.program"
+            dense
+            disable="true" 
+            outlined
+            ref="questionCategoryRef"
+            :options="[selectedForm.programmaticArea.program]" 
+            option-value="id"
+            option-label="description"
+            label="Programa"
           >
             <template v-slot:no-option>
               <q-item>
@@ -81,34 +81,36 @@
 
           <q-space />
           <q-btn
-              @click="searchQuestions()"
-              class="q-ml-md q-mb-xs float-right"
-              square
-              color="primary"
-              icon="search"
+            @click="searchQuestions()"
+            class="q-ml-md q-mb-xs float-right"
+            square
+            color="primary"
+            icon="search"
           >
             <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
           </q-btn>
           <q-btn
-              @click="clearSearchParams"
-              class="q-ml-md q-mb-xs float-right"
-              square
-              color="amber"
-              icon="clear"
+            @click="clearSearchParams"
+            class="q-ml-md q-mb-xs float-right"
+            square
+            color="amber"
+            icon="clear"
           >
             <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
           </q-btn>
         </div>
-
         <div class="q-mx-md">
           <q-table
-              class="col"
-              flat
-              dense
-              wrap-cells
-              :rows="searchResults"
-              :columns="columns"
-              row-key="id"
+            class="col"
+            flat
+            dense
+            wrap-cells
+            :rows="searchResults"
+            :columns="columns"
+            row-key="id"
+            v-model:pagination="pagination"
+            :rows-per-page-options="[10, 20, 50, 100]"
+            :loading="isLoading"
           >
             <template v-slot:no-data="{ icon, filter }">
               <div class="full-width row flex-center text-primary q-gutter-sm text-body2">
@@ -124,70 +126,98 @@
                 <q-th style="width: 190px">{{ columns[2].label }}</q-th>
                 <q-th style="width: 190px">{{ columns[3].label }}</q-th>
                 <q-th style="width: 190px">{{ columns[4].label }}</q-th>
-                <q-th style="width: 70px">{{ columns[5].label }}</q-th>
+                <q-th style="width: 190px">{{ columns[5].label }}</q-th>
+                <q-th style="width: 70px">{{ columns[6].label }}</q-th>
               </q-tr>
             </template>
+
             <template #body="props">
               <q-tr :props="props">
-                <q-td key="questionCategory" :props="props">{{ props.row.question.questionCategory.category }}</q-td>
-                <q-td key="question" :props="props">{{ props.row.question.question }}</q-td>
+                <q-td key="code" :props="props">
+                  {{ props.row.question.tableCode }}
+                </q-td>
+                <q-td key="question" :props="props">
+                  {{ props.row.question.question }}
+                </q-td>
+                <q-td key="section">
+                  <q-select
+                    class="vertical-middle"
+                    fill-input
+                    input-debounce="0"
+                    :disable="!props.row.selected"
+                    dense
+                    outlined
+                    ref="evaluationTypeRef"
+                    v-model="props.row.section"
+                    :rules="[(val) => !!val || 'Por favor indicar a secção']"
+                    lazy-rules
+                    option-value="uuid" 
+                    option-label="description" 
+                    :options="selectedForm.formSections.map(section => section.section)" 
+                  />
+
+
+                </q-td>
                 <q-td key="sequence" :props="props">
                   <q-input
-                      ref="recodeCodeRef"
-                      class="vertical-middle"
-                      dense
-                      outlined
-                      disable
-                      v-model="props.row.question.code"
-                      :rules="[
-                      (val) => !!val || 'Por favor indicar a Sequência/codigo na Ficha',
+                    ref="recodeCodeRef"
+                    class="vertical-middle"
+                    dense
+                    outlined
+                    :disable="!props.row.selected"
+                    v-model="props.row.sequence"
+                    :rules="[
+                      (val) => !!val || 'Por favor indicar a Sequência na Ficha',
                     ]"
-                      lazy-rules
-                      :min="1"
-                  >
-                  </q-input>
+                    lazy-rules
+                    :min="1"
+                  />
                 </q-td>
                 <q-td key="evaluationType">
                   <q-select
-                      class="vertical-middle"
-                      fill-input
-                      input-debounce="0"
-                      :disable="!props.row.selected"
-                      dense
-                      outlined
-                      ref="evaluationTypeRef"
-                      v-model="props.row.evaluationType"
-                      :rules="[
+                    class="vertical-middle"
+                    fill-input
+                    input-debounce="0"
+                    :disable="!props.row.selected"
+                    dense
+                    outlined
+                    ref="evaluationTypeRef"
+                    v-model="props.row.evaluationType"
+                    :rules="[
                       (val) => !!val || 'Por favor indicar o Tipo de Avaliação',
                     ]"
-                      lazy-rules
-                      option-value="id"
-                      option-label="description"
-                      :options="evaluationTypes"
+                    lazy-rules
+                    option-value="id"
+                    option-label="description"
+                    :options="evaluationTypes"
                   />
                 </q-td>
                 <q-td key="responseType">
                   <q-select
-                      class="vertical-middle"
-                      fill-input
-                      input-debounce="0"
-                      dense
-                      outlined
-                      :disable="!props.row.selected"
-                      ref="responseTypeRef"
-                      v-model="props.row.responseType"
-                      :rules="[
+                    class="vertical-middle"
+                    fill-input
+                    input-debounce="0"
+                    dense
+                    outlined
+                    :disable="!props.row.selected"
+                    ref="responseTypeRef"
+                    v-model="props.row.responseType"
+                    :rules="[
                       (val) => !!val || 'Por favor indicar o Tipo de Resposta',
                     ]"
-                      lazy-rules
-                      option-value="id"
-                      option-label="description"
-                      :options="responseTypes"
+                    lazy-rules
+                    option-value="id"
+                    option-label="description"
+                    :options="responseTypes"
                   />
                 </q-td>
                 <q-td key="options" :props="props">
                   <div class="col">
-                    <q-checkbox v-model="props.row.selected" @click="val => addQuestion(props.row)" />
+                    <q-checkbox
+                      v-model="props.row.selected"
+                      @update:model-value="(val) => addQuestion(props.row, val)" 
+                    />
+
                   </div>
                 </q-td>
               </q-tr>
@@ -198,126 +228,134 @@
         <div class="row q-ma-md">
           <q-space />
           <q-btn
-              label="Cancelar"
-              class="float-right"
-              color="red"
-              @click="showAddOrRemoveQuestions = false"
+            label="Fechar"
+            class="float-right"
+            color="red"
+            @click="close"
           />
           <q-btn
-              class="float-right q-ml-md"
-              type="submit"
-              label="Adicionar Seleccionadas"
-              color="primary"
-              @click="addSelectedQuestions()"
+            class="float-right q-ml-md"
+            type="submit"
+            label="Adicionar"
+            color="primary"
+            @click="addSelectedQuestions()"
           />
         </div>
       </div>
+      <pre>{{ selectedForm }}</pre>
     </div>
   </q-card>
 </template>
 
 <script setup>
-import { inject, ref, computed, onMounted, provide } from 'vue';
+import { inject, ref, computed, watch, onMounted } from 'vue';
 import FormQuestion from 'src/stores/model/form/FormQuestion';
 import Question from 'src/stores/model/question/Question';
 import QuestionCategory from 'src/stores/model/question/QuestionCategory';
 import ResponseType from 'src/stores/model/question/ResponseType';
 import EvaluationType from 'src/stores/model/question/EvaluationType';
 import questionService from 'src/services/api/question/questionService';
-import questionCategoryService from 'src/services/api/question/questionCategoryService';
+import programService from 'src/services/api/program/programService';
 import responseTypeService from 'src/services/api/question/responseTypeService';
 import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
-import { useSwal } from 'src/composables/shared/dialog/dialog';
 import { Loading, QSpinnerRings } from 'quasar';
-
-const showAddOrRemoveQuestions = inject('showAddOrRemoveQuestions');
-
 import { v4 as uuid } from 'uuid';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
+import Program from 'src/stores/model/program/Program';
 
+// Inject dependencies
 const selectedForm = inject('selectedForm');
 
-const filterRedCategories = ref([]);
+const emit = defineEmits(['close']);
 
-const { alertError } = useSwal();
+// Alert utility
+const { alertSucess, alertError, alertWarningAction } = useSwal();
 
-const formQuestion = ref(
-    new FormQuestion({
-      question: new Question({
-        questionCategory: new QuestionCategory(),
-      }),
-      evaluationType: new EvaluationType(),
-      responseType: new ResponseType(),
-    })
+// Pagination state
+const pagination = ref({
+  page: 1, // The current page number
+  rowsPerPage: 10, // Number of items per page
+  totalItems: 0, // Total number of items in the result
+});
+
+// Search parameters state
+const searchParams = ref(
+  new FormQuestion({
+    question: new Question({
+      questionCategory: new QuestionCategory(),
+      program: null,
+    }),
+    evaluationType: new EvaluationType(),
+  })
 );
 
-const searchParams = ref(new FormQuestion({
-  question: new Question({
-    questionCategory: new QuestionCategory(),
-  }),
-  evaluationType: new EvaluationType(),
-}));
-
+// Search results (populated from API)
 const searchResults = ref([]);
 
+// Added form questions state
 const addedFormQuestions = ref([]);
 
-const categories = computed(() => {
-  return questionCategoryService.piniaGetAll();
-});
-
-const responseTypes = computed(() => {
-  return responseTypeService.piniaGetAll();
-});
+// Options for programs, response types, and evaluation types
+const programs = computed(() => programService.piniaGetAll());
+const responseTypes = computed(() => responseTypeService.piniaGetAll());
 
 const evaluationTypes = computed(() => {
-  return evaluationTypeService.piniaGetAll();
+  const allEvaluationTypes = evaluationTypeService.piniaGetAll();
+
+  if (selectedForm.value.targetFile === "0") {
+    // Return only the option with code "Consulta"
+    return allEvaluationTypes.filter((type) => type.code === "Consulta");
+  } else if (selectedForm.value.targetPatient === "0") {
+    // Return only the option with code "Ficha"
+    return allEvaluationTypes.filter((type) => type.code === "Ficha");
+  } else {
+    // Return all options if no special conditions
+    return allEvaluationTypes;
+  }
 });
 
-const filterCategories = (val, update, abort) => {
-  const stringOptions = categories;
-  if (val === '') {
-    update(() => {
-      filterRedCategories.value = stringOptions.value.map(
-          (questionCategory) => questionCategory
-      );
-    });
-  } else if (stringOptions.value.length === 0) {
-    update(() => {
-      filterRedCategories.value = [];
-    });
-  } else {
-    update(() => {
-      filterRedCategories.value = stringOptions.value
-          .map((questionCategory) => questionCategory)
-          .filter((questionCategory) => {
-            return (
-                questionCategory &&
-                questionCategory.category.toLowerCase().indexOf(val.toLowerCase()) !== -1
-            );
-          });
-    });
-  }
-};
 
+// Flag to control initial search trigger
+const isSearchInitialized = ref(false);
+
+// Table columns definition
+const columns = [
+  { name: 'code', align: 'left', label: 'Código da Competência', field: (row) => row.tableCode },
+  { name: 'question', align: 'left', label: 'Competência', field: (row) => row.question.question || '' },
+  { name: 'section', align: 'left', label: 'Secção' },
+  { name: 'sequence', align: 'left', label: 'Sequência' },
+  { name: 'evaluationType', align: 'left', label: 'Tipo de Avaliação' },
+  { name: 'responseType', align: 'left', label: 'Tipo de Resposta' },
+  { name: 'options', align: 'left', label: 'Opções' },
+];
+
+onMounted(() => {
+  if (selectedForm.value.programmaticArea && selectedForm.value.programmaticArea.program) {
+    searchParams.value.question.program = selectedForm.value.programmaticArea.program;
+  }
+});
+
+// Search function to fetch the list of questions based on search parameters and pagination
 const searchQuestions = () => {
-  Loading.show({
-    spinner: QSpinnerRings,
-  });
+  Loading.show({ spinner: QSpinnerRings });
+
   const params = {
     code: searchParams.value.question.code,
     description: searchParams.value.question.question,
-    categoryId:
-      searchParams.value.question.questionCategory.id === undefined
-        ? undefined
-        : searchParams.value.question.questionCategory.id,
+    programId: searchParams.value.question.program?.id,
+    page: pagination.value.page - 1, // Adjust for 0-based pagination
+    size: pagination.value.rowsPerPage, // Number of items per page
   };
-  Object.keys(params).forEach(
-    (key) => params[key] === '' && delete params[key]
-  );
+
+  // Clean up empty parameters
+  Object.keys(params).forEach((key) => params[key] === '' && delete params[key]);
+
+  // Call the search service and handle the result
   questionService
     .search(params)
     .then((response) => {
-      composeFormQuestions(response.data);
+      composeFormQuestions(response.data.content); // Assign the paginated content
+      pagination.value.totalItems = response.data.totalElements; // Update total items for pagination
       Loading.hide();
     })
     .catch((error) => {
@@ -326,133 +364,165 @@ const searchQuestions = () => {
     });
 };
 
-const columns = [
-  {
-    name: 'questionCategory',
-    align: 'left',
-    label: 'Categoria',
-    field: (row) => (row.question.questionCategory),
-    sortable: false,
-  },
-  {
-    name: 'question',
-    align: 'left',
-    label: 'Descrição',
-    field: (row) => (row.question),
-    sortable: false,
-  },
-  {
-    name: 'sequence',
-    align: 'left',
-    label: 'Código da Competência',
-    field: (row) => (row.sequence),
-    sortable: false,
-  },
-  {
-    name: 'evaluationType',
-    align: 'left',
-    label: 'Tipo de Avaliação',
-    field: (row) => (row.evaluationType),
-    sortable: false,
-  },
-  {
-    name: 'responseType',
-    align: 'left',
-    label: 'Tipo de Resposta',
-    field: (row) => (row.responseType),
-    sortable: false,
-  },
-  { name: 'options', align: 'left', label: 'Opções', sortable: false },
-];
-
+// Helper function to map API data to form questions
 const composeFormQuestions = (questions) => {
   searchResults.value = [];
+  
   questions.forEach((question) => {
-    let myUUID = uuid();
-    const fQuestion = ref(new FormQuestion({
-          question: new Question({
-            questionCategory: new QuestionCategory(),
-          }),
+    // Check if the question exists in either selectedForm or addedFormQuestions
+    let existingFormQuestion = addedFormQuestions.value.find(
+      (fq) => fq.question.uuid === question.uuid
+    );
+
+    // If the question already exists, use the existing data
+    if (existingFormQuestion) {
+      searchResults.value.push(existingFormQuestion);
+    } else {
+      // Otherwise, create a new FormQuestion object
+      const fQuestion = ref(
+        new FormQuestion({
+          question: new Question({ program: new Program() }),
           evaluationType: new EvaluationType(),
           responseType: new ResponseType(),
         })
-    );
-    fQuestion.value.uuid = myUUID;
-    fQuestion.value.question = question;
-    fQuestion.value.question.questionCategory = question.questionCategory;
-    fQuestion.value.lifeCycleStatus = 'ACTIVE';
-    searchResults.value.push(fQuestion.value);
+      );
+      fQuestion.value.uuid = uuid(); // Assign a unique identifier
+      fQuestion.value.question = question; // Set the question data
+      searchResults.value.push(fQuestion.value); // Add to searchResults
+    }
   });
 };
 
-const addQuestion = (formQuestion) => {
-  const isAlreadyAssociatedQuestion =
-    selectedForm.value.formQuestions.filter(
-      (val) =>
-        val.question.uuid === formQuestion.question.uuid &&
-        val.question.questionCategory.uuid ===
-          formQuestion.question.questionCategory.uuid
-    ).length > 0;
 
-  if (isAlreadyAssociatedQuestion) {
-    formQuestion.selected = false;
-    alertError('Esta competência já foi associada a esta tabela!');
-    return;
+// Watch for changes in pagination and trigger search only after the user initiates the first search
+watch(pagination, () => {
+  if (isSearchInitialized.value) {
+    searchQuestions();
   }
+});
 
-  const exists =
-    addedFormQuestions.value.filter(
-      (val) =>
-        val.question.uuid === formQuestion.question.uuid &&
-        val.question.questionCategory.uuid ===
-          formQuestion.question.questionCategory.uuid
-    ).length > 0;
-  if (!exists) {
-    formQuestion.selected = true;
-    addedFormQuestions.value.push(formQuestion);
-    selectedForm.value.formQuestions.push(formQuestion);
-  }
+// Function to initiate the search (from the user clicking a button)
+const initiateSearch = () => {
+  isSearchInitialized.value = true; // Mark that the user has initiated a search
+  searchQuestions();
 };
 
+// Add selected questions to the form
 const addSelectedQuestions = () => {
   if (addedFormQuestions.value.length === 0) {
-    alertError('Seleccione pelo menos uma questão que pretenda adicionar!');
+    alertError('Selecione pelo menos uma competência que pretenda adicionar!');
     return;
   }
-  addedFormQuestions.value.forEach((formQuestion) => {
-    if (
-      formQuestion.evaluationType === undefined ||
-      formQuestion.evaluationType === null ||
-      formQuestion.evaluationType.uuid === ''
-    ) {
-      alertError(
-        'Indique o Tipo de Avaliação! Competencia - ' +
-          formQuestion.question.code
-      );
-      showAddOrRemoveQuestions.value = true;
-      return;
-    }
-    if (
-      formQuestion.responseType.uuid === undefined ||
-      formQuestion.responseType.uuid === null ||
-      formQuestion.responseType.uuid === ''
-    ) {
-      alertError(
-        'Indique o Tipo de Resposta! Competencia - ' +
-          formQuestion.question.code
-      );
-      showAddOrRemoveQuestions.value = true;
-      return;
-    }
-    selectedForm.value.formQuestions.push(formQuestion);
+
+  const existingCombination = new Set();
+
+  // First, iterate over all formSections in the selected form and populate the combination set
+  selectedForm.value.formSections.forEach((formSection) => {
+    formSection.formQuestions.forEach((formQuestion) => {
+      const sectionId = formSection.section?.uuid || '';
+      const sequence = formQuestion.sequence || '';
+      const combinationKey = `${sectionId}-${sequence}`;
+      existingCombination.add(combinationKey);
+    });
   });
-  showAddOrRemoveQuestions.value = false;
+
+  // Now process the addedFormQuestions
+  for (let formQuestion of addedFormQuestions.value) {
+    if (!formQuestion.evaluationType?.uuid || !formQuestion.responseType?.uuid) {
+      alertError('Preencha os campos obrigatórios antes de adicionar a competência!');
+      return;
+    }
+
+    const sectionId = formQuestion.section?.uuid || '';
+    const sequence = formQuestion.sequence || '';
+    const combinationKey = `${sectionId}-${sequence}`;
+
+    // Check if the combination of section and sequence already exists
+    if (existingCombination.has(combinationKey)) {
+      alertError(`A combinação da secção "${formQuestion.section?.description}" e sequência "${formQuestion.sequence}" já está em uso. Por favor, insira uma combinação única.`);
+      return;
+    }
+
+    // Add combination to the set
+    existingCombination.add(combinationKey);
+
+    // Find the appropriate formSection in selectedForm to add the question
+    const formSection = selectedForm.value.formSections.find(
+      (section) => section.section?.uuid === formQuestion.section?.uuid
+    );
+
+    if (formSection) {
+      formSection.formQuestions.push(formQuestion); // Add to the formSection's question list
+    }
+  }
+
+  // Clear addedFormQuestions and searchResults after successful addition
+  addedFormQuestions.value = [];
+  searchResults.value = [];
+
+  alertSucess('Competências adicionadas com sucesso!');
 };
 
+
+
+
+
+// Add a question to the list of selected questions
+const addQuestion = (formQuestion, isSelected) => {
+  const index = addedFormQuestions.value.findIndex(
+    (fq) => fq.question.uuid === formQuestion.question.uuid
+  );
+
+  if (isSelected) {
+    // If the formQuestion is selected and not already in the list, add it
+    if (index === -1) {
+      formQuestion.selected = true;
+      addedFormQuestions.value.push(formQuestion);
+    }
+  } else {
+    // If the formQuestion is unselected, show warning before removing it
+    if (index !== -1) {
+      alertWarningAction('Tem certeza de que deseja remover esta competência?')
+        .then(async (result) => {
+          if (result) {
+            // Remove formQuestion if the user confirms
+            formQuestion.selected = false;
+
+            // Reset the fields of the formQuestion
+            formQuestion.section = null;
+            formQuestion.sequence = null;
+            formQuestion.evaluationType = null;
+            formQuestion.responseType = null;
+
+            // Remove from the list
+            addedFormQuestions.value.splice(index, 1);
+          } else {
+            // Keep the checkbox selected if the user cancels
+            formQuestion.selected = true;
+          }
+        })
+        .catch((error) => {
+          // Show error message if something goes wrong
+          alertError('Ocorreu um erro ao tentar remover a competência');
+          console.error(error);
+        });
+    }
+  }
+};
+
+const close =()=> {
+  emit('close');
+}
+
+
+// Clear search parameters
 const clearSearchParams = () => {
   searchResults.value.length = 0;
 };
+
 </script>
+
+
 
 <style lang="scss">
 .title {

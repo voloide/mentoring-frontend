@@ -1,3 +1,4 @@
+
 import Program from "src/stores/model/program/Program";
 import useProgramaticArea from '../programmaticArea/programmaticAreaMethods'
 
@@ -9,6 +10,7 @@ export default function useProgram() {
           uuid: programDTO.uuid,
           name: programDTO.name,
           description: programDTO.description,
+          code: programDTO.code,
         })
     }
 
@@ -18,6 +20,7 @@ export default function useProgram() {
           uuid: program.uuid,
           name: program.name,
           description: program.description,
+          code: program.code,
         }
         return  programDTO;
     }

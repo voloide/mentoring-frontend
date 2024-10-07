@@ -1,60 +1,72 @@
 <template>
     <div style="height: 100%;">
-        <search v-if="isSearchStep" @create="changeStep('create')" @goToForms="goToForms" />
-        <add-edit v-if="isCreateStep" @goToForms="goToForms" @close="close" />
+      <!-- Show the Search component when in the 'search' step -->
+      <search v-if="isSearchStep" @create="changeToCreateStep" @goToForms="goToForms" />
+      
+      <!-- Show the AddEdit (ManageForm) component when in the 'create' step -->
+      <add-edit v-if="isEditOrCreate" @goToForms="goToForms" @close="close" />
     </div>
-</template>
-<script setup>
-import { ref, provide, computed, onMounted } from 'vue';
-import Search from 'src/components/Forms/Search.vue';
-import AddEdit from 'src/components/Forms/ManageForm.vue';
-import { useLoading } from 'src/composables/shared/loading/loading';
-import programService from 'src/services/api/program/programService';
-import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
-import questionCategoryService from 'src/services/api/question/questionCategoryService';
-import responseTypeService from 'src/services/api/question/responseTypeService';
-import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
+  </template>
+  
+  <script setup>
+  import { ref, provide, computed, onMounted } from 'vue';
+  import Search from 'src/components/Forms/Search.vue';
+  import AddEdit from 'src/components/Forms/ManageForm.vue'; // ManageForm.vue referenced as AddEdit
+  import { useLoading } from 'src/composables/shared/loading/loading';
+  import programService from 'src/services/api/program/programService';
+  import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
+  import responseTypeService from 'src/services/api/question/responseTypeService';
+  import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
+  import sectionService from 'src/services/api/section/sectionService';
+  import useStepManager from 'src/composables/shared/systemUtils/useStepManager';
+  
+  const { closeLoading, showloading } = useLoading();
+  const step = ref('search'); // Track the current step ('search' or 'create')
+  const selectedForm = ref(null); // Hold the selected form for editing
+  
+  // Using useStepManager to manage steps
+  const { isSearchStep, isEditOrCreate, changeToCreateStep, changeToSearchStep, changeToEditStep, printCurrentStep } = useStepManager(step);
 
-const { closeLoading, showloading } = useLoading();
-const step = ref('');
-const selectedForm = ref(null);
-const isNewForm = ref(true);
-
-    onMounted(() => {
-        showloading();
-        changeStep('search');
-        init();
-    });
-
-    const isSearchStep = computed(() => {
-            return step.value === 'search';
-        });
-    const isCreateStep = computed(() => {
-            return step.value === 'create';
-        });
-    const changeStep = (stepp) => {
-        step.value = stepp;
+  
+  // Run this when the component is mounted
+  onMounted(() => {
+    showloading(); // Show loading spinner while initializing
+    changeToSearchStep();
+    init(); // Initialize data (load services)
+    printCurrentStep();
+  });
+  
+  // When an existing form is selected, go to the edit step
+  const goToForms = (form) => {
+    printCurrentStep();
+    selectedForm.value = form;
+    //changeToEditStep();  // Now transitioning to the edit step
+  };
+  
+  // Initialize all the necessary services (programs, areas, sections, etc.)
+  const init = async () => {
+    try {
+      await Promise.all([
+        programService.getAll(),
+        programmaticAreaService.getAll(),
+        sectionService.getAllSections(),
+        responseTypeService.getAll(),
+        evaluationTypeService.getAll()
+      ]);
+    } catch (error) {
+      console.error('Error initializing form data:', error);
+    } finally {
+      closeLoading(); // Hide loading spinner
     }
-
-    const goToForms = (form) => {
-        selectedForm.value = form;
-        isNewForm.value = false;
-        changeStep('create');
-    }
-
-    const init = () => {
-        programService.getAll();
-        programmaticAreaService.getAll();
-        questionCategoryService.getAll();
-        responseTypeService.getAll();
-        evaluationTypeService.getAll();
-        closeLoading();
-    }
-    const close = () => {
-        changeStep('search');
-    }
-    provide('step', step);
-    provide('selectedForm', selectedForm);
-    provide('isNewForm', isNewForm);
-
-</script>
+  };
+  
+  // Close the form and go back to the search step
+  const close = () => {
+    changeToSearchStep();
+  };
+  
+  // Provide the step, selectedForm, and isNewForm to child components
+  provide('step', step);
+  provide('selectedForm', selectedForm);
+  </script>
+  

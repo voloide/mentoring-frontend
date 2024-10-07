@@ -1,5 +1,5 @@
 import { Model } from 'pinia-orm';
-import QuestionCategory from './QuestionCategory';
+import Program from '../program/Program';
 
 export default class Question extends Model {
   static entity = 'questions';
@@ -7,13 +7,15 @@ export default class Question extends Model {
 
   static fields() {
     return {
-      id: this.number(() => 0),
+      id: this.attr(null),
       uuid: this.attr(''),
       code: this.attr(''),
+      tableCode: this.attr(''),
       question: this.attr(''),
-      question_category_id: this.attr(''),
+      selected: this.boolean(false),
+      program_id: this.attr(''),
       // Relationships
-      questionCategory: this.belongsTo(QuestionCategory, 'question_category_id'),
+      program: this.belongsTo(Program, 'program_id'),
     };
   }
   static piniaOptions = {

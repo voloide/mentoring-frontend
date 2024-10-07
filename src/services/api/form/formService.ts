@@ -11,6 +11,7 @@ export default {
     return await api()
       .get(`/forms/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
+        console.log(resp.data)
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
       })
