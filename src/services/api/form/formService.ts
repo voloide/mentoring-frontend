@@ -4,7 +4,7 @@ import Form from 'src/stores/model/form/Form';
 import useForm from 'src/composables/form/formMethods';
 
 const repo = useRepo(Form);
-const { createFormFromDTO } = useForm();
+const { createFormFromDTO, createDTOFromForm } = useForm();
 
 export default {
   async search(searchParam: string) {
@@ -16,13 +16,13 @@ export default {
         return resp;
       })
       .catch((error) => {
-        return error;
         console.error('Error', error.message);
+        return error;
       });
   },
   async saveOrUpdate(formDTO: any) {
     return await api()
-      .post('/forms/saveOrUpdate', formDTO)
+      .post('/forms/saveOrUpdate', createDTOFromForm(formDTO))
       .then((resp) => {
         if (resp.status === 201) {
           const entity = createFormFromDTO(resp.data);
@@ -31,8 +31,8 @@ export default {
         return resp;
       })
       .catch((error) => {
+        console.error('Error', error);
         return error;
-        console.error('Error', error.message);
       });
   },
   async changeLifeCycleStatus(formDTO: any) {

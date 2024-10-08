@@ -15,6 +15,7 @@ export default class FormSection extends Model {
       section_id: this.attr(''),
       sequence: this.attr(''),
       inEdition: this.boolean(false),
+      isNew: this.boolean(false),
       // Relationships
       form: this.belongsTo(Form, 'form_id'),
       section: this.belongsTo(Section, 'section_id'),

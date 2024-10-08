@@ -17,7 +17,7 @@ export default function useFormQuestion() {
         applicable: formQuestionDTO.applicable,
         createdAt: formQuestionDTO.createdAt,
         createdBy: formQuestionDTO.createdBy,
-        question: createQuestionFromDTO(formQuestionDTO.question),
+        question: createQuestionFromDTO(formQuestionDTO.questionDTO),
         evaluationType: createEvaluationTypeFromDTO(formQuestionDTO.evaluationType),
         responseType: createResponseTypeFromDTO(formQuestionDTO.responseType),
         });

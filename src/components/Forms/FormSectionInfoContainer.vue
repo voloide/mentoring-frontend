@@ -1,8 +1,13 @@
 <template>
     <div>
         <div class="q-mt-lg">
-            <q-banner dense inline-actions class="text-white bg-teal-7 q-px-sm">
-              Secção:  <span style="color: amber-10;">{{ formSection.section.description }}</span>
+            <q-banner
+                dense
+                inline-actions
+                class="text-white q-px-sm"
+                :class="{'bg-teal-7': !localFormSection.inEdition, 'bg-red-7': localFormSection.inEdition}"
+                >
+              [Secção: {{ formSection.sequence }}] -   <span style="color: amber-10;">{{ formSection.section.description }}</span>
               <template>
                 <q-input
                     outlined
@@ -28,6 +33,7 @@
                     label="Código da Competência"
                     dense
                     ref="recordCodeRef"
+                    v-if="localFormSection.inEdition"
                     class="col"
                     bg-color="white"
                     v-model="searchParams.question.code"
@@ -46,6 +52,7 @@
                     label="Descrição da Competência"
                     dense
                     bg-color="white"
+                    v-if="localFormSection.inEdition"
                     ref="descriptionRef"
                     class="col-6 q-ml-md"
                     v-model="searchParams.question.question"
@@ -61,21 +68,16 @@
                 </q-input>
                 <q-btn
                     @click="searchQuestions()"
-                    class="q-ml-md q-mb-xs float-right"
-                    square
-                    color="primary"
+                    class="q-ml-md"
+                    flat
+                    round
+                    dense
+                    v-if="localFormSection.inEdition"
+                    size="md"
+                    color="light-blue-1"
                     icon="search"
                 >
                     <q-tooltip class="bg-green-5">Pesquisar</q-tooltip>
-                </q-btn>
-                <q-btn
-                    @click="clearSearchParams"
-                    class="q-ml-md q-mb-xs float-right"
-                    square
-                    color="amber"
-                    icon="clear"
-                >
-                    <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
                 </q-btn>
                 <q-btn
                   flat
@@ -83,9 +85,10 @@
                   dense
                   size="md"
                   class="q-ml-md"
+                  v-if="!localFormSection.inEdition"
                   color="orange-4"
-                  icon="add"
-                  @click="initNewQuestion"
+                  icon="edit"
+                  @click="initSectionEdition"
                 />
                 <q-btn
                   flat
@@ -93,7 +96,18 @@
                   dense
                   size="md"
                   class="q-ml-md"
-                  color="orange-4"
+                  v-if="localFormSection.inEdition"
+                  color="green-1"
+                  icon="done"
+                  @click="validateAndFinishEdition"
+                />
+                <q-btn
+                  flat
+                  round
+                  dense
+                  size="md"
+                  class="q-ml-md"
+                  color="red-2"
                   icon="keyboard_arrow_up"
                   @click="expandCollapse"
                 />
@@ -102,7 +116,7 @@
           </div>
 
           <div class="q-mt-none" v-if="formSection.formQuestions.length <= 0">
-            <q-banner dense inline-actions class="text-white bg-yellow-7 q-px-sm">
+            <q-banner dense inline-actions class="text-grey-10 bg-amber-1 q-px-sm">
               Nenhuma Competência associada a esta Secção.
             </q-banner>
           </div>
@@ -138,50 +152,36 @@
               <template #body="props">
                   <q-tr :props="props">
                       <q-td key="code" :props="props">
-                        <q-input
-                            outlined
-                            label="Código da Competência"
-                            dense
-                            ref="recordCodeRef"
-                            class="col"
-                            v-model="searchParams.question.code"
-                            @update:model-value="(value) => (filter = value)"
-                        >
-                            <template v-slot:append>
-                            <q-icon
-                                name="close"
-                                @click="searchParams.question.code = ''"
-                                class="cursor-pointer"
-                            />
-                            </template>
-                        </q-input>
                           {{ props.row.question.tableCode }}
                       </q-td>
                       <q-td key="question" :props="props">
                           {{ props.row.question.question }}
                       </q-td>
                       <q-td key="sequence" :props="props">
-                        <q-input
-                            ref="recodeCodeRef"
-                            class="vertical-middle"
-                            dense
-                            outlined
-                            :disable="!props.row.selected"
-                            v-model="props.row.sequence"
-                            :rules="[
-                            (val) => !!val || 'Por favor indicar a Sequência na Ficha',
-                            ]"
-                            lazy-rules
-                            :min="1"
-                        />
+                        <span v-if="localFormSection.inEdition">
+                            <q-input
+                                ref="recodeCodeRef"
+                                class="vertical-middle"
+                                dense
+                                outlined
+                                v-model="props.row.sequence"
+                                :rules="[
+                                (val) => !!val || 'Por favor indicar a Sequência na Ficha',
+                                ]"
+                                lazy-rules
+                                :min="1"
+                            />
+                        </span>
+                        <span v-else>
                           {{ props.row.sequence }}
+                        </span>
                       </q-td>
                       <q-td key="evaluationType" :props="props">
+                        <span v-if="localFormSection.inEdition">
                         <q-select
                             class="vertical-middle"
                             fill-input
                             input-debounce="0"
-                            :disable="!props.row.selected"
                             dense
                             outlined
                             ref="evaluationTypeRef"
@@ -194,9 +194,13 @@
                             option-label="description"
                             :options="evaluationTypes"
                         />
+                    </span>
+                    <span v-else>
                           {{ props.row.evaluationType.description }}
+                        </span>
                       </q-td>
                       <q-td key="responseType" :props="props">
+                        <span v-if="localFormSection.inEdition">
                         <q-select
                             class="vertical-middle"
                             fill-input
@@ -214,7 +218,10 @@
                             option-label="description"
                             :options="responseTypes"
                         />
+                    </span>
+                    <span v-else>
                           {{ props.row.responseType.description }}
+                    </span>
                       </q-td>
                       <q-td key="options" :props="props">
                           <q-btn
@@ -230,10 +237,13 @@
                   </q-tr>
               </template>
           </q-table>
-          <pre>{{ formSection }}</pre>
           <!-- Dialog for Adding or Removing Questions -->
           <q-dialog persistent v-model="showAddOrRemoveQuestions">
-              <AddOrRemoveQuestions @close="showAddOrRemoveQuestions = false" :formSection="formSection"/>
+              <AddOrRemoveQuestions @close="showAddOrRemoveQuestions = false" 
+                                    @addSelectedQuestions="addSelectedQuestions"
+                                    :selectedForm="selectedForm" 
+                                    :formSection="localFormSection" 
+                                    :searchParams="searchParams"/>
           </q-dialog>
     </div>
 </template>
@@ -246,14 +256,21 @@ import EvaluationType from 'src/stores/model/question/EvaluationType';
 import Program from 'src/stores/model/program/Program';
 import ResponseType from 'src/stores/model/question/ResponseType';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import { reactive, watch, ref } from 'vue';
+import { reactive, watch, ref, computed, inject } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import QuestionCategory from 'src/stores/model/question/QuestionCategory';
+import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
+import responseTypeService from 'src/services/api/question/responseTypeService';
 
+// Alert utility
+const { alertSucess, alertError, alertWarningAction } = useSwal();
 
+const selectedForm = inject('selectedForm');
 // Props passed to the component
-const props = defineProps(['formSection', 'selectedForm']);
+const props = defineProps(['formSection']);
 const emit = defineEmits(['update-section', 'remove-section']);
+// Create a reactive copy of formSection
+const localFormSection = reactive({ ...props.formSection });
 
 const searchParams = ref(
   new FormQuestion({
@@ -264,8 +281,7 @@ const searchParams = ref(
     evaluationType: new EvaluationType(),
   })
 );
-// Create a reactive copy of formSection
-const localFormSection = reactive({ ...props.formSection });
+
 
 // Watch for changes in the prop and update the local copy if needed
 watch(() => props.formSection, (newValue) => {
@@ -306,6 +322,135 @@ const removeFormQuestions = (question) => {
   emit('update-section', localFormSection); // Emit updated section
 };
 
+const searchQuestions=()=> {
+    console.log(localFormSection);
+    //searchParams.value.question.program = localFormSection.value.programmaticArea.program
+    showAddOrRemoveQuestions.value = true;
+}
+
+const addSelectedQuestions = (addedFormQuestions) => {
+    const existingUUIDs = new Set();
+
+    // Collect existing sequences and UUIDs from localFormSection
+    localFormSection.formQuestions.forEach((formQuestion) => {
+        existingUUIDs.add(formQuestion.question.uuid);
+    });
+
+    addedFormQuestions.value.forEach((formQuestion) => {
+        const uuid = formQuestion.question.uuid;
+
+        // Check if the question UUID already exists
+        if (existingUUIDs.has(uuid)) {
+            alertError(`A competência com o código "${formQuestion.question.tableCode}" já foi adicionada. Por favor, insira uma competência única.`);
+            return;
+        }
+
+        // If both sequence and UUID are unique, add the question
+        localFormSection.formQuestions.push(formQuestion);
+
+        // Add the new sequence and UUID to the sets
+        existingUUIDs.add(uuid);
+    });
+
+    // Close the dialog after successful addition
+    showAddOrRemoveQuestions.value = false;
+};
+
+
+const initSectionEdition = () => {
+  // Set localFormSection in edition
+  localFormSection.inEdition = true;
+
+  // Find the corresponding section in selectedForm.formSections
+  const matchingSection = selectedForm.value.formSections.find(
+    (section) => section.uuid === localFormSection.uuid
+  );
+
+  if (matchingSection) {
+    // Set inEdition to true for the corresponding section in selectedForm
+    matchingSection.inEdition = true;
+  }
+};
+
+
+const validateAndFinishEdition = () => {
+    const sequences = new Set();
+    let hasValidationErrors = false;
+
+    // Iterate over each formQuestion for validation
+    localFormSection.formQuestions.forEach((formQuestion) => {
+        const { sequence, evaluationType, responseType } = formQuestion;
+
+        for (const formSection of selectedForm.value.formSections) {
+            if (formSection.uuid !== localFormSection.uuid) {
+            for (const otherFormQuestion of formSection.formQuestions) {
+                // Check if any question in the other formSections matches the current one
+                const duplicateQuestion = localFormSection.formQuestions.find(fq => fq.question.uuid === otherFormQuestion.question.uuid);
+                if (duplicateQuestion) {
+                alertError(`A competência "${duplicateQuestion.question.tableCode}" já foi adicionada em outra secção.`);
+                hasValidationErrors = true;
+                }
+            }
+            }
+        }
+        // Check if sequence is valid (not empty, number, and under 100)
+        if (!sequence || isNaN(sequence) || sequence < 1 || sequence > 100) {
+            alertError('Por favor, insira uma sequência válida para todas as competências.');
+            hasValidationErrors = true;
+        } else if (sequences.has(sequence)) {
+            // Check for duplicate sequence
+            alertError(`A sequência "${sequence}" já foi usada. Por favor, insira uma sequência única.`);
+            hasValidationErrors = true;
+        } else {
+            sequences.add(sequence);
+        }
+
+        // Check if evaluationType has a value
+        if (!evaluationType || !evaluationType.id) {
+            alertError('Por favor, selecione um Tipo de Avaliação para todas as competências.');
+            hasValidationErrors = true;
+        }
+
+        // Check if responseType has a value
+        if (!responseType || !responseType.id) {
+            alertError('Por favor, selecione um Tipo de Resposta para todas as competências.');
+            hasValidationErrors = true;
+        }
+    });
+
+    // If there are no validation errors, finish editing
+    if (!hasValidationErrors) {
+        // Find the corresponding section in selectedForm.formSections
+        const matchingSection = selectedForm.value.formSections.find(
+            (section) => section.uuid === localFormSection.uuid
+        );
+
+        if (matchingSection) {
+            // Set inEdition to true for the corresponding section in selectedForm
+            matchingSection.inEdition = false;
+        }
+        localFormSection.inEdition = false;
+    }
+};
+
+
+
+const responseTypes = computed(() => responseTypeService.piniaGetAll());
+
+const evaluationTypes = computed(() => {
+  const allEvaluationTypes = evaluationTypeService.piniaGetAll();
+
+  if (selectedForm.value.targetFile === "0") {
+    // Return only the option with code "Consulta"
+    return allEvaluationTypes.filter((type) => type.code === "Consulta");
+  } else if (selectedForm.value.targetPatient === "0") {
+    // Return only the option with code "Ficha"
+    return allEvaluationTypes.filter((type) => type.code === "Ficha");
+  } else {
+    // Return all options if no special conditions
+    return allEvaluationTypes;
+  }
+});
 
 </script>
 

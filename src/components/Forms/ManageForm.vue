@@ -201,6 +201,16 @@
                       <q-btn
                         flat
                         round
+                        color="red-8"
+                        icon="close"
+                        v-if="props.row.inEdition"
+                        @click="cancelSection(props.row)"
+                        >
+                        <q-tooltip class="bg-green-5">Cancelar</q-tooltip>
+                      </q-btn>
+                      <q-btn
+                        flat
+                        round
                         color="green-8"
                         icon="done"
                         v-if="props.row.inEdition"
@@ -255,7 +265,7 @@
 
   <!-- Form Questions Data Section -->
   <div >
-    <ManageQuestions v-if="isFormQuestionsDataVisible"/>
+    <ManageQuestions v-if="isFormQuestionsDataVisible" @goBack="goBack" @close="close"/>
   </div>
 
   
@@ -281,6 +291,8 @@ import ManageQuestions from 'src/components/Forms/ManageQuestions.vue';
 // Inject the step from the parent
 const step = inject('step'); 
 const { isEditStep, printCurrentStep } = useStepManager(step);
+
+const emit = defineEmits(['close','cancel']);
 
 const form = ref(new Form({
   programmaticArea: {
@@ -345,14 +357,26 @@ const sections = computed(() => sectionService.piniaGetAll());
 
 // Method for canceling the form
 const cancel = () => {
-  emit('close');
+    // Alert the user about potential data loss
+    alertWarningAction('Tem certeza que deseja cancelar? Todas as alterações não gravadas serão perdidas.')
+        .then((result) => {
+            if (result) {
+                // If the user confirms, proceed to emit the 'close' event
+                emit('close');
+            }
+        })
+        .catch((error) => {
+            console.error('Error with cancellation confirmation:', error);
+            alertError('Ocorreu um erro ao tentar cancelar. Tente novamente.');
+        });
 };
+
+const close =()=> {
+  emit('close');
+}
 
 // Method to go to the questions form
 const goToFormQuestions = (form) => {
-  // Print the current step to console
-  printCurrentStep();
-
   // Reference array for validation
   const refs = [programRef, programmaticAreaRef, nameRef, targetPatientRef, targetFileRef];
 
@@ -364,6 +388,9 @@ const goToFormQuestions = (form) => {
 
   // Ensure that form.formSections is not empty
   const hasFormSections = Array.isArray(form.formSections) && form.formSections.length > 0;
+
+  // Check if any form section is still in edit mode
+  const hasOngoingEdition = form.formSections.some(section => section.inEdition === true);
 
   if (!isTargetValid) {
     // Show an error if neither targetFile nor targetPatient is valid
@@ -377,6 +404,20 @@ const goToFormQuestions = (form) => {
     return;
   }
 
+  if (hasOngoingEdition) {
+    // Show an error if any form section is in edit mode
+    alertError('Termine todas as edições de secções antes de prosseguir.');
+    return;
+  }
+
+  form.formSections.sort((a, b) => {
+    // Ensure that both sequences are numbers for proper sorting
+    const sequenceA = parseInt(a.sequence, 10);
+    const sequenceB = parseInt(b.sequence, 10);
+
+    return sequenceA - sequenceB;
+  });
+
   if (areFieldsValid) {
     if (isEditStep.value) {
       searchFormQuestions(form);
@@ -387,6 +428,7 @@ const goToFormQuestions = (form) => {
     isFormQuestionsDataVisible.value = true;
   }
 };
+
 
 
 const goBack =()=> {
@@ -442,7 +484,8 @@ const initFormSection = () => {
     uuid: uuidv4(),
     section: null,
     sequence: '',
-    inEdition: true
+    inEdition: true,
+    isNew: true,
   });
   form.value.formSections.unshift(newSection);
 };
@@ -496,6 +539,7 @@ const saveSection = (section) => {
 
   // If no duplicates, allow saving the section
   section.inEdition = false;
+  section.isNew = false;
 };
 
 
@@ -517,25 +561,7 @@ const deleteSection = (uuid) => {
 
 
 // Save or Update form method
-const saveOrUpdate = (form) => {
-  Loading.show({
-      spinner: QSpinnerRings,
-    });
-  const params = { userId: currUser.value.id };
-  formService.saveOrUpdate(form).then((resp) => {
-    if (resp.status === 200 || resp.status === 201) {
-      alertSucess('Tabela de Competências registada com sucesso!').then((result) => {
-        emit('close');
-      });
-    } else {
-      alertError(resp.message);
-    }
-    Loading.hide();
-  }).catch((error) => {
-    Loading.hide();
-    console.error('Error', error);
-  });
-};
+
 
 const createNewSection = (newSectionDescription) => {
   try {
@@ -564,6 +590,26 @@ const createNewSection = (newSectionDescription) => {
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
 });
+
+const cancelSection = (section) => {
+  // If the section is a new section (not saved yet), remove it from the formSections list
+  if (section.isNew) {
+    form.value.formSections = form.value.formSections.filter(existingSection => existingSection.uuid !== section.uuid);
+    return;
+  }
+
+  // Otherwise, if the section was being edited but existed before, reset the fields
+  const originalSection = form.value.formSections.find(existingSection => existingSection.uuid === section.uuid);
+
+  if (originalSection) {
+    // Resetting the section's fields to their original values
+    originalSection.section = { ...originalSection.section };
+    originalSection.sequence = originalSection.sequence;
+  }
+
+  // Set inEdition to false to exit editing mode
+  section.inEdition = false;
+};
 
 // Placeholder for filter functionality
 const filter = ref('');

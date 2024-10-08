@@ -13,6 +13,7 @@ export default function useForm() {
       const { createPartnerFromDTO } = usePartner();
       const { createFormSectionFromDTO } = useFormSection();
 
+      console.log(formDTO);
       return new Form({
         id: formDTO.id,
         uuid: formDTO.uuid,
@@ -24,14 +25,8 @@ export default function useForm() {
         targetFile: formDTO.targetFile,
         createdAt: formDTO.createdAt,
         createdBy: formDTO.createdBy,
-        programmaticArea: createProgrammaticAreaFromDTO(formDTO.programmaticArea),
-        partner: createPartnerFromDTO(formDTO.partner),
-    
-        // Safely handle form questions if not null, using the factory method
-        formQuestions: formDTO.formQuestions 
-            ? createFormQuestionsListFromDTOs(formDTO.formQuestions) 
-            : [],
-    
+        programmaticArea: createProgrammaticAreaFromDTO(formDTO.programmaticAreaDTO),
+      
         // Safely handle form sections if not null, using the factory method
         formSections: formDTO.formSections 
             ? createFormSectionsListFromDTOs(formDTO.formSections) 
@@ -57,7 +52,6 @@ export default function useForm() {
           createdAt: form.createdAt,
           createdBy: form.createdBy,
           programmaticAreaDTO: createDTOFromProgrammaticArea(form.programmaticArea),
-          partnerDTO: createDTOFromPartner(form.partner),
           //formQuestions: createDTOsListFromFormQuestions(form.formQuestions), // Handling form questions
           formSections: createDTOsListFromFormSections(form.formSections), // Handling form sections
         };
