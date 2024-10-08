@@ -131,8 +131,8 @@
             v-if="addingResource"
             v-model="fileInput"
             outlined
-            label="Selecione o Ficheiro. Max (2MB)"
-            max-file-size="2000048"
+            label="Selecione o Ficheiro. Max (20MB)"
+            max-file-size="20000000"
             @rejected="onRejected"
             counter
             dense
@@ -373,6 +373,12 @@ const gravar = async (node) => {
     });
   }
   doPatch(nodes);
+};
+
+function generateFileName(originalName) {
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+    const extension = originalName.split('.').pop();
+    return `${originalName}_${timestamp}.${extension}`;
 };
 
 const doPatch = (nodes) => {

@@ -1,7 +1,7 @@
 import { Model } from 'pinia-orm';
 import ProgrammaticArea from '../programmaticArea/ProgrammaticArea';
 import Partner from '../partner/Partner';
-import FormQuestion from './FormQuestion';
+import FormSection from './FormSection';
 
 export default class Form extends Model {
   static entity = 'forms';
@@ -24,7 +24,7 @@ export default class Form extends Model {
       // Relationships
       programmaticArea: this.belongsTo(ProgrammaticArea, 'programmatic_area_id'),
       partner: this.belongsTo(Partner, 'partner_id'),
-      formQuestions: this.hasMany(FormQuestion, 'form_id'),
+      formSections: this.hasMany(FormSection, 'form_id'),
     };
   }
 

@@ -11,6 +11,7 @@ export default class Program extends Model {
       uuid: this.attr(''),
       name: this.attr(''),
       description: this.attr(''), 
+      code: this.attr(''), 
           
       programmaticAreas: this.hasMany(ProgrammaticArea, 'program_id'),
     };
