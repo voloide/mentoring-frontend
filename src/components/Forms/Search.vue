@@ -117,10 +117,15 @@
       <div>
         <q-table
           class="col"
+          flat
           dense
+          wrap-cells
           :rows="searchResults"
           :columns="columns"
           row-key="id"
+          v-model:pagination="pagination"
+          :rows-per-page-options="[10, 20, 50, 100]"
+          :loading="isLoading"
         >
           <template v-slot:no-data="{ icon, filter }">
             <div class="full-width row flex-center text-primary q-gutter-sm text-body2">
@@ -128,6 +133,7 @@
               <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
             </div>
           </template>
+
           <template #body="props">
             <q-tr :props="props">
               <q-td key="name" :props="props">
@@ -137,33 +143,42 @@
                 {{ props.row.programmaticArea.name }}
               </q-td>
               <q-td key="options" :props="props">
-                <div class="col">
                   <q-btn
-                    flat
-                    round
-                    class="q-ml-md"
-                    :color="isActive(props.row) ? 'green' : 'red'"
-                    icon="circle"
-                    @click="confirmFormLifeCycleChange(props.row)"
+                      flat
+                      round
+                      class="q-ml-md"
+                      :color="isActive(props.row) ? 'green' : 'red'"
+                      icon="circle"
+                      @click="confirmFormLifeCycleChange(props.row)"
                   >
                     <q-tooltip class="bg-green-5">{{ isActive(props.row) ? 'Inactivar Tabela de Competências' : 'Activar Tabela de Competências' }}</q-tooltip>
                   </q-btn>
 
                   <q-btn
-                    flat
-                    round
-                    class="q-ml-md"
-                    color="yellow-9"
-                    icon="edit"
-                    @click="editForm(props.row)"
+                      flat
+                      round
+                      class="q-ml-md"
+                      color="yellow-9"
+                      icon="edit"
+                      @click="editForm(props.row)"
                   >
                     <q-tooltip class="bg-green-5">Editar Tabela de Competências</q-tooltip>
                   </q-btn>
-                </div>
               </q-td>
             </q-tr>
           </template>
+
         </q-table>
+      </div>
+      <div style="float: right" class="q-mt-md">
+        <q-pagination
+          v-model="pagination.page"
+          :max="pagination.rowsNumber"
+          :max-pages="10"
+          boundary-numbers
+          direction-links
+          color="primary"
+        />
       </div>
 
       <!-- Add New Competency Table Button -->
@@ -177,8 +192,7 @@
 </template>
 
 <script setup>
-import { inject, ref, computed, onMounted, reactive } from 'vue';
-import Form from 'src/stores/model/form/Form';
+import { ref, computed, onMounted, reactive, watch } from 'vue';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
 import User from 'src/stores/model/user/User';
@@ -187,10 +201,17 @@ import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import useStepManager from 'src/composables/shared/systemUtils/useStepManager';
+import {Loading, QSpinnerRings} from "quasar";
 import useForm from 'src/composables/form/formMethods';
-import useStepManager from 'src/composables/shared/systemUtils/useStepManager'; // Import the Step Manager composable
+
+import { v4 as uuid } from 'uuid';
+import Form from "stores/model/form/Form"; // Import the Step Manager composable
+
+const props = defineProps(['params']);
 
 const { changeStepToEdit } = useStepManager(); // Extract the function to change step to edit
+const {createFormFromDTO} = useForm()
 const searchParams = ref({
   code: '',
   name: '',
@@ -198,11 +219,55 @@ const searchParams = ref({
   programmaticArea: new ProgrammaticArea(),
 });
 
+const isSearchInitialized = ref(false);
+
+// Pagination state
+const pagination = ref({
+  page: 1, // The current page number
+  rowsPerPage: 10, // Number of items per page
+  totalItems: 0, // Total number of items in the result
+});
+
+// Create a local copy of searchParams
+const localSearchParams = ref({ ...props.searchParams });
+
+const composeForms = (forms) => {
+  searchResults.value = [];
+
+  forms.forEach((formObj) => {
+    // Check if the question exists in either selectedForm or addedFormQuestions
+    const form = createFormFromDTO(formObj)
+    searchResults.value.push(form)
+  });
+};
+
+
+// Watch for changes in pagination and trigger search only after the user initiates the first search
+watch(pagination, () => {
+  if (isSearchInitialized.value) {
+    search();
+  }
+});
+
+watch(() => props.searchParams, (newSearchParams) => {
+  localSearchParams.value = { ...newSearchParams };
+});
+
+// Search results (populated from API)
 const searchResults = ref([]);
 const selectedForm = reactive(ref(''));
+const selectedProgram = ref(null);
+const selectedProgrammaticArea = ref(null);
 const filterRedProgrammaticAreas = ref([]);
 const { alertError, alertSucess, alertWarningAction } = useSwal();
-const { createDTOFromForm } = useForm();
+
+const programmaticAreas = computed(() => {
+  if (searchParams.value.program) {
+    return programmaticAreaService.getProgrammaticAreasByProgramaId(searchParams.value.program.id)
+  } else {
+    return null;
+  }
+});
 
 const columns = [
   {
@@ -231,14 +296,6 @@ onMounted(() => {
 
 const programs = computed(() => programService.piniaGetAll());
 
-const programmaticAreas = computed(() => {
-  if (searchParams.value.program !== null && searchParams.value.program !== undefined) {
-    return programmaticAreaService.getProgrammaticAreasByProgramaId(searchParams.value.program.id);
-  } else {
-    return null;
-  }
-});
-
 const filterProgrammaticAreas = (val, update, abort) => {
   const stringOptions = programmaticAreas;
   if (val === '') {
@@ -266,7 +323,7 @@ const filterProgrammaticAreas = (val, update, abort) => {
 };
 
 const onChangePrograma = () => {
-  searchParams.value.program = '';
+  // searchParams.value.program = '';
 };
 
 const isActive = (form) => form.lifeCycleStatus === 'ACTIVE';
@@ -301,27 +358,42 @@ const changeLifeCycle = (form) => {
 // Refactor to use `useStepManager` for changing to edit step
 const editForm = (form) => {
   selectedForm.value = form;
-  changeStepToEdit(); 
+  changeStepToEdit();
 };
 
 const search = () => {
   formService.deleteAllFromStorage();
+
+  Loading.show({ spinner: QSpinnerRings });
+
   const params = {
     code: searchParams.value.code,
     name: searchParams.value.name,
-    program: searchParams.value.program.uuid,
-    programmaticAreaCode: searchParams.value.programmaticArea.code,
+    program: searchParams.value.program?.name,
+    programmaticAreaCode: searchParams.value.programmaticArea?.name,
+    page: pagination.value.page - 1, // Adjust for 0-based pagination
+    size: pagination.value.rowsPerPage, // Number of items per page
   };
+  console.log(params)
   Object.keys(params).forEach((key) => params[key] === '' && delete params[key]);
-
-  formService
-    .search(params)
-    .then((response) => {
-      searchResults.value = formService.getFormList();
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+  try {
+    formService
+      .search(params)
+      .then((response) => {
+        searchResults.value = [];
+        if (response.status === 200 || (response.status === 201)) {
+          composeForms(response.data.content)
+          pagination.value.totalItems = response.data.totalElements; // Update total items for pagination
+          pagination.value.rowsNumber = response.data.totalPages;
+        }
+        Loading.hide();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const clearSearchParams = () => {
