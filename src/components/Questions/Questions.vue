@@ -24,7 +24,7 @@
             </template>
             <template #body="props">
               <q-tr :props="props">
-                <q-td key="code" :props="props">
+                <q-td key="tableCode" :props="props">
                   <span
                     v-if="
                       props.row.id === null ||
@@ -36,19 +36,21 @@
                       label="Código"
                       dense
                       ref="codeRef"
-                      class="col"
-                      v-model="data.code"
-                    >
-                      <template v-slot:append>
-                        <q-icon
-                          name="close"
-                          @click="data.code = ''"
-                          class="cursor-pointer"
-                        />
-                      </template>
+                      class="col q-mr-md"
+                      v-model="data.tableCode"
+                      style="width: 120px"
+                      >
+                        <template v-slot:append>
+                          <q-icon
+                            name="close"
+                            @click="data.tableCode = ''"
+                            class="cursor-pointer"
+                          />
+                        </template>
                     </q-input>
+
                   </span>
-                  <span v-else> {{ props.row.code }}</span>
+                  <span v-else> {{ props.row.tableCode }}</span>
                 </q-td>
                 <q-td key="question" :props="props">
                   <span
@@ -78,7 +80,7 @@
                     {{ props.row.question }}
                   </span>
                 </q-td>
-                <q-td key="questionCategory" :props="props">
+                <q-td key="program" :props="props">
                   <span
                     v-if="
                       props.row.id === null ||
@@ -93,13 +95,13 @@
                       input-debounce="0"
                       dense
                       outlined
-                      ref="questionCategoryRef"
+                      ref="programRef"
                       lazy-rules
-                      v-model="data.questionCategory"
-                      :options="questionCategories"
+                      v-model="data.program"
+                      :options="programs"
                       option-value="id"
-                      option-label="category"
-                      label="Categoria"
+                      option-label="description"
+                      label="Programa"
                     >
                       <template v-slot:no-option>
                         <q-item>
@@ -111,7 +113,7 @@
                     </q-select>
                   </span>
                   <span v-else>
-                    {{ props.row.questionCategory.category }}
+                    {{ props.row.program.description }}
                   </span>
                 </q-td>
                 <q-td key="options" :props="props">
@@ -119,22 +121,23 @@
                     <span v-if="props.row.id === null">
                       <q-btn
                         @click="submitForm"
-                        class="q-ml-md q-mb-xs float-right"
+                        class="q-ml-md q-mb-xs"
                         square
                         color="primary"
                         icon="save"
                       >
-                        <q-tooltip class="bg-green-5">Salvar</q-tooltip>
-                      </q-btn>
-                      <q-btn
-                        @click="closeForm"
-                        class="q-ml-md q-mb-xs float-right"
-                        square
-                        color="amber"
-                        icon="close"
-                      >
-                        <q-tooltip class="bg-amber-5">Fechar</q-tooltip>
-                      </q-btn>
+                      <q-tooltip class="bg-green-5">Salvar</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      @click="closeForm"
+                      class="q-ml-md q-mb-xs"
+                      square
+                      color="amber"
+                      icon="close"
+                    >
+                      <q-tooltip class="bg-amber-5">Fechar</q-tooltip>
+                    </q-btn>
+
                     </span>
                     <span v-else>
                       <q-btn
@@ -147,7 +150,7 @@
                         @click="editQuestion(props.row)"
                       >
                         <q-tooltip class="bg-green-5"
-                          >Detalhar/Editar Competência</q-tooltip
+                        >Detalhar/Editar Competência</q-tooltip
                         >
                       </q-btn>
                       <q-btn
@@ -160,7 +163,7 @@
                         @click="saveUpdate(props.row)"
                       >
                         <q-tooltip class="bg-green-5"
-                          >Guardar Alteração</q-tooltip
+                        >Guardar Alteração</q-tooltip
                         >
                       </q-btn>
                       <q-btn
@@ -173,7 +176,7 @@
                         @click="resetFields()"
                       >
                         <q-tooltip class="bg-green-5"
-                          >Descartar Alteração</q-tooltip
+                        >Descartar Alteração</q-tooltip
                         >
                       </q-btn>
                       <q-btn
@@ -196,7 +199,7 @@
           <q-pagination
             v-model="pagination.page"
             :max="pagination.rowsNumber"
-            :max-pages="5"
+            :max-pages="10"
             boundary-numbers
             direction-links
             color="primary"
@@ -216,27 +219,29 @@ import { onMounted, ref, inject, defineEmits, watch } from 'vue';
 import questionService from 'src/services/api/question/questionService';
 import User from 'src/stores/model/user/User';
 import UsersService from 'src/services/api/user/UsersService';
-import questionCategoryService from 'src/services/api/question/questionCategoryService';
 import { computed } from 'vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import useQuestion from 'src/composables/question/questionMethods';
+import {Loading} from "quasar";
+import programService from "src/services/api/program/programService";
 
 const { createQuestionFromDTO } = useQuestion();
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const step = inject('step');
+const isSearchInitialized = ref(false);
 const searchResults = ref([]);
 const selectedQuestion = ref('');
 const openForm = ref(false);
 const newRowAdded = ref(false);
 const data = ref({
-  code: '',
+  tableCode: '',
   question: '',
-  questionCategory: '',
+  program: '',
 });
 const columns = [
   {
-    name: 'code',
+    name: 'tableCode',
     align: 'left',
     label: 'Código',
     sortable: false,
@@ -248,9 +253,9 @@ const columns = [
     sortable: false,
   },
   {
-    name: 'questionCategory',
+    name: 'program',
     align: 'left',
-    label: 'Categoria',
+    label: 'Programa',
     sortable: false,
   },
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
@@ -279,29 +284,45 @@ onMounted(() => {
   loadData();
 });
 
-const questionCategories = computed(() => {
-  return questionCategoryService.piniaGetAll();
+const programs = computed(() => {
+  return programService.piniaGetAll();
 });
+
+const reloadData = () => {
+  questionService.getAll().then((response) => {
+
+    if (response.status === 200 || (response.status === 201)) {
+      composeQuestios(response.data.content)
+      pagination.value.totalItems = response.data.totalElements; // Update total items for pagination
+      pagination.value.rowsNumber = response.data.totalPages;
+    }
+    Loading.hide();
+  })
+  .catch((error) => {
+      console.error(error);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
 
 const submitForm = () => {
   const question = {
-    code: data.value.code,
+    tableCode: data.value.tableCode,
     question: data.value.question,
-    questionCategory: data.value.questionCategory,
+    program: data.value.program,
   };
   questionService.saveQuestion(question).then((res) => {
     closeForm;
     newRowAdded.value = false;
-    questionService.getAll().then(() => {
-      searchResults.value = questionService.piniaGetAll();
-    });
+    reloadData()
   });
 };
 
 const closeForm = () => {
-  data.value.code = '';
+  data.value.tableCode = '';
   data.value.question = '';
-  data.value.questionCategory = '';
+  data.value.program = '';
   removeRow();
 };
 
@@ -314,9 +335,9 @@ const editQuestion = (question) => {
 const saveUpdate = () => {
   const question = {
     id: selectedQuestion.value.id,
-    code: data.value.code,
+    tableCode: data.value.tableCode,
     question: data.value.question,
-    questionCategory: data.value.questionCategory,
+    program: data.value.program,
   };
 
   questionService.updateQuestion(question).then((res) => {
@@ -327,7 +348,7 @@ const saveUpdate = () => {
 
 const resetFields = () => {
   selectedQuestion.value = {};
-  data.value = { code: '', description: '' };
+  data.value = { tableCode: '', question: '', program: '' };
 };
 
 const deleteQuestion = (question) => {
@@ -339,12 +360,7 @@ const deleteQuestion = (question) => {
           .then((response) => {
             if (response.status === 200 || response.status === 201) {
               alertSucess('Question apagada com sucesso!').then((result) => {
-                questionService.getAll().then((res) => {
-                  searchResults.value = questionService.piniaGetAll();
-                });
-                // if (result) {
-                //   emit('close');
-                // }
+                reloadData()
               });
             } else {
               alertError('Não foi possivel apagar o questiona.');
@@ -368,9 +384,9 @@ const addNewRow = () => {
     const newRow = {
       id: null,
       question: {
-        code: null,
+        tableCode: null,
         question: null,
-        questionCategory: null,
+        program: null,
       },
       acao: 'NOVA_LINHA',
     };
@@ -393,6 +409,15 @@ const loadData = () => {
   search();
 };
 
+const composeQuestios = (questions) => {
+  searchResults.value = [];
+
+  questions.forEach((questionObj) => {
+    const question = createQuestionFromDTO(questionObj)
+    searchResults.value.push(question)
+  });
+};
+
 const search = async () => {
   const params = {
     page: pagination.value.page - 1,
@@ -401,28 +426,12 @@ const search = async () => {
   Object.keys(params).forEach(
     (key) => params[key] === '' && delete params[key]
   );
-  questionService
-    .getAll(params)
-    .then((response) => {
-      searchResults.value = [];
-      console.log(response);
-      response.data.content.forEach((dto) => {
-        searchResults.value.push(createQuestionFromDTO(dto));
-      });
-      pagination.value.rowsNumber = response.data.totalPages;
-    })
-    .catch((error) => {
-      console.error(error);
-    })
-    .finally(() => {
-      loading.value = false;
-    });
+  reloadData()
 };
 
-watch(
-  () => pagination.value.page,
-  (newPage) => {
+watch(pagination, () => {
+  if (isSearchInitialized.value) {
     loadData();
   }
-);
+});
 </script>
