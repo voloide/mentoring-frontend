@@ -323,8 +323,6 @@ const removeFormQuestions = (question) => {
 };
 
 const searchQuestions=()=> {
-    console.log(localFormSection);
-    //searchParams.value.question.program = localFormSection.value.programmaticArea.program
     showAddOrRemoveQuestions.value = true;
 }
 

@@ -18,138 +18,23 @@
       <div class="row q-mt-md">
         <q-list padding class="text-white col">
           <q-item
-            clickable
-            v-ripple
-            :active="link === 'home'"
-            @click="link = 'home'"
-            active-class="my-menu-link"
-            to="/home"
-            exact
-          >
-            <q-item-section avatar>
-              <q-icon name="home" />
-            </q-item-section>
-            <q-item-section>Início</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'tables'"
-            @click="link = 'tables'"
-            active-class="my-menu-link"
-            v-if="isMenuOptionVisible('/tables')"
-            to="/tables"
-          >
-            <q-item-section avatar>
-              <q-icon name="fact_check" />
-            </q-item-section>
-            <q-item-section>Tabelas de Competências</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'mentores'"
-            @click="link = 'mentores'"
-            active-class="my-menu-link"
-            v-if="isMenuOptionVisible('/mentors')"
-            to="/mentors"
-            exact
-          >
-            <q-item-section avatar>
-              <q-icon name="person" />
-            </q-item-section>
-
-            <q-item-section>Mentores</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'mentorandos'"
-            @click="link = 'mentorandos'"
-            active-class="my-menu-link"
-            v-if="isMenuOptionVisible('/mentees')"
-            to="/mentees"
-            exact
-          >
-            <q-item-section avatar>
-              <q-icon name="diversity_3" />
-            </q-item-section>
-
-            <q-item-section>Mentorandos</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'earesources'"
-            @click="link = 'earesources'"
-            active-class="my-menu-link"
-            v-if="isMenuOptionVisible('/resources')"
-            to="/resources"
-            exact
-          >
-            <q-item-section avatar>
-              <q-icon name="library_books" />
-            </q-item-section>
-
-            <q-item-section>Recursos de EA</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'rondas'"
-            @click="link = 'rondas'"
-            active-class="my-menu-link"
-            v-if="isMenuOptionVisible('/rondas')"
-            to="/rondas"
-            exact
-          >
-            <q-item-section avatar>
-              <q-icon name="playlist_add_check_circle" />
-            </q-item-section>
-
-            <q-item-section>Rondas/Ciclos de Mentoria</q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'reports'"
-            @click="link = 'reports'"
-            active-class="my-menu-link"
-            v-if="isMenuOptionVisible('/reports')"
-            to="/reports"
-            style="margin-bottom: 50%"
-          >
-            <q-item-section avatar>
-              <q-icon name="legend_toggle" />
-            </q-item-section>
-
-            <q-item-section>Relatórios</q-item-section>
-          </q-item>
+          v-for="menuOption in visibleMenuOptions"
+          :key="menuOption.link"
+          clickable
+          v-ripple
+          :active="link === menuOption.link"
+          @click="link = menuOption.link"
+          active-class="my-menu-link"
+          :to="menuOption.to"
+          exact
+        >
+          <q-item-section avatar>
+            <q-icon :name="menuOption.icon" />
+          </q-item-section>
+          <q-item-section>{{ menuOption.label }}</q-item-section>
+        </q-item>
 
           <q-separator spaced color="white" />
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'settings'"
-            @click="link = 'settings'"
-            active-class="my-menu-link"
-            v-if="isMenuOptionVisible('/settings')"
-            to="/settings"
-            exact
-          >
-            <q-item-section avatar>
-              <q-icon name="settings" />
-            </q-item-section>
-
-            <q-item-section>Configurações</q-item-section>
-          </q-item>
 
           <q-item
             clickable
@@ -184,9 +69,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount, provide } from 'vue';
+import { ref, computed, onBeforeMount, provide, onMounted, onBeforeUnmount } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
-import { Loading, QSpinnerRings } from 'quasar';
+import { Loading, QSpinnerRings, LocalStorage } from 'quasar';
 import { useRouter } from 'vue-router';
 import useEmployee from 'src/composables/employee/employeeMethods';
 import useUser from 'src/composables/user/userMethods';
@@ -198,34 +83,45 @@ const { fullName } = useEmployee();
 const { createUserFromDTO } = useUser();
 
 const menuOptions = [
-  '/tables',
-  '/mentors',
-  '/mentees',
-  '/resources',
-  '/rondas',
-  '/settings',
-  '/reports',
+  { label: 'Início', icon: 'home', to: '/home', link: 'home' },
+  { label: 'Tabelas de Competências', icon: 'fact_check', to: '/tables', link: 'tables' },
+  { label: 'Mentores', icon: 'person', to: '/mentors', link: 'mentores' },
+  { label: 'Mentorandos', icon: 'diversity_3', to: '/mentees', link: 'mentorandos' },
+  { label: 'Recursos de EA', icon: 'library_books', to: '/resources', link: 'earesources' },
+  { label: 'Rondas/Ciclos de Mentoria', icon: 'playlist_add_check_circle', to: '/rondas', link: 'rondas' },
+  { label: 'Relatórios', icon: 'legend_toggle', to: '/reports', link: 'reports' },
+  { label: 'Configurações', icon: 'settings', to: '/settings', link: 'settings' }
 ];
+
+
+let inactivityTimer; // Store the timer reference
+const INACTIVITY_TIME = 5 * 60 * 1000;
 
 const currUser = computed(() => {
   return UsersService.getLogedUser();
 });
 
 onBeforeMount(() => {
-    const userData = JSON.parse(localStorage.getItem('userData'));
-  console.log(userData.roles)
+  const userData = JSON.parse(localStorage.getItem('userData'));
   initUserInfo();
-  console.log(isMenuOptionVisible('/tables'));
+});
+
+// Clean up on component unmount
+onBeforeUnmount(() => {
+  stopInactivityTracking(); // Stop tracking inactivity
+});
+
+// Run when the component is mounted
+onMounted(() => {
+  startInactivityTracking(); // Start tracking inactivity on mount
 });
 
 const initUserInfo = () => {
-  const currentTimestamp = Date.now();
-  const tokenExpiration = localStorage.getItem('tokenExpiration');
+  const tokenExpiration = Number(localStorage.getItem('tokenExpiration'));
 
-  if (tokenExpiration > currentTimestamp) {
-    const userInfo = localStorage.getItem('userInfo');
-    const user = createUserFromDTO(JSON.parse(userInfo));
-    UsersService.piniaSave(user);
+  if (tokenExpiration > Date.now()) {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {}; // Fallback if userInfo is null
+    UsersService.piniaSave(createUserFromDTO(userInfo));
   } else {
     UsersService.logout();
   }
@@ -233,76 +129,35 @@ const initUserInfo = () => {
 
 const reportMode = ref(false)
 
-const isMenuOptionVisible = (menuOptionValue) => {
-    // if(menuOptionValue === '/reports') {
-    //     reportMode.value = true
-    // } else {
-    //     reportMode.value = false
-    //
-    // }
-    // console.log(reportMode.value)
-  const userData = JSON.parse(localStorage.getItem('userData'));
-  const roles = userData.roles;
-  for (let i = 0; i < roles.length; i++) {
-    if (roles[i] === 'NATIONAL_ADMINISTRATOR') {
-      if (
-        menuOptions[0] === menuOptionValue ||
-        menuOptions[1] === menuOptionValue ||
-        menuOptions[2] === menuOptionValue ||
-        menuOptions[3] === menuOptionValue ||
-        menuOptions[4] === menuOptionValue ||
-        menuOptions[5] === menuOptionValue
-      ) {
-        return true;
-      }
-    }
-    if (roles[i] === 'PROVINCIAL_ADMINISTRATOR') {
-      if (
-        menuOptions[0] === menuOptionValue ||
-        menuOptions[1] === menuOptionValue ||
-        menuOptions[2] === menuOptionValue ||
-        menuOptions[4] === menuOptionValue ||
-        menuOptions[5] === menuOptionValue
-      ) {
-        return true;
-      }
-    }
-    if (roles[i] === 'DISTRICT_ADMINISTRATOR') {
-      if (
-        menuOptions[2] === menuOptionValue ||
-        menuOptions[4] === menuOptionValue ||
-        menuOptions[5] === menuOptionValue
-      ) {
-        return true;
-      }
-    }
-    if (
-      roles[i] === 'NATIONAL_MENTOR' ||
-      roles[i] === 'PROVINCIAL_MENTOR' ||
-      roles[i] === 'DISTRICT_MENTOR'
-    ) {
-      if (menuOptions[6] === menuOptionValue) {
-        return true;
-      }
-    }
-    if (roles[i] === 'HEALTH_FACILITY_MENTOR') {
-      if (
-        menuOptions[2] === menuOptionValue ||
-        menuOptions[3] === menuOptionValue ||
-        menuOptions[6] === menuOptionValue
-      ) {
-        return true;
-      }
-    }
-    if (roles[i] === 'MENTEE') {
-      if (menuOptions[3] === menuOptionValue) {
-        return true;
-      }
-    }
-  }
+const visibleMenuOptions = computed(() =>
+  menuOptions.filter(option => isMenuOptionVisible(option.to))
+);
 
-  return false;
+const isMenuOptionVisible = (menuOption) => {
+  const userData = JSON.parse(localStorage.getItem('userData')) || {};
+  const roles = userData.roles || [];
+
+  const rolePermissions = {
+    NATIONAL_ADMINISTRATOR: ['/home', '/tables', '/mentors', '/mentees', '/resources', '/rondas', '/settings'],
+    PROVINCIAL_ADMINISTRATOR: ['/home','/tables', '/mentors', '/mentees', '/rondas', '/settings'],
+    DISTRICT_ADMINISTRATOR: ['/home','/mentees', '/rondas', '/settings'],
+    NATIONAL_MENTOR: ['/home','/reports', '/mentees'],
+    PROVINCIAL_MENTOR: ['/home','/reports', '/mentees'],
+    DISTRICT_MENTOR: ['/home','/reports', '/mentees'],
+    HEALTH_FACILITY_MENTOR: ['/home','/mentees', '/resources', '/reports'],
+    MENTEE: ['/home','/resources']
+  };
+
+  // Collect all allowed paths for the user's roles
+  const allowedPaths = roles.reduce((paths, role) => {
+    const rolePaths = rolePermissions[role] || [];
+    return [...new Set([...paths, ...rolePaths])]; // Merge without duplicates
+  }, []);
+
+  // Check if the menu option is allowed
+  return allowedPaths.includes(menuOption);
 };
+
 
 provide('reportMode', reportMode)
 
@@ -313,6 +168,43 @@ const logout = () => {
   UsersService.logout();
   Loading.hide();
   router.push({ path: '/login' });
+};
+
+// Reset the inactivity timer on user interaction
+const resetInactivityTimer = () => {
+  clearTimeout(inactivityTimer); // Clear previous timer
+
+  const tokenExpiration = Number(LocalStorage.getItem('tokenExpiration'));
+  const currentTime = Date.now();
+
+  if (tokenExpiration <= currentTime) {
+    logout();
+  } else {
+    inactivityTimer = setTimeout(logout, INACTIVITY_TIME); // Start new inactivity timer
+  }
+};
+
+// Start tracking user activity
+const startInactivityTracking = () => {
+  const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+
+  // Reset the inactivity timer on any interaction
+  events.forEach((event) => {
+    window.addEventListener(event, resetInactivityTimer);
+  });
+
+  resetInactivityTimer(); // Initialize the timer on mount
+};
+
+// Stop tracking user activity
+const stopInactivityTracking = () => {
+  const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+
+  events.forEach((event) => {
+    window.removeEventListener(event, resetInactivityTimer);
+  });
+
+  clearTimeout(inactivityTimer); // Clear the timer on unmount
 };
 </script>
 <style lang="scss">
