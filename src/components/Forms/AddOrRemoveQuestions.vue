@@ -26,10 +26,12 @@
             wrap-cells
             :rows="searchResults"
             :columns="columns"
+            ref="tableRef"
             row-key="id"
             v-model:pagination="pagination"
-            :rows-per-page-options="[10, 20, 50, 100]"
-            :loading="isLoading"
+            :rows-per-page-options="[5, 10, 20, 50, 100]"
+            :loading="loading"
+            @request="onRequest"
           >
             <template v-slot:no-data="{ icon, filter }">
               <div class="full-width row flex-center text-primary q-gutter-sm text-body2">
@@ -89,16 +91,12 @@
 </template>
 
 <script setup>
-import { inject, ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import FormQuestion from 'src/stores/model/form/FormQuestion';
 import Question from 'src/stores/model/question/Question';
-import QuestionCategory from 'src/stores/model/question/QuestionCategory';
 import ResponseType from 'src/stores/model/question/ResponseType';
 import EvaluationType from 'src/stores/model/question/EvaluationType';
 import questionService from 'src/services/api/question/questionService';
-import programService from 'src/services/api/program/programService';
-import responseTypeService from 'src/services/api/question/responseTypeService';
-import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
 import { Loading, QSpinnerRings } from 'quasar';
 import { v4 as uuid } from 'uuid';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
@@ -111,13 +109,16 @@ const emit = defineEmits(['close','addSelectedQuestions']);
 // Alert utility
 const { alertSucess, alertError, alertWarningAction } = useSwal();
 
+const loading = ref(false);
 // Pagination state
 const pagination = ref({
-  page: 1, // The current page number
-  rowsPerPage: 10, // Number of items per page
-  totalItems: 0, // Total number of items in the result
-});
-
+      sortBy: 'desc',
+      descending: false,
+      page: 1,
+      rowsPerPage: 10,
+      rowsNumber: 0
+    })
+const tableRef = ref()
 // Create a local copy of searchParams
 const localSearchParams = ref({ ...props.searchParams });
 
@@ -143,41 +144,44 @@ const columns = [
 
 onMounted(() => {
   if (props.selectedForm?.programmaticArea?.program) {
-    console.log(props.selectedForm.programmaticArea.program);
     localSearchParams.value.question.program = props.selectedForm.programmaticArea.program;
-    searchQuestions();
+    if (tableRef.value?.requestServerInteraction) {
+      tableRef.value.requestServerInteraction();
+    }
   } else {
-    console.error("selectedForm or programmaticArea is not defined or empty");
+    console.error('selectedForm or programmaticArea is not defined or empty');
   }
 });
+
 // Search function to fetch the list of questions based on search parameters and pagination
 const searchQuestions = () => {
-  Loading.show({ spinner: QSpinnerRings });
-
+  loading.value = true;
   const params = {
-    code: localSearchParams.value.question.code,
-    description: localSearchParams.value.question.question,
+    code: localSearchParams.value.question.code || '',
+    description: localSearchParams.value.question.question || '',
     programId: localSearchParams.value.question.program?.id,
-    page: pagination.value.page - 1, // Adjust for 0-based pagination
-    size: pagination.value.rowsPerPage, // Number of items per page
+    page: pagination.value.page - 1, // API uses 0-based page index
+    size: pagination.value.rowsPerPage,
   };
 
-  // Clean up empty parameters
-  Object.keys(params).forEach((key) => params[key] === '' && delete params[key]);
+  // Remove empty parameters
+  Object.keys(params).forEach((key) => !params[key] && delete params[key]);
 
-  // Call the search service and handle the result
   questionService
     .search(params)
     .then((response) => {
-      composeFormQuestions(response.data.content); // Assign the paginated content
-      pagination.value.totalItems = response.data.totalElements; // Update total items for pagination
-      Loading.hide();
+      composeFormQuestions(response.data.content); // Populate search results
+      pagination.value.rowsNumber = response.data.totalSize; // Update rows count
     })
     .catch((error) => {
-      Loading.hide();
       console.error(error);
+      alertError('Erro ao buscar dados. Por favor, tente novamente.');
+    })
+    .finally(() => {
+      loading.value = false; // Always hide loading spinner
     });
 };
+
 
 // Helper function to map API data to form questions
 const composeFormQuestions = (questions) => {
@@ -259,9 +263,17 @@ const addSelectedQuestions = () => {
   searchResults.value = [];
 
 };
-// Clear search parameters
-const clearSearchParams = () => {
-  searchResults.value.length = 0;
+const onRequest = (props) => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+  // Update pagination state
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
+
+  // Fetch data based on the updated pagination
+  searchQuestions();
 };
 
 </script>
