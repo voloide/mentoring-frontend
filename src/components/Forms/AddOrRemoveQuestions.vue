@@ -17,7 +17,7 @@
             </q-btn>
           </template>
         </q-banner>
-        
+
         <div class="q-ma-md">
           <q-table
             class="col"
@@ -60,7 +60,7 @@
                   <div class="col">
                     <q-checkbox
                       v-model="props.row.selected"
-                      @update:model-value="(val) => addQuestion(props.row, val)" 
+                      @update:model-value="(val) => addQuestion(props.row, val)"
                     />
                   </div>
                 </q-td>
@@ -170,8 +170,8 @@ const searchQuestions = () => {
   questionService
     .search(params)
     .then((response) => {
-      composeFormQuestions(response.data.content); // Populate search results
-      pagination.value.rowsNumber = response.data.totalSize; // Update rows count
+      composeFormQuestions(response.data.content);
+      pagination.value.rowsNumber = response.data.totalSize;
     })
     .catch((error) => {
       console.error(error);
@@ -186,7 +186,7 @@ const searchQuestions = () => {
 // Helper function to map API data to form questions
 const composeFormQuestions = (questions) => {
   searchResults.value = [];
-  
+
   questions.forEach((question) => {
     // Check if the question exists in either selectedForm or addedFormQuestions
     const fQuestion = ref(
@@ -199,7 +199,7 @@ const composeFormQuestions = (questions) => {
       fQuestion.value.uuid = uuid(); // Assign a unique identifier
       fQuestion.value.question = question; // Set the question data
       searchResults.value.push(fQuestion.value); // Add to searchResults
-   
+
   });
 };
 
