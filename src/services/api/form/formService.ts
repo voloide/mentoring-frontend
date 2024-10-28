@@ -11,8 +11,10 @@ export default {
     return await api()
       .get(`/forms/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        console.log(resp.data)
-        this.generateAndSaveEntityFromDTO(resp.data);
+        console.log(resp)
+        if (resp.status === 200 || (resp.status === 201)) {
+          this.generateAndSaveEntityFromDTO(resp.data?.content);
+        }
         return resp;
       })
       .catch((error) => {
@@ -47,7 +49,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    dtoList.forEach((dto) => {
+    dtoList.forEach((dto: any) => {
       const entity = createFormFromDTO(dto);
       repo.save(entity);
     });
