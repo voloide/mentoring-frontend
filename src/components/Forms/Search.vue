@@ -126,6 +126,7 @@
           v-model:pagination="pagination"
           :rows-per-page-options="[10, 20, 50, 100]"
           :loading="isLoading"
+          @request="onRequest"
         >
           <template v-slot:no-data="{ icon, filter }">
             <div class="full-width row flex-center text-primary q-gutter-sm text-body2">
@@ -170,17 +171,6 @@
 
         </q-table>
       </div>
-      <div style="float: right" class="q-mt-md">
-        <q-pagination
-          v-model="pagination.page"
-          :max="pagination.rowsNumber"
-          :max-pages="10"
-          boundary-numbers
-          direction-links
-          color="primary"
-        />
-      </div>
-
       <!-- Add New Competency Table Button -->
       <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
         <q-btn round color="primary" icon="add" @click="$emit('create', true)">
@@ -223,10 +213,12 @@ const isSearchInitialized = ref(false);
 
 // Pagination state
 const pagination = ref({
-  page: 1, // The current page number
-  rowsPerPage: 10, // Number of items per page
-  totalItems: 0, // Total number of items in the result
-});
+  sortBy: 'desc',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0
+})
 
 // Create a local copy of searchParams
 const localSearchParams = ref({ ...props.searchParams });
@@ -240,14 +232,6 @@ const composeForms = (forms) => {
     searchResults.value.push(form)
   });
 };
-
-
-// Watch for changes in pagination and trigger search only after the user initiates the first search
-watch(pagination, () => {
-  if (isSearchInitialized.value) {
-    search();
-  }
-});
 
 watch(() => props.searchParams, (newSearchParams) => {
   localSearchParams.value = { ...newSearchParams };
@@ -371,10 +355,9 @@ const search = () => {
     name: searchParams.value.name,
     program: searchParams.value.program?.name,
     programmaticAreaCode: searchParams.value.programmaticArea?.name,
-    page: pagination.value.page - 1, // Adjust for 0-based pagination
-    size: pagination.value.rowsPerPage, // Number of items per page
+    page: pagination.value.page - 1,
+    size: pagination.value.rowsPerPage,
   };
-  console.log(params)
   Object.keys(params).forEach((key) => params[key] === '' && delete params[key]);
   try {
     formService
@@ -383,8 +366,7 @@ const search = () => {
         searchResults.value = [];
         if (response.status === 200 || (response.status === 201)) {
           composeForms(response.data.content)
-          pagination.value.totalItems = response.data.totalElements; // Update total items for pagination
-          pagination.value.rowsNumber = response.data.totalPages;
+          pagination.value.rowsNumber = response.data.totalSize;
         }
         Loading.hide();
       })
@@ -406,5 +388,19 @@ const clearSearchParams = () => {
   formService.deleteAllFromStorage();
   searchResults.value = [];
 };
+
+const onRequest = (props) => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+  // Update pagination state
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
+
+  // Fetch data based on the updated pagination
+  search();
+};
+
 </script>
 

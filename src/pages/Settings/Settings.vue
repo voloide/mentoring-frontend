@@ -122,7 +122,6 @@ const init = () => {
   });
   programmaticAreasService.getAll();
   professionalCategoryService.getAll();
-  questionCategoryService.getAll();
   questionService.getAll(paramsQuestions);
   healthFacilityService.getAll(params);
   partnerService.getAll();

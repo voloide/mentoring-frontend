@@ -10,6 +10,8 @@ export default function useQuestion() {
             uuid: questionDTO.uuid,
             code: questionDTO.code,
             tableCode: questionDTO.tableCode,
+            lifeCycleStatus: questionDTO.lifeCycleStatus,
+            used_in_form_section: questionDTO.used_in_form_section,
             question: questionDTO.question,
             program: createProgramFromDTO(questionDTO.program),
           })
@@ -23,6 +25,8 @@ export default function useQuestion() {
             code: question.code,
             tableCode: question.tableCode,
             description: question.description,
+            lifeCycleStatus: question.lifeCycleStatus,
+            used_in_form_section: question.used_in_form_section,
             program: createDTOFromProgram(question.program),
           }
         return  questionDTO;

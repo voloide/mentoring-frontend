@@ -9,8 +9,8 @@
             :rows="searchResults"
             :columns="columns"
             row-key="id"
-            :filter="filter"
             v-model:pagination="pagination"
+            :rows-per-page-options="[10, 20, 50, 100]"
             :loading="loading"
             @request="onRequest"
           >
@@ -184,26 +184,28 @@
                         flat
                         round
                         class="q-ml-md"
+                        :color="isActive(props.row) ? 'green' : 'red'"
+                        icon="circle"
+                        @click="confirmQuestionLifeCycleChange(props.row)"
+                      >
+                    <q-tooltip class="bg-green-5">{{ isActive(props.row) ? 'Inactivar Tabela de Competências' : 'Activar Tabela de Competências' }}</q-tooltip>
+                  </q-btn>
+                      <q-btn
+                        v-if="selectedQuestion.id !== props.row.id && !used_in_form_section(props.row)"
+                        flat
+                        round
+                        class="q-ml-md"
                         color="red-8"
                         icon="delete"
-                        @click="deleteQuestion(props.row.id)"
-                      ></q-btn>
+                        @click="deleteQuestion(props.row.id)">
+                         <q-tooltip class="bg-red-5">'Apagar Competência'</q-tooltip>
+                      </q-btn>
                     </span>
                   </div>
                 </q-td>
               </q-tr>
             </template>
           </q-table>
-        </div>
-        <div style="float: right" class="q-mt-md">
-          <q-pagination
-            v-model="pagination.page"
-            :max="pagination.rowsNumber"
-            :max-pages="10"
-            boundary-numbers
-            direction-links
-            color="primary"
-          />
         </div>
 
         <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
@@ -215,21 +217,20 @@
 </template>
 
 <script setup>
-import { onMounted, ref, inject, defineEmits, watch } from 'vue';
+import { onMounted, ref, inject, defineEmits } from 'vue';
 import questionService from 'src/services/api/question/questionService';
 import User from 'src/stores/model/user/User';
 import UsersService from 'src/services/api/user/UsersService';
 import { computed } from 'vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import useQuestion from 'src/composables/question/questionMethods';
-import {Loading} from "quasar";
+import {Loading, QSpinnerRings} from "quasar";
 import programService from "src/services/api/program/programService";
 
-const { createQuestionFromDTO } = useQuestion();
+const { createQuestionFromDTO,createDTOFromQuestion } = useQuestion();
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const step = inject('step');
-const isSearchInitialized = ref(false);
 const searchResults = ref([]);
 const selectedQuestion = ref('');
 const openForm = ref(false);
@@ -267,44 +268,21 @@ const currUser = ref(new User());
 const loading = ref(true);
 
 const pagination = ref({
+  sortBy: 'desc',
+  descending: false,
   page: 1,
   rowsPerPage: 10,
-  rowsNumber: 0,
-  totalPages: 5,
-});
-
-const onRequest = (props) => {
-  pagination.value.page = props.pagination.page;
-  pagination.value.rowsPerPage = props.pagination.rowsPerPage;
-  loadData();
-};
+  rowsNumber: 0
+})
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
-  loadData();
+  search();
 });
 
 const programs = computed(() => {
   return programService.piniaGetAll();
 });
-
-const reloadData = () => {
-  questionService.getAll().then((response) => {
-
-    if (response.status === 200 || (response.status === 201)) {
-      composeQuestios(response.data.content)
-      pagination.value.totalItems = response.data.totalElements; // Update total items for pagination
-      pagination.value.rowsNumber = response.data.totalPages;
-    }
-    Loading.hide();
-  })
-  .catch((error) => {
-      console.error(error);
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 
 const submitForm = () => {
   const question = {
@@ -315,7 +293,7 @@ const submitForm = () => {
   questionService.saveQuestion(question).then((res) => {
     closeForm;
     newRowAdded.value = false;
-    reloadData()
+    search()
   });
 };
 
@@ -340,9 +318,14 @@ const saveUpdate = () => {
     program: data.value.program,
   };
 
-  questionService.updateQuestion(question).then((res) => {
-    searchResults.value = questionService.piniaGetAll();
-    resetFields();
+  questionService.updateQuestion(question).then((response) => {
+    if(response.status === 200 || response.status === 201){
+      resetFields();
+      alertSucess('Competência actualizada com sucesso');
+      search()
+    } else {
+      alertError('Ocorreu algum erro durante a operação.')
+    }
   });
 };
 
@@ -351,19 +334,54 @@ const resetFields = () => {
   data.value = { tableCode: '', question: '', program: '' };
 };
 
-const deleteQuestion = (question) => {
-  alertWarningAction('Tem certeza que deseja apagar o questiona?').then(
+const confirmQuestionLifeCycleChange = (question) => {
+  let msg = question.lifeCycleStatus === 'ACTIVE'
+    ? 'Confirma inactivar a competência?'
+    : 'Confirma activar a competência?';
+
+  alertWarningAction(msg).then((result) => {
+    if (result) {
+      changeLifeCycle(question);
+    }
+  });
+};
+
+const changeLifeCycle = (question) => {
+  question.lifeCycleStatus = question.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+  questionService
+    .changeLifeCycleStatus(createDTOFromQuestion(question))
+    .then((response) => {
+      console.log(response)
+      if(response.status === 200 || response.status === 201){
+        alertSucess('Operação efectuada com sucesso');
+        questionService.update(question);
+      } else {
+        alertError('Ocorreu algum erro durante a operação.')
+      }
+    })
+    .catch((error) => {
+      question.lifeCycleStatus = question.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      console.error('Error', error.message);
+      alertError('Ocorreu um erro inesperado nesta operação.');
+    });
+};
+
+const isActive = (question) => question.lifeCycleStatus === 'ACTIVE';
+const used_in_form_section = (question) => question.used_in_form_section === true;
+
+const deleteQuestion = (questionId) => {
+  alertWarningAction('Tem certeza que deseja apagar a competência?').then(
     (result) => {
       if (result) {
         questionService
-          .deleteQuestion(question)
+          .deleteQuestion(questionId)
           .then((response) => {
             if (response.status === 200 || response.status === 201) {
-              alertSucess('Question apagada com sucesso!').then((result) => {
-                reloadData()
+              alertSucess('Competência apagada com sucesso!').then((result) => {
+                search()
               });
             } else {
-              alertError('Não foi possivel apagar o questiona.');
+              alertError('Não foi possivel apagar a competência.');
             }
           })
           .catch((error) => {
@@ -404,11 +422,6 @@ const removeRow = () => {
   }
 };
 
-const loadData = () => {
-  loading.value = true;
-  search();
-};
-
 const composeQuestios = (questions) => {
   searchResults.value = [];
 
@@ -419,19 +432,45 @@ const composeQuestios = (questions) => {
 };
 
 const search = async () => {
+  Loading.show({ spinner: QSpinnerRings });
   const params = {
+    code: '',
+    description: '',
+    programId: '',
     page: pagination.value.page - 1,
     size: pagination.value.rowsPerPage,
   };
   Object.keys(params).forEach(
     (key) => params[key] === '' && delete params[key]
   );
-  reloadData()
+  questionService
+    .search(params)
+    .then((response) => {
+      searchResults.value = [];
+      if (response.status === 200 || (response.status === 201)) {
+        composeQuestios(response.data.content)
+        pagination.value.rowsNumber = response.data.totalSize; // Update rows count
+      }
+    Loading.hide();
+  })
+    .catch((error) => {
+      console.error(error);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 };
 
-watch(pagination, () => {
-  if (isSearchInitialized.value) {
-    loadData();
-  }
-});
+const onRequest = (props) => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+  // Update pagination state
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
+
+  // Fetch data based on the updated pagination
+  search();
+};
 </script>
