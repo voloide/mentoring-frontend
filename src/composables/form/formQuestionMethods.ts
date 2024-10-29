@@ -1,15 +1,15 @@
-import FormQuestion from 'src/stores/model/form/FormQuestion';
+import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
 import useQuestion from 'src/composables/question/questionMethods';
 import useEvaluationType from 'src/composables/question/evaluationTypeMethods';
 import useResponseType from 'src/composables/question/responseTypeMethods';
 
-export default function useFormQuestion() {
+export default function useFormSectionQuestion() {
 
-    function createFormQuestionFromDTO(formQuestionDTO: any) {
+    function createFormSectionQuestionFromDTO(formQuestionDTO: any) {
       const { createQuestionFromDTO } = useQuestion();
       const { createEvaluationTypeFromDTO } = useEvaluationType();
       const { createResponseTypeFromDTO } = useResponseType();
-      const formQuestion = new FormQuestion({
+      const formQuestion = new FormSectionQuestion({
         id: formQuestionDTO.id,
         uuid: formQuestionDTO.uuid,
         mandatory: formQuestionDTO.mandatory,
@@ -24,7 +24,7 @@ export default function useFormQuestion() {
         return formQuestion;
     }
 
-    function createDTOFromFormQuestion(formQuestion: FormQuestion) {
+    function createDTOFromFormSectionQuestion(formQuestion: FormSectionQuestion) {
       const { createDTOFromQuestion } = useQuestion();
       const { createDTOFromEvaluationType } = useEvaluationType();
       const { createDTOFromResponseType } = useResponseType();
@@ -44,7 +44,7 @@ export default function useFormQuestion() {
     }
 
     return {
-        createFormQuestionFromDTO,
-        createDTOFromFormQuestion,
+        createFormSectionQuestionFromDTO: createFormSectionQuestionFromDTO,
+        createDTOFromFormSectionQuestion: createDTOFromFormSectionQuestion,
       };
 }

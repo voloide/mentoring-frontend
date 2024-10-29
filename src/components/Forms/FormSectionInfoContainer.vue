@@ -115,7 +115,7 @@
             </q-banner>
           </div>
 
-          <div class="q-mt-none" v-if="formSection.formQuestions.length <= 0">
+          <div class="q-mt-none" v-if="formSection.formQuestions?.length <= 0">
             <q-banner dense inline-actions class="text-grey-10 bg-amber-1 q-px-sm">
               Nenhuma Competência associada a esta Secção.
             </q-banner>
@@ -123,7 +123,7 @@
 
           <q-table
               class="col"
-              v-if="formSection.formQuestions.length > 0"
+              v-if="formSection.formQuestions?.length > 0"
               dense
               flat
               wrap-cells
@@ -239,10 +239,10 @@
           </q-table>
           <!-- Dialog for Adding or Removing Questions -->
           <q-dialog persistent v-model="showAddOrRemoveQuestions">
-              <AddOrRemoveQuestions @close="showAddOrRemoveQuestions = false" 
+              <AddOrRemoveQuestions @close="showAddOrRemoveQuestions = false"
                                     @addSelectedQuestions="addSelectedQuestions"
-                                    :selectedForm="selectedForm" 
-                                    :formSection="localFormSection" 
+                                    :selectedForm="selectedForm"
+                                    :formSection="localFormSection"
                                     :searchParams="searchParams"/>
           </q-dialog>
     </div>
@@ -250,13 +250,13 @@
 
 <script setup>
 import AddOrRemoveQuestions from './AddOrRemoveQuestions.vue';
-import FormQuestion from 'src/stores/model/form/FormQuestion';
+import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
 import Question from 'src/stores/model/question/Question';
 import EvaluationType from 'src/stores/model/question/EvaluationType';
 import Program from 'src/stores/model/program/Program';
 import ResponseType from 'src/stores/model/question/ResponseType';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import { reactive, watch, ref, computed, inject } from 'vue';
+import { reactive, watch, ref, computed, inject, onMounted } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import QuestionCategory from 'src/stores/model/question/QuestionCategory';
 import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
@@ -273,7 +273,7 @@ const emit = defineEmits(['update-section', 'remove-section']);
 const localFormSection = reactive({ ...props.formSection });
 
 const searchParams = ref(
-  new FormQuestion({
+  new FormSectionQuestion({
     question: new Question({
       questionCategory: new QuestionCategory(),
       program: null,
@@ -303,7 +303,7 @@ const showAddOrRemoveQuestions = ref(false);
 
 // Initialize a new form question
 const initNewQuestion = () => {
-  const newQuestion = new FormQuestion({
+  const newQuestion = new FormSectionQuestion({
     uuid: uuidv4(),
     question: new Question({ program: new Program() }),
     evaluationType: new EvaluationType(),
@@ -449,6 +449,10 @@ const evaluationTypes = computed(() => {
     return allEvaluationTypes;
   }
 });
+
+onMounted(() => {
+  console.log(props.formSection)
+})
 
 </script>
 

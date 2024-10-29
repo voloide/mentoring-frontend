@@ -92,7 +92,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import FormQuestion from 'src/stores/model/form/FormQuestion';
+import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
 import Question from 'src/stores/model/question/Question';
 import ResponseType from 'src/stores/model/question/ResponseType';
 import EvaluationType from 'src/stores/model/question/EvaluationType';
@@ -190,7 +190,7 @@ const composeFormQuestions = (questions) => {
   questions.forEach((question) => {
     // Check if the question exists in either selectedForm or addedFormQuestions
     const fQuestion = ref(
-        new FormQuestion({
+        new FormSectionQuestion({
           question: new Question({ program: new Program() }),
           evaluationType: new EvaluationType(),
           responseType: new ResponseType(),

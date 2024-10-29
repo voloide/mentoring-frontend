@@ -182,7 +182,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, watch } from 'vue';
+import {ref, computed, onMounted, reactive, watch, inject} from 'vue';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
 import User from 'src/stores/model/user/User';
@@ -208,6 +208,8 @@ const searchParams = ref({
   program: new Program(),
   programmaticArea: new ProgrammaticArea(),
 });
+
+const form = inject('form')
 
 const isSearchInitialized = ref(false);
 
@@ -239,7 +241,6 @@ watch(() => props.searchParams, (newSearchParams) => {
 
 // Search results (populated from API)
 const searchResults = ref([]);
-const selectedForm = reactive(ref(''));
 const selectedProgram = ref(null);
 const selectedProgrammaticArea = ref(null);
 const filterRedProgrammaticAreas = ref([]);
@@ -340,9 +341,10 @@ const changeLifeCycle = (form) => {
 };
 
 // Refactor to use `useStepManager` for changing to edit step
-const editForm = (form) => {
-  selectedForm.value = form;
-  changeStepToEdit();
+const editForm = (formSelectedd) => {
+  form.value = formSelectedd;
+  emit('create', true)
+  // changeStepToEdit();
 };
 
 const search = () => {

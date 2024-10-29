@@ -1,11 +1,11 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
 import Question from 'src/stores/model/question/Question';
-import FormQuestion from 'src/stores/model/form/FormQuestion';
+import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
 import useQuestion from 'src/composables/question/questionMethods';
 
 const repo = useRepo(Question);
-const repoFormQuestion = useRepo(FormQuestion);
+const repoFormQuestion = useRepo(FormSectionQuestion);
 const { createQuestionFromDTO } = useQuestion();
 
 export default {

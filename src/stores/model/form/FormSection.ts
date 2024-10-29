@@ -1,7 +1,7 @@
 import { Model } from 'pinia-orm';
-import Form from './Form'; 
-import Section from '../section/Section'; 
-import FormQuestion from './FormQuestion';
+import Form from './Form';
+import Section from '../section/Section';
+import FormSectionQuestion from './FormSectionQuestion';
 
 export default class FormSection extends Model {
   static entity = 'form_sections';
@@ -19,7 +19,7 @@ export default class FormSection extends Model {
       // Relationships
       form: this.belongsTo(Form, 'form_id'),
       section: this.belongsTo(Section, 'section_id'),
-      formQuestions: this.hasMany(FormQuestion, 'form_id'),
+      formSectionQuestions: this.hasMany(FormSectionQuestion, 'form_section_id'),
     };
   }
 

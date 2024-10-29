@@ -11,7 +11,6 @@ export default {
     return await api()
       .get(`/forms/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        console.log(resp)
         if (resp.status === 200 || (resp.status === 201)) {
           this.generateAndSaveEntityFromDTO(resp.data?.content);
         }
@@ -26,7 +25,7 @@ export default {
     return await api()
       .post('/forms/saveOrUpdate', createDTOFromForm(formDTO))
       .then((resp) => {
-        if (resp.status === 201) {
+        if (resp.status === 200 || resp.status === 201) {
           const entity = createFormFromDTO(resp.data);
           repo.save(entity);
         }

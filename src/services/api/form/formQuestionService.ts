@@ -1,10 +1,10 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import FormQuestion from 'src/stores/model/form/FormQuestion';
-import useFormQuestion from 'src/composables/form/formQuestionMethods';
+import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
+import useFormSectionQuestion from 'src/composables/form/formQuestionMethods';
 
-const repo = useRepo(FormQuestion);
-const { createFormQuestionFromDTO } = useFormQuestion();
+const repo = useRepo(FormSectionQuestion);
+const { createFormSectionQuestionFromDTO } = useFormSectionQuestion();
 
 export default {
   async search(searchParam: string) {
@@ -24,7 +24,7 @@ export default {
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto) => {
-      const entity = createFormQuestionFromDTO(dto);
+      const entity = createFormSectionQuestionFromDTO(dto);
       repo.save(entity);
     });
   },
