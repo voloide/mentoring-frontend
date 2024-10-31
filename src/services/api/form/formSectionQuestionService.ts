@@ -1,16 +1,16 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import FormQuestion from 'src/stores/model/form/FormQuestion';
-import useFormQuestion from 'src/composables/form/formQuestionMethods';
+import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
+import useFormSectionQuestion from 'src/composables/form/formSectionQuestionMethods';
 
-const repo = useRepo(FormQuestion);
-const { createFormQuestionFromDTO } = useFormQuestion();
+const repo = useRepo(FormSectionQuestion);
+const { createFormSectionQuestionFromDTO } = useFormSectionQuestion();
 
 export default {
   async search(searchParam: string) {
     return await api()
       .get(
-        `/formQuestions/getByFormId?${new URLSearchParams(
+        `/formSectionQuestions/getByFormId?${new URLSearchParams(
           searchParam
         ).toString()}`
       )
@@ -24,7 +24,7 @@ export default {
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto) => {
-      const entity = createFormQuestionFromDTO(dto);
+      const entity = createFormSectionQuestionFromDTO(dto);
       repo.save(entity);
     });
   },
@@ -45,19 +45,32 @@ export default {
       .orderBy('id', 'asc')
       .first();
   },
-  async remove(searchParam: string, formQuestion: any) {
+  async remove(searchParam: string, formSectionQuestion: any) {
     return await api()
       .patch(
-        `/formQuestions/remove?${new URLSearchParams(searchParam).toString()}`,
-        formQuestion
+        `/formSectionQuestions/remove?${new URLSearchParams(searchParam).toString()}`,
+        formSectionQuestion
       )
       .then((resp) => {
-        this.update(formQuestion);
+        this.update(formSectionQuestion);
         return resp;
       })
       .catch((error) => {
         console.error('Error', error.message);
       });
+  },
+  async disassociateQuesion(formSectionQuestionId: number) {
+    return await api()
+      .delete(`/formSectionQuestions/${formSectionQuestionId}`)
+      .then(
+        (resp) => {
+          repo.destroy(formSectionQuestionId);
+          return resp;
+        })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+    repo.delete(formSectionQuestionId);
   },
   update(formQuestion: any) {
     repo.save(formQuestion);

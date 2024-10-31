@@ -8,7 +8,7 @@
               Competências Associadas à <span style="color: amber-10;">[{{ selectedForm.name }}]</span>
             </q-banner>
           </div>
-  
+
           <!-- Loop through formSections and pass to FormSectionInfoContainer -->
           <div>
             <q-scroll-area
@@ -27,7 +27,7 @@
             </span>
         </q-scroll-area>
           </div>
-  
+
           <!-- Action Buttons -->
           <div class="row q-my-sm q-mt-lg">
             <q-space />
@@ -46,20 +46,20 @@
       </form>
     </div>
   </template>
-  
+
   <script setup>
-  import { inject, provide, reactive } from 'vue';
+  import {inject, onMounted, provide, reactive} from 'vue';
   import { useSwal } from 'src/composables/shared/dialog/dialog';
   import FormSectionInfoContainer from './FormSectionInfoContainer.vue';
   import { Loading, QSpinnerRings } from 'quasar';
 import formService from 'src/services/api/form/formService';
-  
+
   // Inject selectedForm
   const selectedForm = inject('selectedForm');
   const emit = defineEmits(['close','goBack']);
   // Swal dialog methods
   const { alertError, alertSucess, alertWarningAction } = useSwal();
-  
+
   // Method to handle section updates
   const updateFormSection = (updatedSection) => {
     const index = selectedForm.value.formSections.findIndex(
@@ -69,7 +69,7 @@ import formService from 'src/services/api/form/formService';
       selectedForm.value.formSections[index] = updatedSection; // Update the section
     }
   };
-  
+
   // Method to remove a section
   const removeFormSection = (sectionUuid) => {
     alertWarningAction('Tem certeza que deseja remover esta secção?').then((result) => {
@@ -81,7 +81,7 @@ import formService from 'src/services/api/form/formService';
       }
     });
   };
-  
+
   const saveOrUpdate = () => {
     // Check if any section is in edition mode
     const hasOngoingEdition = selectedForm.value.formSections.some(section => section.inEdition === true);
@@ -91,10 +91,10 @@ import formService from 'src/services/api/form/formService';
         return; // Stop execution if any section is still in edition mode
     }
 
-    // Check if any formSection has an empty formQuestions array
-    const hasEmptyFormQuestions = selectedForm.value.formSections.some(section => section.formQuestions.length === 0);
+    // Check if any formSection has an empty formSectionQuestions array
+    const hasEmptyformSectionQuestions = selectedForm.value.formSections.some(section => section.formSectionQuestions.length === 0);
 
-    if (hasEmptyFormQuestions) {
+    if (hasEmptyformSectionQuestions) {
         alertWarningAction('Há secções sem competências associadas. Deseja continuar?')
             .then((result) => {
                 if (result) {
@@ -104,7 +104,7 @@ import formService from 'src/services/api/form/formService';
             })
             .catch(alertError);
     } else {
-        // Proceed to save directly if all formSections have formQuestions
+        // Proceed to save directly if all formSections have formSectionQuestions
         proceedToSave();
     }
 };
@@ -152,7 +152,7 @@ import formService from 'src/services/api/form/formService';
         });
 };
 
-  
+
   const goBack = () => {
     // Check if any form section is still in edition mode
     const formSectionInEdit = selectedForm.value.formSections.find(section => section.inEdition === true);
@@ -163,7 +163,7 @@ import formService from 'src/services/api/form/formService';
         .then((result) => {
             if (result) {
             // If the user confirms, remove records without `id` from the section in edition
-            formSectionInEdit.formQuestions = formSectionInEdit.formQuestions.filter(question => question.id !== null);
+            formSectionInEdit.formSectionQuestions = formSectionInEdit.formSectionQuestions.filter(question => question.id !== null);
 
             // Set inEdition to false for the section in edit mode
             formSectionInEdit.inEdition = false;
@@ -199,11 +199,11 @@ import formService from 'src/services/api/form/formService';
         opacity: '0.75'
     }
     });
+
   </script>
-  
+
   <style lang="scss">
   .title {
     background-color: $primary;
   }
   </style>
-  

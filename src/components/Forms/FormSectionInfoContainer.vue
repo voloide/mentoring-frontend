@@ -115,7 +115,7 @@
             </q-banner>
           </div>
 
-          <div class="q-mt-none" v-if="formSection.formQuestions.length <= 0">
+          <div class="q-mt-none" v-if="formSection.formSectionQuestions?.length <= 0">
             <q-banner dense inline-actions class="text-grey-10 bg-amber-1 q-px-sm">
               Nenhuma Competência associada a esta Secção.
             </q-banner>
@@ -123,11 +123,11 @@
 
           <q-table
               class="col"
-              v-if="formSection.formQuestions.length > 0"
+              v-if="formSection.formSectionQuestions?.length > 0"
               dense
               flat
               wrap-cells
-              :rows="formSection.formQuestions"
+              :rows="formSection.formSectionQuestions"
               :columns="columns"
               row-key="uuid"
           >
@@ -225,11 +225,12 @@
                       </q-td>
                       <q-td key="options" :props="props">
                           <q-btn
+                            v-if="!fsqInUse(props.row)"
                               flat
                               round
                               color="red"
                               icon="close"
-                              @click="removeFormQuestions(props.row)"
+                              @click="removeFormSectionQuestions(props.row)"
                           >
                               <q-tooltip class="bg-green-5">Remover a Competência</q-tooltip>
                           </q-btn>
@@ -239,10 +240,10 @@
           </q-table>
           <!-- Dialog for Adding or Removing Questions -->
           <q-dialog persistent v-model="showAddOrRemoveQuestions">
-              <AddOrRemoveQuestions @close="showAddOrRemoveQuestions = false" 
+              <AddOrRemoveQuestions @close="showAddOrRemoveQuestions = false"
                                     @addSelectedQuestions="addSelectedQuestions"
-                                    :selectedForm="selectedForm" 
-                                    :formSection="localFormSection" 
+                                    :selectedForm="selectedForm"
+                                    :formSection="localFormSection"
                                     :searchParams="searchParams"/>
           </q-dialog>
     </div>
@@ -250,17 +251,19 @@
 
 <script setup>
 import AddOrRemoveQuestions from './AddOrRemoveQuestions.vue';
-import FormQuestion from 'src/stores/model/form/FormQuestion';
+import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
 import Question from 'src/stores/model/question/Question';
 import EvaluationType from 'src/stores/model/question/EvaluationType';
 import Program from 'src/stores/model/program/Program';
 import ResponseType from 'src/stores/model/question/ResponseType';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import { reactive, watch, ref, computed, inject } from 'vue';
+import { reactive, watch, ref, computed, inject, onMounted } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import QuestionCategory from 'src/stores/model/question/QuestionCategory';
 import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
 import responseTypeService from 'src/services/api/question/responseTypeService';
+import questionService from "src/services/api/question/questionService";
+import formQuestionService from "src/services/api/form/formSectionQuestionService";
 
 // Alert utility
 const { alertSucess, alertError, alertWarningAction } = useSwal();
@@ -273,7 +276,7 @@ const emit = defineEmits(['update-section', 'remove-section']);
 const localFormSection = reactive({ ...props.formSection });
 
 const searchParams = ref(
-  new FormQuestion({
+  new FormSectionQuestion({
     question: new Question({
       questionCategory: new QuestionCategory(),
       program: null,
@@ -303,23 +306,44 @@ const showAddOrRemoveQuestions = ref(false);
 
 // Initialize a new form question
 const initNewQuestion = () => {
-  const newQuestion = new FormQuestion({
+  const newQuestion = new FormSectionQuestion({
     uuid: uuidv4(),
     question: new Question({ program: new Program() }),
     evaluationType: new EvaluationType(),
     responseType: new ResponseType(),
   });
 
-  localFormSection.formQuestions.unshift(newQuestion);
+  localFormSection.formSectionQuestions.unshift(newQuestion);
   emit('update-section', localFormSection); // Emit updated section
 };
 
+const fsqInUse = (formSectionQuestion) => formSectionQuestion.in_use;
+
+
 // Remove a question from the form section
-const removeFormQuestions = (question) => {
-  localFormSection.formQuestions = localFormSection.formQuestions.filter(
-    (q) => q.uuid !== question.uuid
-  );
-  emit('update-section', localFormSection); // Emit updated section
+const removeFormSectionQuestions = (formSectionQuestion) => {
+  alertWarningAction('Tem certeza que deseja desassociar esta competência?').then(
+    (result) => {
+      if (result) {
+        formQuestionService
+          .disassociateQuesion(formSectionQuestion.id)
+          .then((response) => {
+            if (response.status === 200 || response.status === 201) {
+              alertSucess('Competência desassociada com sucesso!').then((result) => {
+                localFormSection.formSectionQuestions = localFormSection.formSectionQuestions.filter(
+                  (q) => q.uuid !== formSectionQuestion.uuid
+                );
+                emit('update-section', localFormSection); // Emit updated section
+              });
+            } else {
+              alertError('Não foi possivel apagar a competência.');
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+  })
 };
 
 const searchQuestions=()=> {
@@ -330,7 +354,7 @@ const addSelectedQuestions = (addedFormQuestions) => {
     const existingUUIDs = new Set();
 
     // Collect existing sequences and UUIDs from localFormSection
-    localFormSection.formQuestions.forEach((formQuestion) => {
+    localFormSection.formSectionQuestions.forEach((formQuestion) => {
         existingUUIDs.add(formQuestion.question.uuid);
     });
 
@@ -344,7 +368,7 @@ const addSelectedQuestions = (addedFormQuestions) => {
         }
 
         // If both sequence and UUID are unique, add the question
-        localFormSection.formQuestions.push(formQuestion);
+        localFormSection.formSectionQuestions.push(formQuestion);
 
         // Add the new sequence and UUID to the sets
         existingUUIDs.add(uuid);
@@ -376,14 +400,14 @@ const validateAndFinishEdition = () => {
     let hasValidationErrors = false;
 
     // Iterate over each formQuestion for validation
-    localFormSection.formQuestions.forEach((formQuestion) => {
+    localFormSection.formSectionQuestions.forEach((formQuestion) => {
         const { sequence, evaluationType, responseType } = formQuestion;
 
         for (const formSection of selectedForm.value.formSections) {
             if (formSection.uuid !== localFormSection.uuid) {
-            for (const otherFormQuestion of formSection.formQuestions) {
+            for (const otherFormQuestion of formSection.formSectionQuestions) {
                 // Check if any question in the other formSections matches the current one
-                const duplicateQuestion = localFormSection.formQuestions.find(fq => fq.question.uuid === otherFormQuestion.question.uuid);
+                const duplicateQuestion = localFormSection.formSectionQuestions.find(fq => fq.question.uuid === otherFormQuestion.question.uuid);
                 if (duplicateQuestion) {
                 alertError(`A competência "${duplicateQuestion.question.tableCode}" já foi adicionada em outra secção.`);
                 hasValidationErrors = true;
@@ -449,6 +473,10 @@ const evaluationTypes = computed(() => {
     return allEvaluationTypes;
   }
 });
+
+onMounted(() => {
+  // console.log(props.formSection)
+})
 
 </script>
 

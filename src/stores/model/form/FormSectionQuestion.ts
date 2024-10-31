@@ -5,8 +5,8 @@ import EvaluationType from '../question/EvaluationType';
 import ResponseType from '../question/ResponseType';
 import FormSection from './FormSection';
 
-export default class FormQuestion extends Model {
-  static entity = 'forms_questions';
+export default class FormSectionQuestion extends Model {
+  static entity = 'form_section_questions';
   static primaryKey = 'id';
 
   static fields() {
@@ -21,8 +21,9 @@ export default class FormQuestion extends Model {
       question_id: this.attr(''),
       evaluation_type_id: this.attr(''),
       response_type_id: this.attr(''),
+      in_use: this.attr(false),
       // Relationships
-      formSection: this.belongsTo(FormSection, 'form_id'),
+      formSection: this.belongsTo(FormSection, 'form_section_id'),
       question: this.belongsTo(Question, 'question_id'),
       evaluationType: this.belongsTo(EvaluationType, 'evaluation_type_id'),
       responseType: this.belongsTo(ResponseType, 'response_type_id'),

@@ -109,11 +109,8 @@
             label="Número de Avaliação de Fichas"
             dense
             ref="targetFileRef"
-            :rules="[(val) => !!val || 'Por favor indicar o Número de Avaliação de Fichas']"
-            lazy-rules
             v-model="form.targetFile"
             type="number"
-            :min="0"
           />
         </div>
 
@@ -163,7 +160,7 @@
                         option-value="id"
                         option-label="description"
                         label="Secção"
-                        @new-value="createNewSection" 
+                        @new-value="createNewSection"
                         :rules="[
                           val => !!val || 'Por favor selecione uma secção'
                         ]"
@@ -268,7 +265,7 @@
     <ManageQuestions v-if="isFormQuestionsDataVisible" @goBack="goBack" @close="close"/>
   </div>
 
-  
+
 </template>
 
 <script setup>
@@ -279,7 +276,7 @@ import FormSection from 'src/stores/model/form/FormSection';
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';
-import formQuestionService from 'src/services/api/form/formQuestionService';
+import formQuestionService from 'src/services/api/form/formSectionQuestionService';
 import sectionService from 'src/services/api/section/sectionService';
 import UsersService from 'src/services/api/user/UsersService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
@@ -289,26 +286,12 @@ import { Loading, QSpinnerRings } from 'quasar';
 import ManageQuestions from 'src/components/Forms/ManageQuestions.vue';
 
 // Inject the step from the parent
-const step = inject('step'); 
+const step = inject('step');
 const { isEditStep, printCurrentStep } = useStepManager(step);
 
 const emit = defineEmits(['close','cancel']);
 
-const form = ref(new Form({
-  programmaticArea: {
-    program: {
-      id: null,
-      name: null,
-    }
-  },
-  code: '',
-  name: '',
-  description: '',
-  targetPatient: '',
-  targetFile: '',
-  formSections: [],
-  formQuestions: []
-}));
+const form = inject('form')
 
 // Define refs for inputs and selects
 const programRef = ref(null);
@@ -523,7 +506,7 @@ const saveSection = (section) => {
 
   const isDuplicateSequence = form.value.formSections.some(
     (existingSection) =>
-      existingSection.uuid !== section.uuid && 
+      existingSection.uuid !== section.uuid &&
       existingSection.sequence === section.sequence
   );
 
@@ -541,7 +524,6 @@ const saveSection = (section) => {
   section.inEdition = false;
   section.isNew = false;
 };
-
 
 
 // Delete a specific section
