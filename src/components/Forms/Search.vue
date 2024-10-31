@@ -231,6 +231,7 @@ const composeForms = (forms) => {
   forms.forEach((formObj) => {
     // Check if the question exists in either selectedForm or addedFormQuestions
     const form = createFormFromDTO(formObj)
+    console.log(form)
     searchResults.value.push(form)
   });
 };

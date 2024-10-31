@@ -21,6 +21,7 @@ export default class FormSectionQuestion extends Model {
       question_id: this.attr(''),
       evaluation_type_id: this.attr(''),
       response_type_id: this.attr(''),
+      in_use: this.attr(false),
       // Relationships
       formSection: this.belongsTo(FormSection, 'form_section_id'),
       question: this.belongsTo(Question, 'question_id'),

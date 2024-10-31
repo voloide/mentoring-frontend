@@ -1,7 +1,7 @@
 import FormSection from 'src/stores/model/form/FormSection';
 import useSection from 'src/composables/section/sectionMethods';
 import useForm from 'src/composables/form/formMethods';
-import useFormSectionQuestion from './formQuestionMethods';
+import useFormSectionQuestion from './formSectionQuestionMethods';
 
 export default function useFormSection() {
 
@@ -14,7 +14,7 @@ export default function useFormSection() {
       uuid: formSectionDTO.uuid,
       sequence: formSectionDTO.sequence,
       section: createSectionFromDTO(formSectionDTO.section),
-      formQuestions: formSectionDTO.formQuestions ? createFormQuestionsListFromDTOs(formSectionDTO.formQuestions) : [],
+      formSectionQuestions: formSectionDTO.formSectionQuestions ? createFormQuestionsListFromDTOs(formSectionDTO.formSectionQuestions) : [],
     });
     return formSection;
   }
@@ -28,7 +28,7 @@ export default function useFormSection() {
       uuid: formSection.uuid,
       sequence: formSection.sequence,
       section: createDTOFromSection(formSection.section),
-      formQuestions: createDTOsListFromFormQuestions(formSection.formQuestions), // Handling form questions
+      formSectionQuestions: createDTOsListFromFormQuestions(formSection.formSectionQuestions), // Handling form questions
     };
     return formSectionDTO;
   }

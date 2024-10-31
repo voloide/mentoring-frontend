@@ -48,7 +48,7 @@
   </template>
 
   <script setup>
-  import { inject, provide, reactive } from 'vue';
+  import {inject, onMounted, provide, reactive} from 'vue';
   import { useSwal } from 'src/composables/shared/dialog/dialog';
   import FormSectionInfoContainer from './FormSectionInfoContainer.vue';
   import { Loading, QSpinnerRings } from 'quasar';
@@ -92,9 +92,9 @@ import formService from 'src/services/api/form/formService';
     }
 
     // Check if any formSection has an empty formSectionQuestions array
-    const hasEmptyFormQuestions = selectedForm.value.formSections.some(section => section.formQuestions.length === 0);
+    const hasEmptyformSectionQuestions = selectedForm.value.formSections.some(section => section.formSectionQuestions.length === 0);
 
-    if (hasEmptyFormQuestions) {
+    if (hasEmptyformSectionQuestions) {
         alertWarningAction('Há secções sem competências associadas. Deseja continuar?')
             .then((result) => {
                 if (result) {
@@ -163,7 +163,7 @@ import formService from 'src/services/api/form/formService';
         .then((result) => {
             if (result) {
             // If the user confirms, remove records without `id` from the section in edition
-            formSectionInEdit.formQuestions = formSectionInEdit.formQuestions.filter(question => question.id !== null);
+            formSectionInEdit.formSectionQuestions = formSectionInEdit.formSectionQuestions.filter(question => question.id !== null);
 
             // Set inEdition to false for the section in edit mode
             formSectionInEdit.inEdition = false;
@@ -199,6 +199,7 @@ import formService from 'src/services/api/form/formService';
         opacity: '0.75'
     }
     });
+
   </script>
 
   <style lang="scss">

@@ -276,7 +276,7 @@ import FormSection from 'src/stores/model/form/FormSection';
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';
-import formQuestionService from 'src/services/api/form/formQuestionService';
+import formQuestionService from 'src/services/api/form/formSectionQuestionService';
 import sectionService from 'src/services/api/section/sectionService';
 import UsersService from 'src/services/api/user/UsersService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';

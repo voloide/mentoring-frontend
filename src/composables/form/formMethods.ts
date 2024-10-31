@@ -1,7 +1,7 @@
 import Form from "src/stores/model/form/Form";
 import useProgrammaticArea from "src/composables/programmaticArea/programmaticAreaMethods";
 import useFormType from "./formTypeMethods";
-import useFormSectionQuestion from "./formQuestionMethods";
+import useFormSectionQuestion from "./formSectionQuestionMethods";
 import usePartner from "src/composables/partner/partnerMethods";
 import useSection from "src/composables/section/sectionMethods";
 import useFormSection from "src/composables/form/formSectionMethods";
@@ -68,6 +68,7 @@ export default function useForm() {
     }
 
     function createDTOsListFromFormQuestions(formQuestions: any) {
+      console.log(formQuestions)
       const { createDTOFromFormSectionQuestion } = useFormSectionQuestion();
       const generatedFormQuestions = [];
       formQuestions.forEach((formQuestion) => {

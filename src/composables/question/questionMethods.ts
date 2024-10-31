@@ -24,7 +24,7 @@ export default function useQuestion() {
             uuid: question.uuid,
             code: question.code,
             tableCode: question.tableCode,
-            description: question.description,
+            description: question.question,
             lifeCycleStatus: question.lifeCycleStatus,
             used_in_form_section: question.used_in_form_section,
             program: createDTOFromProgram(question.program),
