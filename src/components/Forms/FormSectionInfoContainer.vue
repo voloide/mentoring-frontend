@@ -108,13 +108,15 @@
                   size="md"
                   class="q-ml-md"
                   color="red-2"
-                  icon="keyboard_arrow_up"
+                  :icon="localFormSection.isExpanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
                   @click="expandCollapse"
                 />
               </template>
             </q-banner>
           </div>
 
+          <transition name="expand-transition">
+            <div v-if="localFormSection.isExpanded">
           <div class="q-mt-none" v-if="formSection.formSectionQuestions?.length <= 0">
             <q-banner dense inline-actions class="text-grey-10 bg-amber-1 q-px-sm">
               Nenhuma Competência associada a esta Secção.
@@ -244,6 +246,9 @@
                   </q-tr>
               </template>
           </q-table>
+            </div>
+        </transition>
+
           <!-- Dialog for Adding or Removing Questions -->
           <q-dialog persistent v-model="showAddOrRemoveQuestions">
               <AddOrRemoveQuestions @close="showAddOrRemoveQuestions = false"
@@ -279,7 +284,14 @@ const selectedForm = inject('selectedForm');
 const props = defineProps(['formSection']);
 const emit = defineEmits(['update-section', 'remove-section']);
 // Create a reactive copy of formSection
-const localFormSection = reactive({ ...props.formSection });
+const localFormSection = reactive({
+    ...props.formSection,
+    isExpanded: true
+});
+
+const expandCollapse = () => {
+    localFormSection.isExpanded = !localFormSection.isExpanded;
+};
 
 const searchParams = ref(
   new FormSectionQuestion({
@@ -487,11 +499,15 @@ const evaluationTypes = computed(() => {
   }
 });
 
-onMounted(() => {
-  // console.log(props.formSection)
-})
 
 </script>
 
 <style lang="scss">
+.expand-transition-enter-active, .expand-transition-leave-active {
+    transition: all 0.3s ease;
+}
+.expand-transition-enter, .expand-transition-leave-to {
+    opacity: 0;
+    transform: scaleY(0);
+}
 </style>

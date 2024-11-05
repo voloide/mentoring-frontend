@@ -148,6 +148,7 @@
                     <span v-if="props.row.inEdition">
                       <q-select
                         class="row"
+                        ref="sectionSelect"
                         use-input
                         hide-selected
                         fill-input
@@ -157,10 +158,10 @@
                         lazy-rules
                         v-model="props.row.section"
                         :options="sections"
-                        option-value="id"
+                        option-value="uuid"
                         option-label="description"
                         label="Secção"
-                        @new-value="createNewSection"
+                        @new-value="newValue => createNewSection(newValue, props)"
                         :rules="[
                           val => !!val || 'Por favor selecione uma secção'
                         ]"
@@ -305,6 +306,7 @@ const programmaticAreaRef = ref(null);
 const nameRef = ref(null);
 const targetPatientRef = ref(null);
 const targetFileRef = ref(null);
+const sectionSelect = ref(null);
 
 const currUser = ref({});
 const filterRedProgrammaticAreas = ref([]);
@@ -493,7 +495,7 @@ const editSection = (section) => {
 
 const saveSection = (section) => {
   // Check if section and sequence are filled
-  if (!section.section || !section.section.id) {
+  if (!section.section || !section.section.uuid) {
     alertError('Por favor, selecione uma secção.');
     return;
   }
@@ -507,7 +509,7 @@ const saveSection = (section) => {
   const isDuplicateSection = form.value.formSections.some(
     (existingSection) =>
       existingSection.uuid !== section.uuid &&
-      existingSection.section?.id === section.section?.id
+      existingSection.section?.uuid === section.section?.uuid
   );
 
   const isDuplicateSequence = form.value.formSections.some(
@@ -575,30 +577,40 @@ const deleteSection = (sectionn) => {
 
 
 // Save or Update form method
-
-
-const createNewSection = (newSectionDescription) => {
+const createNewSection = (newSectionDescription, props) => {
   try {
-    // Validate and create a new section using the Section model
+    // Ensure the section description is unique
+    const normalizedDescription = newSectionDescription.trim().toLowerCase();
+
+    const isDuplicate = sections.value.some(
+      section => section.description.trim().toLowerCase() === normalizedDescription
+    );
+
+    if (isDuplicate) {
+      alertError('Esta secção já existe. Por favor, insira uma descrição diferente.');
+      return;
+    }
+
+    // Create a new section instance
     const newSection = new Section({
       uuid: uuidv4(),
       description: newSectionDescription,
     });
 
-    // Call the custom setter for validation
-    newSection.setDescription(newSectionDescription);
-
-    // Persist the new section in the store using Pinia ORM methods
-    sectionService.insert({ data: newSection });
-
     // Add the new section to the options
     sections.value.push(newSection);
 
+    // Set the newly created section as the selected option for the current row
+    props.row.section = newSection;
+
+    if (sectionSelect.value) sectionSelect.value.hidePopup();
+
   } catch (error) {
     // Handle validation errors
-    alertError(error.message); // Assuming alertError is a function that shows an alert
+    alertError(error.message);
   }
 };
+
 
 // Mounted Lifecycle Hook
 onMounted(() => {

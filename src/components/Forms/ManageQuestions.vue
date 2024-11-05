@@ -12,11 +12,12 @@
           <!-- Loop through formSections and pass to FormSectionInfoContainer -->
           <div>
             <q-scroll-area
-            :thumb-style="styles.thumbStyle"
-            :content-style="styles.contentStyle"
-            :content-active-style="styles.contentActiveStyle"
-            style="height: 800px; min-width: 300px;"
+              :thumb-style="styles.thumbStyle"
+              :content-style="styles.contentStyle"
+              :content-active-style="styles.contentActiveStyle"
+              :style="{ height: dynamicHeight, minWidth: '300px' }"
             >
+
             <span v-for="formSection in selectedForm.formSections" :key="formSection.uuid">
               <form-section-info-container
                 :formSection="formSection"
@@ -48,17 +49,24 @@
   </template>
 
   <script setup>
-  import {inject, onMounted, provide, reactive} from 'vue';
+  import {inject, onMounted, provide, reactive, ref} from 'vue';
   import { useSwal } from 'src/composables/shared/dialog/dialog';
   import FormSectionInfoContainer from './FormSectionInfoContainer.vue';
   import { Loading, QSpinnerRings } from 'quasar';
-import formService from 'src/services/api/form/formService';
+  import formService from 'src/services/api/form/formService';
 
   // Inject selectedForm
   const selectedForm = inject('selectedForm');
   const emit = defineEmits(['close','goBack']);
   // Swal dialog methods
   const { alertError, alertSucess, alertWarningAction } = useSwal();
+
+  const dynamicHeight = ref(`${window.innerHeight - 250}px`);
+  onMounted(() => {
+      window.addEventListener('resize', () => {
+          dynamicHeight.value = `${window.innerHeight - 250}px`;
+      });
+  });
 
   // Method to handle section updates
   const updateFormSection = (updatedSection) => {
@@ -95,7 +103,7 @@ import formService from 'src/services/api/form/formService';
     const hasEmptyformSectionQuestions = selectedForm.value.formSections.some(section => section.formSectionQuestions.length === 0);
 
     if (hasEmptyformSectionQuestions) {
-        alertWarningAction('Há secções sem competências associadas. Deseja continuar?')
+        alertWarningAction('Há secções sem competências associadas, a tabela será gravada no estado inactivo até estar completa. Deseja continuar?')
             .then((result) => {
                 if (result) {
                     // If user confirms, proceed with save operation
@@ -165,31 +173,39 @@ import formService from 'src/services/api/form/formService';
 };
 
 
-  const goBack = () => {
-    // Check if any form section is still in edition mode
-    const formSectionInEdit = selectedForm.value.formSections.find(section => section.inEdition === true);
+const goBack = () => {
+    // Find all form sections that are in edit mode
+    const formSectionsInEdit = selectedForm.value.formSections.filter(section => section.inEdition === true);
 
-    if (formSectionInEdit) {
+    if (formSectionsInEdit.length > 0) {
         // Warn the user about potential data loss
         alertWarningAction('Há secções em modo de edição. Você pode perder dados não salvos. Deseja continuar?')
-        .then((result) => {
-            if (result) {
-            // If the user confirms, remove records without `id` from the section in edition
-            formSectionInEdit.formSectionQuestions = formSectionInEdit.formSectionQuestions.filter(question => question.id !== null);
+            .then((result) => {
+                if (result) {
+                    // If the user confirms, update each section in edit mode
+                    formSectionsInEdit.forEach(section => {
+                        // Remove questions without an `id` from the section's formSectionQuestions
+                        section.formSectionQuestions = section.formSectionQuestions.filter(question => question.id !== null);
 
-            // Set inEdition to false for the section in edit mode
-            formSectionInEdit.inEdition = false;
+                        // Set inEdition to false
+                        section.inEdition = false;
+                    });
 
-            // Emit the goBack event to proceed
-            emit('goBack');
-            }
-        })
-        .catch(alertError); // Handle any errors during the alert dialog
+                    // Emit the goBack event to proceed
+                    emit('goBack');
+                }
+            })
+            .catch((error) => {
+                // Handle any errors during the alert dialog interaction
+                console.error('Error displaying warning dialog:', error);
+                alertError('Ocorreu um erro ao exibir o alerta. Tente novamente.');
+            });
     } else {
-        // If no section is in edit mode, proceed with the goBack action
+        // If no sections are in edit mode, proceed with the goBack action
         emit('goBack');
     }
 };
+
 
 
   provide('selectedForm', selectedForm);
