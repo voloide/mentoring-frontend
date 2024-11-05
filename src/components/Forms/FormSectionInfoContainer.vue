@@ -226,6 +226,12 @@
                     </span>
                       </q-td>
                       <q-td key="options" :props="props">
+                          <span
+                            style="color: green"
+                            v-if="fsqInUse(props.row)"
+                          >
+                            Em uso
+                          </span>
                           <q-btn
                             v-if="!fsqInUse(props.row)"
                               flat
@@ -337,23 +343,30 @@ const removeFormSectionQuestions = (formSectionQuestion) => {
   alertWarningAction('Tem certeza que deseja desassociar esta competência?').then(
     (result) => {
       if (result) {
-        formQuestionService
-          .disassociateQuesion(formSectionQuestion.id)
-          .then((response) => {
-            if (response.status === 200 || response.status === 201) {
-              alertSucess('Competência desassociada com sucesso!').then((result) => {
-                localFormSection.formSectionQuestions = localFormSection.formSectionQuestions.filter(
-                  (q) => q.uuid !== formSectionQuestion.uuid
-                );
-                emit('update-section', localFormSection); // Emit updated section
-              });
-            } else {
-              alertError('Não foi possivel apagar a competência.');
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-          });
+        if(formSectionQuestion.id){
+          formQuestionService
+            .disassociateQuesion(formSectionQuestion.id)
+            .then((response) => {
+              if (response.status === 200 || response.status === 201) {
+                alertSucess('Competência desassociada com sucesso!').then((result) => {
+                  localFormSection.formSectionQuestions = localFormSection.formSectionQuestions.filter(
+                    (q) => q.uuid !== formSectionQuestion.uuid
+                  );
+                  emit('update-section', localFormSection); // Emit updated section
+                });
+              } else {
+                alertError('Não foi possivel apagar a competência.');
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        } else {
+          localFormSection.formSectionQuestions = localFormSection.formSectionQuestions.filter(
+            (q) => q.uuid !== formSectionQuestion.uuid
+          );
+          emit('update-section', localFormSection); // Emit updated section
+        }
       }
   })
 };

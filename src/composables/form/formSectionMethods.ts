@@ -13,6 +13,7 @@ export default function useFormSection() {
       id: formSectionDTO.id,
       uuid: formSectionDTO.uuid,
       sequence: formSectionDTO.sequence,
+      in_use: formSectionDTO.in_use,
       section: createSectionFromDTO(formSectionDTO.section),
       formSectionQuestions: formSectionDTO.formSectionQuestions ? createFormQuestionsListFromDTOs(formSectionDTO.formSectionQuestions) : [],
     });

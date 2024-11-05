@@ -226,13 +226,19 @@
                       >
                         <q-tooltip class="bg-green-5">Editar Secção</q-tooltip>
                       </q-btn>
+                      <span
+                        style="color: green"
+                        v-if="!props.row.inEdition && props.row.in_use"
+                      >
+                        Em uso
+                      </span>
                       <q-btn
                         flat
                         round
                         color="red-8"
                         icon="delete"
-                        v-if="!props.row.inEdition"
-                        @click="deleteSection(props.row.uuid)"
+                        v-if="!props.row.inEdition && !props.row.in_use"
+                        @click="deleteSection(props.row)"
                       >
                         <q-tooltip class="bg-red-5">Excluir Secção</q-tooltip>
                       </q-btn>
@@ -529,8 +535,8 @@ const saveSection = (section) => {
 
 
 // Delete a specific section
-const deleteSection = (uuid) => {
-  // Check if any section is in edition mode
+const deleteSection = (sectionn) => {
+
   const isEditing = form.value.formSections.some((section) => section.inEdition);
 
   if (isEditing) {
@@ -538,9 +544,35 @@ const deleteSection = (uuid) => {
     return; // Do not proceed if there's an ongoing edition
   }
 
-  // Proceed with deletion if no section is being edited
-  form.value.formSections = form.value.formSections.filter((section) => section.uuid !== uuid);
-  alertSucess('Secção excluída com sucesso.');
+  alertWarningAction('Tem certeza que deseja excluir esta secção?').then(
+    (result) => {
+      if (result) {
+        if(sectionn.id){
+          formService
+            .deleteFormSection(sectionn.id)
+            .then((response) => {
+              if (response.status === 200 || response.status === 201) {
+                alertSucess('Secção excluida com sucesso!').then((result) => {
+
+                    form.value.formSections = form.value.formSections.filter((section) => section.uuid !== sectionn.uuid);
+
+                });
+              } else {
+                alertError('Não foi possivel apagar a competência.');
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        } else {
+          alertSucess('Secção excluida com sucesso!').then((result) => {
+
+            form.value.formSections = form.value.formSections.filter((section) => section.uuid !== sectionn.uuid);
+
+          });
+        }
+      }
+    })
 };
 
 

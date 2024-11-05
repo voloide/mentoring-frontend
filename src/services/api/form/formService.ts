@@ -49,6 +49,19 @@ export default {
         console.error('Error', error.message);
       });
   },
+  async deleteFormSection(formSectionId: number) {
+    return await api()
+      .delete(`/forms/${formSectionId}`)
+      .then(
+        (resp) => {
+          repo.destroy(formSectionId);
+          return resp;
+        })
+      .catch((error) => {
+        console.error('Error', error.message);
+      });
+    repo.delete(formSectionId);
+  },
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto: any) => {
       const entity = createFormFromDTO(dto);

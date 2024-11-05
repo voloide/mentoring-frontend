@@ -9,7 +9,7 @@
   </template>
 
   <script setup>
-  import { ref, provide, computed, onMounted } from 'vue';
+  import { ref, provide, watch, onMounted } from 'vue';
   import Search from 'src/components/Forms/Search.vue';
   import AddEdit from 'src/components/Forms/ManageForm.vue'; // ManageForm.vue referenced as AddEdit
   import { useLoading } from 'src/composables/shared/loading/loading';
@@ -75,6 +75,27 @@
       closeLoading(); // Hide loading spinner
     }
   };
+
+  // Watch for changes in 'step' and reset 'form' when it changes to 'create'
+  watch(step, (newStep) => {
+    if (newStep === 'create') {
+      form.value = new Form({
+        programmaticArea: {
+          program: {
+            id: null,
+            name: null,
+          }
+        },
+        code: '',
+        name: '',
+        description: '',
+        targetPatient: '',
+        targetFile: '',
+        formSections: [],
+        formQuestions: []
+      });
+    }
+  });
 
   // Close the form and go back to the search step
   const close = () => {
