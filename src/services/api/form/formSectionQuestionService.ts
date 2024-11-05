@@ -15,7 +15,7 @@ export default {
         ).toString()}`
       )
       .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
+        this.generateAndSaveEntityFromDTO(resp.data?.content);
         return resp;
       })
       .catch((error) => {
@@ -23,6 +23,7 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
+    console.log(dtoList)
     dtoList.forEach((dto) => {
       const entity = createFormSectionQuestionFromDTO(dto);
       repo.save(entity);
