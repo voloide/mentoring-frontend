@@ -81,7 +81,7 @@
             </div>
           </q-form>
           <div class="row">
-            <label class="col text-right">v1.0</label>
+            <label class="col text-right">v{{ appVersion }}</label>
           </div>
         </q-card-section>
       </q-card>
@@ -95,6 +95,7 @@ import UsersService from 'src/services/api/user/UsersService'
 import { useRouter } from 'vue-router';
 import { Loading, QSpinnerRings } from 'quasar';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import { version } from '../../../package.json'
 
 const username = ref('');
 const password = ref('');
@@ -103,6 +104,7 @@ const passwordRef = ref(null);
 const submitting = ref(false);
 const router = useRouter();
 const { alertError } = useSwal();
+const appVersion = version;
 
 const authUser = async () => {
   Loading.show({

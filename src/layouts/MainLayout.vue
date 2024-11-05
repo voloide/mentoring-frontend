@@ -50,6 +50,7 @@
             <q-item-section>Log out</q-item-section>
           </q-item>
         </q-list>
+
       </div>
     </q-drawer>
     <q-page-container style="padding-top: 10px; height: 100%">
@@ -75,12 +76,14 @@ import { Loading, QSpinnerRings, LocalStorage } from 'quasar';
 import { useRouter } from 'vue-router';
 import useEmployee from 'src/composables/employee/employeeMethods';
 import useUser from 'src/composables/user/userMethods';
+import { version } from '../../package.json'
 
 const leftDrawerOpen = ref(false);
 const link = ref('home');
 const router = useRouter();
 const { fullName } = useEmployee();
 const { createUserFromDTO } = useUser();
+const appVersion = version;
 
 const menuOptions = [
   { label: 'Início', icon: 'home', to: '/home', link: 'home' },
