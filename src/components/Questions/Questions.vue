@@ -290,10 +290,14 @@ const submitForm = () => {
     question: data.value.question,
     program: data.value.program,
   };
-  questionService.saveQuestion(question).then((res) => {
-    closeForm;
-    newRowAdded.value = false;
-    search()
+  questionService.saveQuestion(question).then((response) => {
+    if(response.status === 200 || response.status === 201){closeForm;
+      newRowAdded.value = false;
+      search()
+      alertSucess('Competência registada com sucesso');
+    } else {
+      alertError('Ocorreu algum erro durante a operação.')
+    }
   });
 };
 
