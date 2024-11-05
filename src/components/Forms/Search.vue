@@ -210,6 +210,7 @@ const searchParams = ref({
 });
 
 const form = inject('form')
+const step = inject('step')
 
 const isSearchInitialized = ref(false);
 
@@ -231,7 +232,6 @@ const composeForms = (forms) => {
   forms.forEach((formObj) => {
     // Check if the question exists in either selectedForm or addedFormQuestions
     const form = createFormFromDTO(formObj)
-    console.log(form)
     searchResults.value.push(form)
   });
 };
@@ -344,7 +344,7 @@ const changeLifeCycle = (form) => {
 // Refactor to use `useStepManager` for changing to edit step
 const editForm = (formSelectedd) => {
   form.value = formSelectedd;
-  emit('create', true)
+  emit('edit', true)
   // changeStepToEdit();
 };
 

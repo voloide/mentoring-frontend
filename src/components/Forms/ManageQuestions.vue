@@ -114,17 +114,29 @@ import formService from 'src/services/api/form/formService';
     // Create a deep copy of selectedForm to avoid circular references
     const formCopy = JSON.parse(JSON.stringify(selectedForm.value));
 
+    let isEditStep = false;
+
+    if(formCopy.id) isEditStep = true
+
     Loading.show({
         spinner: QSpinnerRings,
     });
 
     formService.saveOrUpdate(formCopy).then((resp) => {
         if (resp.status === 200 || resp.status === 201) {
-            alertSucess('Tabela de Competências registada com sucesso!').then((r) => {
-                if (r) {
-                    emit('close');
-                }
+          if (isEditStep) {
+            alertSucess('Tabela de Competências actualizada com sucesso!').then((r) => {
+              if (r) {
+                emit('close');
+              }
             });
+          } else {
+            alertSucess('Tabela de Competências registada com sucesso!').then((r) => {
+              if (r) {
+                emit('close');
+              }
+            });
+          }
         } else {
             alertError(resp.message);
         }
