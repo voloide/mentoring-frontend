@@ -78,6 +78,7 @@ export default {
     return res;
   },
   async saveUser(user: any) {
+    console.log(user)
     return await api()
       .post('/user/save', user)
       .then((resp) => {

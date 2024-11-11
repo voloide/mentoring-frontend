@@ -7,11 +7,11 @@ const repo = useRepo(ProgrammaticArea);
 const { createProgrammaticAreaFromDTO } = useProgrammaticArea();
 
 export default {
-  async getAll() {
+  async getAll(searchParam: string) {
     return await api()
-      .get('/programmaticareas/getAll')
+      .get(`/programmaticareas/getAll?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
+        this.generateAndSaveEntityFromDTO(resp.data?.content);
         return resp;
       })
       .catch((error) => {

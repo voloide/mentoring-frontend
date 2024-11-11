@@ -10,6 +10,7 @@
             :columns="columns"
             row-key="id"
             v-model:pagination="pagination"
+            :rows-per-page-options="[10, 20, 50, 100]"
             :filter="filter"
             :loading="loading"
             @request="onRequest"
@@ -178,16 +179,6 @@
             </template>
           </q-table>
         </div>
-        <div style="float: right" class="q-mt-md">
-          <q-pagination
-            v-model="pagination.page"
-            :max="pagination.rowsNumber"
-            :max-pages="5"
-            boundary-numbers
-            direction-links
-            color="primary"
-          />
-        </div>
         <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
           <q-fab color="primary" glossy icon="add" @click="addNewRow" />
         </q-page-sticky>
@@ -234,14 +225,21 @@ const columns = [
 ];
 
 const pagination = ref({
+  sortBy: 'desc',
+  descending: false,
   page: 1,
   rowsPerPage: 10,
-  rowsNumber: 0,
-});
+  rowsNumber: 0
+})
 
 const onRequest = (props) => {
-  pagination.value.page = props.pagination.page;
-  pagination.value.rowsPerPage = props.pagination.rowsPerPage;
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+  // Atualiza o estado de paginação
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
   loadData();
 };
 

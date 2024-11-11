@@ -4,7 +4,7 @@
       <form ref="myForm">
         <div class="q-ma-md">
           <q-banner dense inline-actions class="text-white bg-primary q-px-md">
-            Dados do User
+            Dados do Utilizador
             <template v-slot:action>
               <q-img src="~assets/mentoring.png" />
             </template>
@@ -14,7 +14,7 @@
               <div class="row items-center q-mb-md">
                 <q-icon name="person_outline" size="sm" />
                 <span class="q-pl-sm text-subtitle2"
-                  >Identificação do User</span
+                  >Identificação do Utilizador</span
                 >
               </div>
               <q-separator color="grey-13" size="1px" />

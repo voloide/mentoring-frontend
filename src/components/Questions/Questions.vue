@@ -190,6 +190,12 @@
                       >
                     <q-tooltip class="bg-green-5">{{ isActive(props.row) ? 'Inactivar Tabela de Competências' : 'Activar Tabela de Competências' }}</q-tooltip>
                   </q-btn>
+                      <span
+                        style="color: green"
+                        v-if="used_in_form_section(props.row)"
+                      >
+                        Em uso
+                      </span>
                       <q-btn
                         v-if="selectedQuestion.id !== props.row.id && !used_in_form_section(props.row)"
                         flat
