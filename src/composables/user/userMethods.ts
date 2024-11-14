@@ -37,9 +37,20 @@ export default function useUser() {
       password: user.password,
       shouldResetPassword: user.shouldResetPassword,
       employeeDTO: createDTOFromEmployee(user.employee),
-      lifeCycleStatus:user.lifeCycleStatus
+      lifeCycleStatus:user.lifeCycleStatus,
+      userRoleDTOS: [],
+      roleIds: generateUserRolesIds(user.userRoles)
     };
     return userDTO;
+  }
+
+  function generateUserRolesIds(userRoles: any) {
+    const res = []
+    userRoles.forEach((userRole) => {
+      res.push(userRole.id);
+    })
+
+    return res
   }
 
   return {

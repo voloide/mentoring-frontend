@@ -7,8 +7,11 @@
           dense
           :rows="searchResults"
           :columns="columns"
+          v-model:pagination="pagination"
+          :rows-per-page-options="[10, 20, 50, 100]"
           row-key="id"
           :filter="filter"
+          @request="onRequest"
         >
           <template v-slot:no-data="{ icon, filter }">
             <div
@@ -236,6 +239,10 @@ import programmaticAreaService from 'src/services/api/programmaticArea/programma
 import programService from 'src/services/api/program/programService';
 import { computed } from 'vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import {Loading} from "quasar";
+import useProgrammaticArea from "src/composables/programmaticArea/programmaticAreaMethods";
+
+const { createProgrammaticAreaFromDTO } = useProgrammaticArea();
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
@@ -247,6 +254,13 @@ const data = ref({
   description: '',
   program: '',
 });
+const pagination = ref({
+  sortBy: 'desc',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0
+})
 const openForm = ref(false);
 const columns = [
   {
@@ -392,5 +406,45 @@ const removeRow = () => {
     searchResults.value.splice(index, 1);
     newRowAdded.value = false;
   }
+};
+
+const composeProgrammaticAreas = (programmaticAreas) => {
+  searchResults.value = [];
+
+  programmaticAreas.forEach((programmaticArea) => {
+    const programmaticArea1 = createProgrammaticAreaFromDTO(programmaticArea)
+    searchResults.value.push(programmaticArea1)
+  });
+};
+
+const getAllProgrammaticAreas = () => {
+  const params = {
+    page: pagination.value.page - 1,
+    size: pagination.value.rowsPerPage,
+  };
+  Object.keys(params).forEach(
+    (key) => params[key] === '' && delete params[key]
+  );
+  programmaticAreaService.getAll(params)
+    .then((response) => {
+      searchResults.value = [];
+      if (response.status === 200 || (response.status === 201)) {
+        composeProgrammaticAreas(response.data.content)
+        pagination.value.rowsNumber = response.data.totalSize; // Update rows count
+      }
+      Loading.hide();
+    });
+}
+
+const onRequest = (props) => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+  // Atualiza o estado de paginação
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
+
+  getAllProgrammaticAreas();
 };
 </script>

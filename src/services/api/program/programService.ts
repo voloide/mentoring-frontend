@@ -7,11 +7,11 @@ const repo = useRepo(Program);
 const { createProgramFromDTO } = useProgram();
 
 export default {
-  async getAll() {
+  async getAll(searchParam: string) {
     return await api()
-      .get('/programs/getAll')
+      .get(`/programs/getAll?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        this.generateAndSaveEntityFromDTO(resp.data);
+        this.generateAndSaveEntityFromDTO(resp.data?.content);
         return resp;
       })
       .catch((error) => {

@@ -4,7 +4,7 @@
       <form ref="myForm">
         <div class="q-ma-md">
           <q-banner dense inline-actions class="text-white bg-primary q-px-md">
-            Dados do User
+            Dados do Utilizador
             <template v-slot:action>
               <q-img src="~assets/mentoring.png" />
             </template>
@@ -14,7 +14,7 @@
               <div class="row items-center q-mb-md">
                 <q-icon name="person_outline" size="sm" />
                 <span class="q-pl-sm text-subtitle2"
-                  >Identificação do User</span
+                  >Identificação do Utilizador</span
                 >
               </div>
               <q-separator color="grey-13" size="1px" />
@@ -173,22 +173,24 @@
               <q-select
                 class="col q-ml-md"
                 use-input
-                hide-selected
                 fill-input
                 input-debounce="0"
                 dense
+                clearable
                 outlined
                 ref="roleRef"
                 lazy-rules
-                :rules="[
-                  (val) => !!val || 'Por favor indicar o Vínculo Laboral',
-                ]"
-                v-model="user.role"
+                :rules="[(val) => (val && val.length > 0) || 'Por favor indicar o Vínculo Laboral']"
+                v-model="user.userRoles"
                 :options="roles"
                 option-value="id"
                 option-label="label"
                 label="Perfil de Acesso"
+                multiple
+                counter
+                hint="perfis"
               />
+
             </div>
 
             <div class="q-mt-lg">
@@ -449,11 +451,13 @@ const user = ref(
           location: new Location(),
         },
       ],
+      userRoles: [],
     }),
   })
 );
 
-const emit = defineEmits(['goToUseringAreas', 'close']);
+
+const emit = defineEmits(['goToUseringAreas', 'close', 'cancel']);
 
 const { createDTOFromUser } = useUser();
 const { stringContains } = useStringUtils();
@@ -511,7 +515,16 @@ const init = () => {
     selectedUserLaborInfo.value =
       user.value.employee.partner.name === 'MISAU' ? 'SNS' : 'ONG';
   }
-  user.value.role = roles.value.filter((item) => item.id === roleId.value)[0];
+  // Sobrescreve o userRoles com as roles filtradas
+  user.value.userRoles = user.value.userRoles.map((userRole) => {
+    if (userRole.role) {
+      // Filtra as roles com base no ID
+      return roles.value.filter((item) => item.id === userRole.role.id)[0];
+    }
+    return null;  // Caso a role não exista, retorna null ou outro valor adequado
+  }).filter((role) => role !== null);  // Remove itens nulos, se houver
+
+  // user.value.rolesOfUser = roles.value.filter((item) => item.id === roleId.value);
 };
 onMounted(() => {
   init();
@@ -585,30 +598,31 @@ const submitForm = () => {
     if (isEditStep.value) {
       userService
         .updateUser(userDTO)
-        .then((resp) => handleResponse(resp, 'User actualizado.', 'close'))
+        .then((resp) => handleResponse(resp, 'Utilizador actualizado.', 'cancel'))
         .catch((error) => handleError(error, 'Erro ao atualizar o User'));
     } else {
-      userService
-        .saveUser(userDTO)
-        .then((resp) =>
-          handleResponse(resp, 'User criado com sucesso', 'cancel')
-        )
-        .catch((error) =>
-          handleError(error, 'Ocorreu um erro ao tentar criar User')
-        );
+      console.log('Registando')
+        userService
+          .saveUser(userDTO)
+          .then((resp) =>
+            handleResponse(resp, 'Utilizador registado com sucesso', 'cancel')
+          )
+          .catch((error) =>
+            handleError(error, 'Ocorreu um erro ao tentar criar User')
+          );
     }
   }
 };
 
 const handleResponse = (resp, successMessage, emitAction) => {
   if (resp.status === 200 || resp.status === 201) {
-    userRolesService
-      .mergeUserRole(resp.data.id, user.value.role.id)
-      .then(() => {
+    // userRolesService
+    //   .mergeUserRole(resp.data.id, user.value.role.id)
+    //   .then(() => {
         alertSucess(successMessage).then(() => {
           emit(emitAction);
         });
-      });
+      // });
   } else {
     alertError(resp?.message);
   }

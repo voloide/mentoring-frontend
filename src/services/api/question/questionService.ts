@@ -10,6 +10,7 @@ const { createQuestionFromDTO } = useQuestion();
 
 export default {
   async search(searchParam: string) {
+    console.log(searchParam)
     return await api()
       .get(`/questions/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {

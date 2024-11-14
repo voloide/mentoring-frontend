@@ -2,14 +2,17 @@
   <div class="q-pt-sm" style="height: 100%">
     <div class="q-ma-md q-pa-md page-container">
       <div>
-        <q-table
-          class="col"
-          dense
-          :rows="searchResults"
-          :columns="columns"
-          row-key="id"
-          :filter="filter"
-        >
+          <q-table
+            class="col"
+            dense
+            :rows="searchResults"
+            :columns="columns"
+            v-model:pagination="pagination"
+            :rows-per-page-options="[10, 20, 50, 100]"
+            row-key="id"
+            :filter="filter"
+            @request="onRequest"
+          >
           <template v-slot:no-data="{ icon, filter }">
             <div
               class="full-width row flex-center text-primary q-gutter-sm text-body2"
@@ -175,7 +178,10 @@ import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
+import {Loading} from "quasar";
+import useProgram from "src/composables/program/programMethods";
 
+const { createProgramFromDTO } = useProgram();
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 
 const searchResults = ref([]);
@@ -187,6 +193,13 @@ const data = ref({
   description: '',
 });
 const openForm = ref(false);
+const pagination = ref({
+  sortBy: 'desc',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0
+})
 const columns = [
   {
     name: 'name',
@@ -207,33 +220,74 @@ const currUser = ref(new User());
 
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
-  searchResults.value = programService.piniaGetAll();
+  getAllPrograms();
 });
+
+const getAllPrograms = () => {
+  const params = {
+    page: pagination.value.page - 1,
+    size: pagination.value.rowsPerPage,
+  };
+  Object.keys(params).forEach(
+    (key) => params[key] === '' && delete params[key]
+  );
+  programService.getAll(params)
+    .then((response) => {
+      searchResults.value = [];
+      if (response.status === 200 || (response.status === 201)) {
+        composePrograms(response.data.content)
+        pagination.value.rowsNumber = response.data.totalSize; // Update rows count
+      }
+      Loading.hide();
+    });
+}
+
+const onRequest = (props) => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+  // Atualiza o estado de paginação
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
+
+  getAllPrograms();
+};
+
+const composePrograms = (programs) => {
+  searchResults.value = [];
+
+  programs.forEach((program) => {
+    const program1 = createProgramFromDTO(program)
+    searchResults.value.push(program1)
+  });
+};
 
 const submitForm = () => {
   const program = {
     name: data.value.name,
     description: data.value.description,
   };
-  programService.saveProgram(program).then((res) => {
-    closeForm;
-    newRowAdded.value = false
-    searchResults.value = programService.piniaGetAll();
+  programService.saveProgram(program).then((response) => {
+    closeForm();
+    getAllPrograms()
   });
-};
 
-const closeForm = () => {
-  resetFields();
-  removeRow();
-  openForm.value = false;
-};
+}
 
-const editProgram = (program) => {
-  removeRow();
-  openForm.value = false;
-  selectedProgram.value = program;
-  data.value = program;
-};
+  const closeForm = () => {
+    resetFields();
+    removeRow();
+    openForm.value = false;
+  };
+
+  const editProgram = (program) => {
+    removeRow();
+    openForm.value = true;
+    selectedProgram.value = program;
+    data.value = { ...program }; // Usando a cópia do objeto para garantir reatividade
+  };
+
 
 const saveUpdate = () => {
   const program = {
@@ -242,7 +296,7 @@ const saveUpdate = () => {
     description: data.value.description,
   };
   programService.updateProgram(program).then((res) => {
-    searchResults.value = programService.piniaGetAll();
+    getAllPrograms();
     resetFields();
   });
 
@@ -261,7 +315,7 @@ const deleteProgram = (program) => {
         programService
           .deleteProgram(selectedProgram.value)
           .then((response) => {
-            if (response.status === 200 || esponse.status === 201) {
+            if (response.status === 200 || response.status === 201) {
               alertSucess('Programa apagado com sucesso!').then(
                 (result) => {
                   programService.getAll().then((res) => {

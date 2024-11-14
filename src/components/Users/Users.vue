@@ -88,6 +88,7 @@
             :columns="columns"
             row-key="id"
             v-model:pagination="pagination"
+            :rows-per-page-options="[10, 20, 50, 100]"
             :loading="loading"
             @request="onRequest"
           >
@@ -179,15 +180,6 @@
               </q-tr>
             </template>
           </q-table>
-        </div>
-        <div style="float: right" class="q-mt-md">
-          <q-pagination
-            v-model="pagination.page"
-            :max="pagination.rowsNumber"
-            boundary-numbers
-            direction-links
-            color="primary"
-          />
         </div>
         <q-page-sticky position="bottom-right" :offset="[20, 30]" class="row">
           <q-fab
