@@ -1,8 +1,8 @@
-import Authority from "src/stores/model/authority/Authority"
+import Authority from 'src/stores/model/authority/Authority'
 
 export default function useAuthority() {
     
-    function createAuthorityFromDTO(authorityDTO: any) {
+    function createAuthorityFromDTO(authorityDTO) {
         return  new Authority({
             id: authorityDTO.id,
             uuid: authorityDTO.uuid,

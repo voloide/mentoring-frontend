@@ -23,7 +23,6 @@ export default {
       });
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
-    console.log(dtoList)
     dtoList.forEach((dto) => {
       const entity = createFormSectionQuestionFromDTO(dto);
       repo.save(entity);
