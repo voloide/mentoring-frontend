@@ -7,8 +7,11 @@
           dense
           :rows="searchResults"
           :columns="columns"
+          v-model:pagination="pagination"
+          :rows-per-page-options="[10, 20, 50, 100]"
           row-key="id"
           :filter="filter"
+          @request="onRequest"
         >
           <template v-slot:no-data="{ icon, filter }">
             <div
@@ -144,15 +147,25 @@ import partnerService from 'src/services/api/partner/partnerService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import healthFacilityService from "src/services/api/healthfacility/healthFacilityService";
 import usePartner from "src/composables/partner/partnerMethods";
+import programService from "src/services/api/program/programService";
+import {Loading} from "quasar";
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
 const selectedPartner = ref('');
 const newRowAdded = ref(false);
+const { createPartnerFromDTO } = usePartner();
 const data = ref({
   name: '',
   description: '',
 });
+const pagination = ref({
+  sortBy: 'desc',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0
+})
 const openForm = ref(false);
 const columns = [
   {
@@ -172,9 +185,37 @@ const columns = [
 
 const currUser = ref(new User());
 
+const composePartners = (partners) => {
+  searchResults.value = [];
+
+  partners.forEach((partner) => {
+    const partner1 = createPartnerFromDTO(partner)
+    searchResults.value.push(partner1)
+  });
+};
+
+const getAllPartners = () => {
+  const params = {
+    page: pagination.value.page - 1,
+    size: pagination.value.rowsPerPage,
+  };
+  Object.keys(params).forEach(
+    (key) => params[key] === '' && delete params[key]
+  );
+  partnerService.getAll(params)
+    .then((response) => {
+      searchResults.value = [];
+      if (response.status === 200 || (response.status === 201)) {
+        composePartners(response.data.content)
+        pagination.value.rowsNumber = response.data.totalSize; // Update rows count
+      }
+      Loading.hide();
+    });
+}
+
 onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
-  searchResults.value = PartnerService.piniaGetAll();
+  getAllPartners();
 });
 
 const submitForm = () => {
@@ -275,5 +316,17 @@ const removeRow = () => {
   searchResults.value.splice(index, 1);
   newRowAdded.value = false;
   }
+};
+
+const onRequest = (props) => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+  // Atualiza o estado de paginação
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy;
+  pagination.value.descending = descending;
+
+  getAllPartners();
 };
 </script>

@@ -1,5 +1,7 @@
 import useRole from 'src/composables/role/roleMethods'
 import UserRole from "src/stores/model/role/UserRole";
+import Role from "stores/model/role/Role";
+import User from "stores/model/user/User";
 
 export default function useUserRole() {
 
@@ -12,7 +14,17 @@ export default function useUserRole() {
           });
     }
 
+  function createDTOFromUserRole(userRole: any) {
+    // return {
+    //   id: userRole.id,
+    //   uuid: userRole.uuid,
+    //   lifeCycleStatus: 'ACTIVE'
+    // };
+    return []
+  }
+
     return {
-        createUserRoleFromDTO,
+      createUserRoleFromDTO,
+      createDTOFromUserRole
     }
 }
