@@ -66,6 +66,9 @@
                 </q-td>
               </q-tr>
             </template>
+            <template v-slot:loading>
+              <q-inner-loading showing color="primary"></q-inner-loading>
+            </template>
           </q-table>
         </div>
 
