@@ -1,9 +1,9 @@
 {
   "name": "mentoring-frontend",
-  "version": "0.0.1",
+  "version": "1.0.3",
   "description": "Projecto Mentoria",
   "productName": "Mentoria",
-  "author": "Voloide",
+  "author": "Voloide Tamele",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
