@@ -110,9 +110,6 @@ const authUser = async () => {
   Loading.show({
     spinner: QSpinnerRings,
   })
-  const encodedStringBtoA = btoa(
-    String(username.value).concat(':').concat(password.value)
-  );
   usernameRef.value.validate();
   passwordRef.value.validate();
 
@@ -129,9 +126,10 @@ const authUser = async () => {
           localStorage.setItem('refresh_token', response.data.refresh_token);
           localStorage.setItem('username', response.data.username);
           localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo));
-          localStorage.setItem('tokenExpiration', String(Date.now() + 60000));
+          localStorage.setItem('tokenExpiration', String(Date.now() + 900000));
           localStorage.setItem('userData', JSON.stringify(response.data));
 
+          UsersService.startTokenSynchronization();
           router.push({ path: '/' });
         } else {
           alertError(response.response.data.message);

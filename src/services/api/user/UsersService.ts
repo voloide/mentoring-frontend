@@ -8,6 +8,8 @@ import User from 'src/stores/model/user/User';
 const userRepo = useRepo(User);
 const { createUserFromDTO } = useUser();
 
+const TOKEN_REFRESH_MARGIN = 2 * 60 * 1000; // Refresh token 2 minutes before expiration
+
 export default {
   async post(obj: string) {
     try {
@@ -19,18 +21,14 @@ export default {
       console.error(error);
     }
   },
-  async login(params: any) {
-    return api()
-      .post('/login', params)
-      .then((resp) => {
-        if (resp.status === 200) {
-          this.convertUserFromDTO(resp.data.userInfo);
-        }
-        return resp;
-      })
-      .catch((error) => {
-        return error;
-      });
+  async login(params) {
+    try {
+      const resp = await api().post('/login', params);
+      return resp;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
   },
   logout() {
     localStorage.removeItem('access_token');
@@ -154,5 +152,39 @@ export default {
         console.error(error);
         console.error('Error', error.message);
       });
+  },
+  handleTokenResponse(data) {
+    const { accessToken, refreshToken, expiresIn, userInfo } = data;
+
+    // Save tokens and expiration time
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('tokenExpiration', Date.now() + expiresIn * 900000); // Convert to milliseconds
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+  },
+  async refreshToken() {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) return;
+
+    try {
+      const response = await api().post('/auth/refresh', { refresh_token: refreshToken });
+      if (response.status === 200) {
+        localStorage.setItem('access_token', response.data[0].access_token);
+        localStorage.setItem('refresh_token', response.data[0].refresh_token);
+        localStorage.setItem('tokenExpiration', String(Date.now() + 900000));
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      this.logout();
+    }
+  },
+  startTokenSynchronization() {
+    setInterval(() => {
+      if (localStorage.getItem('tokenExpiration') === null) return;
+      const tokenExpiration = Number(localStorage.getItem('tokenExpiration'));
+      if (Date.now() > tokenExpiration - TOKEN_REFRESH_MARGIN) {
+        this.refreshToken();
+      }
+    }, 5 * 60 * 1000); // Check every 5 minute
   },
 };
