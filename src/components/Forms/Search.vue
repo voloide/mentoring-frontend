@@ -368,6 +368,7 @@ const search = () => {
       .then((response) => {
         searchResults.value = [];
         if (response.status === 200 || (response.status === 201)) {
+          if(response.data.content?.length > 0)
           composeForms(response.data.content)
           pagination.value.rowsNumber = response.data.totalSize;
         }

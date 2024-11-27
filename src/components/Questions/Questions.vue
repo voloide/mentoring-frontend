@@ -461,6 +461,8 @@ const search = async () => {
     .then((response) => {
       searchResults.value = [];
       if (response.status === 200 || (response.status === 201)) {
+        console.log(response.data.content?.length)
+        if(response.data.content?.length > 0)
         composeQuestios(response.data.content)
         pagination.value.rowsNumber = response.data.totalSize; // Update rows count
       }
