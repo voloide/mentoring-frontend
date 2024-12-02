@@ -337,7 +337,7 @@ const changeLifeCycle = (form) => {
     .catch((error) => {
       form.lifeCycleStatus = form.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       console.error('Error', error.message);
-      alertError('Ocorreu um erro inesperado nesta operação.');
+      alertError(error.message);
     });
 };
 
