@@ -291,13 +291,16 @@ const programs = computed(() => {
 });
 
 const submitForm = () => {
+  Loading.show({ spinner: QSpinnerRings });
   const question = {
     tableCode: data.value.tableCode,
     question: data.value.question,
     program: data.value.program,
   };
   questionService.saveQuestion(question).then((response) => {
-    if(response.status === 200 || response.status === 201){closeForm;
+    if(response.status === 200 || response.status === 201){
+      closeForm;
+      Loading.hide()
       newRowAdded.value = false;
       search()
       alertSucess('Competência registada com sucesso');
@@ -458,6 +461,8 @@ const search = async () => {
     .then((response) => {
       searchResults.value = [];
       if (response.status === 200 || (response.status === 201)) {
+        console.log(response.data.content?.length)
+        if(response.data.content?.length > 0)
         composeQuestios(response.data.content)
         pagination.value.rowsNumber = response.data.totalSize; // Update rows count
       }

@@ -12,6 +12,7 @@ export default {
       .get(`/forms/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
         if (resp.status === 200 || (resp.status === 201)) {
+          if(resp.data?.content?.length > 0)
           this.generateAndSaveEntityFromDTO(resp.data?.content);
         }
         return resp;
