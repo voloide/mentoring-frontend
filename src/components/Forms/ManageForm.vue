@@ -74,6 +74,20 @@
               </template>
             </q-select>
           </div>
+          <div class="col">
+            <q-select
+              class="col q-ml-md"
+              v-model="form.evaluationLocation"
+              :options="usageLocationOptions"
+              label="Local de Uso"
+              option-value="uuid" 
+              option-label="description"
+              emit-value
+              map-options
+              dense
+              outlined
+            />
+          </div>
         </div>
 
         <!-- Description and Target Fields -->
@@ -278,7 +292,6 @@
 <script setup>
 import { inject, ref, computed, onMounted, reactive, provide } from 'vue';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid
-import Form from 'src/stores/model/form/Form';
 import FormSection from 'src/stores/model/form/FormSection';
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
@@ -289,8 +302,8 @@ import UsersService from 'src/services/api/user/UsersService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import useStepManager from 'src/composables/shared/systemUtils/useStepManager';
 import Section from 'src/stores/model/section/Section';
-import { Loading, QSpinnerRings } from 'quasar';
 import ManageQuestions from 'src/components/Forms/ManageQuestions.vue';
+import evaluationLocationService from 'src/services/api/question/evaluationLocationService';
 
 // Inject the step from the parent
 const step = inject('step');
@@ -315,6 +328,15 @@ const filterRedProgrammaticAreas = ref([]);
 const isFormDataVisible = ref(true);
 const isFormQuestionsDataVisible = ref(false);
 const searchResults = ref([]);
+
+const usageLocations = ref([]); // Para armazenar as opções de Local de Uso
+
+const usageLocationOptions = computed(() =>
+  usageLocations.value.map(location => ({
+    uuid: location.uuid,
+    description: location.description,
+  }))
+);
 
 // Swal dialog methods
 const { alertError, alertSucess, alertWarningAction } = useSwal();
@@ -366,8 +388,23 @@ const close =()=> {
   emit('close');
 }
 
+const fullLocation = computed(() =>{
+    if (!usageLocations.value || !Array.isArray(usageLocations.value)) {
+      return null; // Retorna null se a lista não estiver disponível ou não for um array
+    }
+    const res = null
+    usageLocations.value.forEach((location) => {
+      if (location.uuid === form.evaluationLocation){
+        res = location
+        console.log(res)
+      }
+    });
+      return res;
+});
+
 // Method to go to the questions form
-const goToFormQuestions = (form) => {
+const goToFormQuestions = async (form) => {
+  
   // Reference array for validation
   const refs = [programRef, programmaticAreaRef, nameRef, targetPatientRef, targetFileRef];
 
@@ -408,6 +445,19 @@ const goToFormQuestions = (form) => {
 
     return sequenceA - sequenceB;
   });
+
+  // Handle evaluationLocation and evaluation_location_id
+  if (form.evaluationLocation && typeof form.evaluationLocation === 'string') {
+    usageLocations.value.forEach((location) => {
+      if (location.uuid === form.evaluationLocation){
+        form.evaluationLocation = location;
+        form.evaluation_location_id = location.uuid;
+      }
+    });
+  } else if (form.evaluationLocation && form.evaluationLocation.uuid) {
+    // Ensure the UUID is set
+    form.evaluation_location_id = form.evaluationLocation.uuid;
+  }
 
   if (areFieldsValid) {
     if (isEditStep.value) {
@@ -613,7 +663,13 @@ const createNewSection = (newSectionDescription, props) => {
 
 
 // Mounted Lifecycle Hook
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const response = await evaluationLocationService.getAll(); // Buscando os locais de uso
+    usageLocations.value = response.data?.content
+  } catch (error) {
+    console.error('Erro ao buscar locais de uso:', error);
+  }
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
 });
 
