@@ -2,8 +2,9 @@ import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
 import useQuestion from 'src/composables/question/questionMethods';
 import useEvaluationType from 'src/composables/question/evaluationTypeMethods';
 import useResponseType from 'src/composables/question/responseTypeMethods';
-
+import useEvaluationLocation from 'src/composables/question/evaluationLocationMethods'
 export default function useFormSectionQuestion() {
+  const {createEvaluationLocationFromDTO, createDTOFromEvaluationLocation} = useEvaluationLocation();
 
     function createFormSectionQuestionFromDTO(formSectionQuestionDTO: any) {
       const { createQuestionFromDTO } = useQuestion();
@@ -21,7 +22,8 @@ export default function useFormSectionQuestion() {
         question: createQuestionFromDTO(formSectionQuestionDTO.questionDTO),
         evaluationType: createEvaluationTypeFromDTO(formSectionQuestionDTO.evaluationType),
         responseType: createResponseTypeFromDTO(formSectionQuestionDTO.responseType),
-        in_use: formSectionQuestionDTO.in_use,
+        in_use: formSectionQuestionDTO.in_use,        
+        evaluationLocation: createEvaluationLocationFromDTO(formSectionQuestionDTO.evaluationLocationDTO)
         });
         return formSectionQuestion;
     }
@@ -42,6 +44,7 @@ export default function useFormSectionQuestion() {
             questionDTO: createDTOFromQuestion(formSectionQuestion.question),
             evaluationType: createDTOFromEvaluationType(formSectionQuestion.evaluationType),
             responseType: createDTOFromResponseType(formSectionQuestion.responseType),
+            evaluationLocationDTO: createDTOFromEvaluationLocation(formSectionQuestion.evaluationLocation)
           }
         return  formQuestionDTO;
     }

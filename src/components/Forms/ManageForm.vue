@@ -79,7 +79,7 @@
               class="col q-ml-md"
               v-model="form.evaluationLocation"
               :options="usageLocationOptions"
-              label="Local de Uso"
+              label="Local da Mentoria"
               option-value="uuid" 
               option-label="description"
               emit-value
@@ -329,7 +329,7 @@ const isFormDataVisible = ref(true);
 const isFormQuestionsDataVisible = ref(false);
 const searchResults = ref([]);
 
-const usageLocations = ref([]); // Para armazenar as opções de Local de Uso
+const usageLocations = ref([]); // Para armazenar as opções de Local da Mentoria
 
 const usageLocationOptions = computed(() =>
   usageLocations.value.map(location => ({

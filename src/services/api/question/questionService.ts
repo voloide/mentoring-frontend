@@ -109,9 +109,7 @@ export default {
   },
 
   async updateQuestion(question: any) {  
-    console.log(question)  
     const questionDTO = createDTOFromQuestion(question)
-    console.log(questionDTO)
     return await api()
       .patch('/questions/update', questionDTO)
       .then((resp) => {

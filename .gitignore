@@ -35,3 +35,5 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+hs_err_pid15592.log
+hs_err_pid26996.log

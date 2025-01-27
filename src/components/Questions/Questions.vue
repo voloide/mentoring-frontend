@@ -116,41 +116,6 @@
                     {{ props.row.program.description }}
                   </span>
                 </q-td>
-                <q-td key="LocalUso" :props="props">
-                  <span
-                    v-if="
-                      props.row.id === null ||
-                      selectedQuestion.id === props.row.id
-                    "
-                  >
-                  <q-select
-                      class="col"
-                      use-input
-                      hide-selected
-                      fill-input
-                      input-debounce="0"
-                      dense
-                      outlined
-                      v-model="data.usageLocation"
-                      :options="usageLocationOptions"
-                      label="Local de Uso"
-                      emit-value
-                      option-value="id"
-                      option-label="description"
-                    >
-                      <template v-slot:no-option>
-                        <q-item>
-                          <q-item-section class="text-grey">
-                            Sem Resultados
-                          </q-item-section>
-                        </q-item>
-                      </template>
-                    </q-select>                
-                </span>
-                <span v-else>
-                  {{ props.row.evaluationLocation.description }}
-                </span>
-                </q-td>
                 <q-td key="options" :props="props">
                   <div class="col">
                     <span v-if="props.row.id === null">
@@ -267,7 +232,6 @@ import { useSwal } from 'src/composables/shared/dialog/dialog';
 import useQuestion from 'src/composables/question/questionMethods';
 import {Loading, QSpinnerRings} from "quasar";
 import programService from "src/services/api/program/programService";
-import evaluationLocationService from 'src/services/api/question/evaluationLocationService';
 
 const { createQuestionFromDTO,createDTOFromQuestion } = useQuestion();
 
@@ -277,13 +241,11 @@ const searchResults = ref([]);
 const selectedQuestion = ref('');
 const openForm = ref(false);
 const newRowAdded = ref(false);
-const usageLocations = ref([]);
 
 const data = ref({
   tableCode: '',
   question: '',
   program: '',
-  usageLocation: '',
 });
 const columns = [
   {
@@ -304,7 +266,6 @@ const columns = [
     label: 'Programa',
     sortable: false,
   },
-  { name: 'LocalUso', align: 'left', label: 'Local de Uso', sortable: false },
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
@@ -321,25 +282,10 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-const usageLocationOptions = computed(() =>
-  usageLocations.value.map(location => ({
-    uuid: location.uuid,
-    description: location.description,
-  }))
-);
-
 onMounted(async() => {
   
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   await search();
-
-  try {
-    const response = await evaluationLocationService.getAll(); // Buscando os locais de uso
-    usageLocations.value = response.data?.content || []; // Armazena os locais de uso
-  } catch (error) {
-    console.error('Erro ao buscar locais de uso:', error);
-    alertError('Não foi possível carregar os locais de uso.');
-  }
 });
 
 const programs = computed(() => {
@@ -347,26 +293,12 @@ const programs = computed(() => {
 });
 
 const submitForm = () => {
-  console.log(data.value.usageLocation.uuid)
   Loading.show({ spinner: QSpinnerRings });
   const question = {
     tableCode: data.value.tableCode,
     question: data.value.question,
     program: data.value.program,
-    evaluationLocation: data.value.usageLocation.uuid,
   };
-  // Handle evaluationLocation and evaluation_location_id
-  if (question.evaluationLocation && typeof question.evaluationLocation === 'string') {
-    usageLocations.value.forEach((location) => {
-      if (location.uuid === question.evaluationLocation){
-        question.evaluationLocation = location;
-        question.evaluation_location_id = location.uuid;
-      }
-    });
-  } else if (question.evaluationLocation && question.evaluationLocation.uuid) {
-    // Ensure the UUID is set
-    question.evaluation_location_id = question.evaluationLocation.uuid;
-  }
 
   questionService.saveQuestion(question).then((response) => {
     if(response.status === 200 || response.status === 201){
@@ -400,21 +332,7 @@ const saveUpdate = () => {
     tableCode: data.value.tableCode,
     question: data.value.question,
     program: data.value.program,    
-    evaluationLocation: data.value.usageLocation.uuid,
   };
-
-  if (question.evaluationLocation && typeof question.evaluationLocation === 'string') {
-    usageLocations.value.forEach((location) => {
-      if (location.uuid === question.evaluationLocation){
-        question.evaluationLocation = location;
-        question.evaluation_location_id = location.uuid;
-      }
-    });
-  } else if (question.evaluationLocation && question.evaluationLocation.uuid) {
-    // Ensure the UUID is set
-    question.evaluation_location_id = question.evaluationLocation.uuid;
-  }
-  console.log(question)
 
   questionService.updateQuestion(question).then((response) => {
     if(response.status === 200 || response.status === 201){

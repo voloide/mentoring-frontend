@@ -1,9 +1,7 @@
 import Question from 'src/stores/model/question/Question';
 import useProgram from '../program/programMethods';
-import useEvaluationLocation from './evaluationLocationMethods';
 
 export default function useQuestion() {
-  const {createEvaluationLocationFromDTO, createDTOFromEvaluationLocation} = useEvaluationLocation();
     function createQuestionFromDTO(questionDTO) {
       
       const { createProgramFromDTO } = useProgram();
@@ -16,7 +14,6 @@ export default function useQuestion() {
             used_in_form_section: questionDTO.used_in_form_section,
             question: questionDTO.question,
             program: createProgramFromDTO(questionDTO.program),
-            evaluationLocation: createEvaluationLocationFromDTO(questionDTO.evaluationLocationDTO)
           })
     }
 
@@ -31,7 +28,6 @@ export default function useQuestion() {
             lifeCycleStatus: question.lifeCycleStatus,
             used_in_form_section: question.used_in_form_section,
             program: createDTOFromProgram(question.program),
-            evaluationLocationDTO: createDTOFromEvaluationLocation(question.evaluationLocation)
           }
         return  questionDTO;
     }
