@@ -5,8 +5,11 @@ import useFormSectionQuestion from "./formSectionQuestionMethods";
 import usePartner from "src/composables/partner/partnerMethods";
 import useSection from "src/composables/section/sectionMethods";
 import useFormSection from "src/composables/form/formSectionMethods";
+import useEvaluationLocation from '../question/evaluationLocationMethods';
 
 export default function useForm() {
+  
+  const {createEvaluationLocationFromDTO, createDTOFromEvaluationLocation} = useEvaluationLocation();
 
     function createFormFromDTO(formDTO: any) {
       const { createProgrammaticAreaFromDTO } = useProgrammaticArea();
@@ -25,6 +28,7 @@ export default function useForm() {
         createdAt: formDTO.createdAt,
         createdBy: formDTO.createdBy,
         programmaticArea: createProgrammaticAreaFromDTO(formDTO.programmaticAreaDTO),
+        evaluationLocation: createEvaluationLocationFromDTO(formDTO.evaluationLocationDTO),
 
         // Safely handle form sections if not null, using the factory method
         formSections: formDTO.formSections
@@ -49,7 +53,8 @@ export default function useForm() {
           targetPatient: form.targetPatient,
           targetFile: form.targetFile,
           createdAt: form.createdAt,
-          createdBy: form.createdBy,
+          createdBy: form.createdBy,          
+          evaluationLocationDTO: createDTOFromEvaluationLocation(form.evaluationLocation),
           programmaticAreaDTO: createDTOFromProgrammaticArea(form.programmaticArea),
           //formSectionQuestions: createDTOsListFromFormQuestions(form.formSectionQuestions), // Handling form questions
           formSections: createDTOsListFromFormSections(form.formSections), // Handling form sections

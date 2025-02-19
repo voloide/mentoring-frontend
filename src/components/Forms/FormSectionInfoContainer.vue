@@ -18,14 +18,14 @@
                     v-model="searchParams.question.code"
                     @update:model-value="(value) => (filter = value)"
                 >
-                <template v-slot:append>
-                <q-icon
-                    name="close"
-                    @click="searchParams.question.code = ''"
-                    class="cursor-pointer"
-                />
-            </template>
-          </q-input>
+                  <template v-slot:append>
+                      <q-icon
+                          name="close"
+                          @click="searchParams.question.code = ''"
+                          class="cursor-pointer"
+                      />
+                  </template>
+                </q-input>
               </template>
               <template v-slot:action>
                 <q-input
@@ -148,6 +148,7 @@
                     <q-th style="width: 190px">{{ columns[3].label }}</q-th>
                     <q-th style="width: 190px">{{ columns[4].label }}</q-th>
                     <q-th style="width: 90px">{{ columns[5].label }}</q-th>
+                    <q-th style="width: 90px">{{ columns[6].label }}</q-th>
                 </q-tr>
             </template>
               <!-- Body Template for Competency Questions -->
@@ -224,6 +225,30 @@
                     <span v-else>
                           {{ props.row.responseType.description }}
                     </span>
+                      </q-td>                      
+                      <q-td key="evaluationLocation" :props="props">
+                        <span v-if="localFormSection.inEdition">
+                        <q-select
+                            class="vertical-middle"
+                            fill-input
+                            input-debounce="0"
+                            dense
+                            outlined
+                            :disable="!props.row.selected"
+                            ref="evaluationLocationRef"
+                            v-model="props.row.evaluationLocation"
+                            :rules="[
+                            (val) => !!val || 'Por favor indicar o Local da Mentoria',
+                            ]"
+                            lazy-rules
+                            option-value="id"
+                            option-label="description"
+                            :options="getEvaluationLocationOptions(props.row)"
+                        />
+                    </span>
+                    <span v-else>
+                          {{ props.row.evaluationLocation.description }}
+                    </span>
                       </q-td>
                       <q-td key="options" :props="props">
                           <span
@@ -275,9 +300,12 @@ import evaluationTypeService from 'src/services/api/question/evaluationTypeServi
 import responseTypeService from 'src/services/api/question/responseTypeService';
 import questionService from "src/services/api/question/questionService";
 import formQuestionService from "src/services/api/form/formSectionQuestionService";
+import evaluationLocationService from 'src/services/api/question/evaluationLocationService'
 
 // Alert utility
 const { alertSucess, alertError, alertWarningAction } = useSwal();
+
+const responseLocations = ref([]);
 
 const selectedForm = inject('selectedForm');
 // Props passed to the component
@@ -303,6 +331,35 @@ const searchParams = ref(
   })
 );
 
+const isLocationEditable = computed(() => selectedForm.value.evaluationLocation?.id === 3);
+
+const getEvaluationLocationOptions = (formQuestion) => {
+  // Se `evaluationLocation.id !== 3`, force o mesmo ID de `selectedForm.evaluationLocation.id`
+  if (!isLocationEditable.value) {
+    formQuestion.evaluationLocation = responseLocations.value.find(
+      (location) => location.id === selectedForm.value.evaluationLocation?.id
+    );
+
+    // Filtra `responseLocations` para mostrar apenas a opção com o ID correspondente ao de `selectedForm.evaluationLocation.id`
+    responseLocations.value = responseLocations.value.filter(
+      (location) => location.id === selectedForm.value.evaluationLocation?.id
+    );
+  }
+  
+  return responseLocations.value; // Sempre retorna as opções, mas será limitada a uma opção se `isLocationEditable` for false
+};
+
+
+onMounted(async() => {
+  try {
+    const response = await evaluationLocationService.getAll(); // Buscando os locais de uso
+    responseLocations.value = response.data?.content;
+  } catch (error) {
+    console.error('Erro ao buscar locais de uso:', error);
+    alertError('Não foi possível carregar os locais de uso.');
+  }
+});
+
 
 // Watch for changes in the prop and update the local copy if needed
 watch(() => props.formSection, (newValue) => {
@@ -315,8 +372,9 @@ const columns = [
   { name: 'question', align: 'left', label: 'Competência', field: (row) => row.question.question || '' },
   { name: 'sequence', align: 'left', label: 'Sequência' },
   { name: 'evaluationType', align: 'left', label: 'Tipo de Avaliação' },
-  { name: 'responseType', align: 'left', label: 'Tipo de Resposta' },
-  { name: 'options', label: 'Opções', field: 'options' },
+  { name: 'responseType', align: 'left', label: 'Tipo de Resposta' },  
+  { name: 'evaluationLocation', align: 'left', label: 'Local da Mentoria' },
+  { name: 'options', label: 'Opções' },
 ];
 
 // Flag for showing the AddOrRemoveQuestions dialog
@@ -329,6 +387,11 @@ const initNewQuestion = () => {
     question: new Question({ program: new Program() }),
     evaluationType: new EvaluationType(),
     responseType: new ResponseType(),
+    evaluationLocation: isLocationEditable.value
+      ? null // Permite escolher depois
+      : responseLocations.value.find(
+          (location) => location.id === selectedForm.value.evaluationLocation?.id
+        ),
   });
 
   localFormSection.formSectionQuestions.unshift(newQuestion);

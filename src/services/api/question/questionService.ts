@@ -6,7 +6,7 @@ import useQuestion from 'src/composables/question/questionMethods';
 
 const repo = useRepo(Question);
 const repoFormQuestion = useRepo(FormSectionQuestion);
-const { createQuestionFromDTO } = useQuestion();
+const { createQuestionFromDTO, createDTOFromQuestion } = useQuestion();
 
 export default {
   async search(searchParam: string) {
@@ -82,8 +82,10 @@ export default {
       .first();
   },
   async saveQuestion(question: any) {
+    const questionDTO = createDTOFromQuestion(question)
+    console.log(questionDTO)
     return await api()
-      .post('/questions/save', question)
+      .post('/questions/save', questionDTO)
       .then((resp) => {
         repo.save(createQuestionFromDTO(resp.data));
         return resp;
@@ -106,9 +108,10 @@ export default {
       repo.delete(questionId);
   },
 
-  async updateQuestion(question: any) {
+  async updateQuestion(question: any) {  
+    const questionDTO = createDTOFromQuestion(question)
     return await api()
-      .patch('/questions/update', question)
+      .patch('/questions/update', questionDTO)
       .then((resp) => {
         repo.save(createQuestionFromDTO(resp.data));
         return resp;
