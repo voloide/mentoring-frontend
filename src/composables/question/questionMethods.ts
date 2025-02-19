@@ -2,8 +2,8 @@ import Question from 'src/stores/model/question/Question';
 import useProgram from '../program/programMethods';
 
 export default function useQuestion() {
-
     function createQuestionFromDTO(questionDTO) {
+      
       const { createProgramFromDTO } = useProgram();
         return  new Question({
             id: questionDTO.id,
@@ -24,7 +24,7 @@ export default function useQuestion() {
             uuid: question.uuid,
             code: question.code,
             tableCode: question.tableCode,
-            description: question.question,
+            question: question.question,
             lifeCycleStatus: question.lifeCycleStatus,
             used_in_form_section: question.used_in_form_section,
             program: createDTOFromProgram(question.program),

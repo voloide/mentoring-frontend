@@ -241,6 +241,7 @@ const searchResults = ref([]);
 const selectedQuestion = ref('');
 const openForm = ref(false);
 const newRowAdded = ref(false);
+
 const data = ref({
   tableCode: '',
   question: '',
@@ -281,9 +282,10 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-onMounted(() => {
+onMounted(async() => {
+  
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
-  search();
+  await search();
 });
 
 const programs = computed(() => {
@@ -297,6 +299,7 @@ const submitForm = () => {
     question: data.value.question,
     program: data.value.program,
   };
+
   questionService.saveQuestion(question).then((response) => {
     if(response.status === 200 || response.status === 201){
       closeForm;
@@ -328,7 +331,7 @@ const saveUpdate = () => {
     id: selectedQuestion.value.id,
     tableCode: data.value.tableCode,
     question: data.value.question,
-    program: data.value.program,
+    program: data.value.program,    
   };
 
   questionService.updateQuestion(question).then((response) => {
