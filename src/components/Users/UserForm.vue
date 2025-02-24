@@ -601,7 +601,6 @@ const submitForm = () => {
         .then((resp) => handleResponse(resp, 'Utilizador actualizado.', 'cancel'))
         .catch((error) => handleError(error, 'Erro ao atualizar o User'));
     } else {
-      console.log('Registando')
         userService
           .saveUser(userDTO)
           .then((resp) =>

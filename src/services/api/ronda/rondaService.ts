@@ -39,7 +39,6 @@ export default {
       return await api()
         .get(`/ronda/report/${uuid}`)
         .then((resp) => {
-          console.log(resp.data);
           return resp;
         })
         .catch((error) => {
