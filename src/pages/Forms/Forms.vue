@@ -17,6 +17,7 @@
   import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
   import responseTypeService from 'src/services/api/question/responseTypeService';
   import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
+  import evaluationLocationService from 'src/services/api/question/evaluationLocationService';
   import sectionService from 'src/services/api/section/sectionService';
   import useStepManager from 'src/composables/shared/systemUtils/useStepManager';
   import Form from "stores/model/form/Form";
@@ -67,7 +68,8 @@
         programmaticAreaService.getAll(),
         sectionService.getAllSections(),
         responseTypeService.getAll(),
-        evaluationTypeService.getAll()
+        evaluationTypeService.getAll(),
+        evaluationLocationService.getAll()
       ]);
     } catch (error) {
       console.error('Error initializing form data:', error);
