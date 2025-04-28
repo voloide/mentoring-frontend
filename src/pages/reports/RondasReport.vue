@@ -49,12 +49,14 @@ const search = () => {
       console.error(error);
     });
 };
+const reportMode = inject('reportMode');
 
 const currUser = computed(() => {
   return UsersService.getLogedUser();
 });
 
 onMounted(() => {
+  reportMode.value = true;
   // showloading();
   init();
 });
