@@ -473,8 +473,8 @@ const validateAndFinishEdition = () => {
                 // Check if any question in the other formSections matches the current one
                 const duplicateQuestion = localFormSection.formSectionQuestions.find(fq => fq.question.uuid === otherFormQuestion.question.uuid);
                 if (duplicateQuestion) {
-                alertError(`A competência "${duplicateQuestion.question.tableCode}" já foi adicionada em outra secção.`);
-                hasValidationErrors = true;
+                // alertError(`A competência "${duplicateQuestion.question.tableCode}" já foi adicionada em outra secção.`);
+                // hasValidationErrors = true;
                 }
             }
             }
@@ -482,10 +482,6 @@ const validateAndFinishEdition = () => {
         // Check if sequence is valid (not empty, number, and under 100)
         if (!sequence || isNaN(sequence) || sequence < 1 || sequence > 100) {
             alertError('Por favor, insira uma sequência válida para todas as competências.');
-            hasValidationErrors = true;
-        } else if (sequences.has(sequence)) {
-            // Check for duplicate sequence
-            alertError(`A sequência "${sequence}" já foi usada. Por favor, insira uma sequência única.`);
             hasValidationErrors = true;
         } else {
             sequences.add(sequence);

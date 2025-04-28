@@ -660,10 +660,10 @@ const saveSection = (section) => {
     return;
   }
 
-  if (isDuplicateSequence) {
-    alertError('A sequência já está em uso. Por favor, insira uma sequência única.');
-    return;
-  }
+  // if (isDuplicateSequence) {
+  //   alertError('A sequência já está em uso. Por favor, insira uma sequência única.');
+  //   return;
+  // }
 
   // If no duplicates, allow saving the section
   section.inEdition = false;
