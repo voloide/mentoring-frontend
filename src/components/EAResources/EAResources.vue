@@ -52,7 +52,7 @@
                     {{ props.node.label }}
                   </q-btn>
                   <div v-else class="row">
-                    <span
+                    <!-- <span
                       @click="resourceRequest(props.node)"
                       :class="{
                         'text-blue': props.node.clickable === 2,
@@ -60,7 +60,28 @@
                       }"
                     >
                       {{ props.node.label }}
+                    </span> -->
+                    <q-icon
+                      v-if="props.node.isLink"
+                      name="link"
+                      class="q-mr-sm text-primary"
+                    />
+
+                    <span
+                      @click="handleClickResource(props.node)"
+                      :class="{
+                        'text-blue': props.node.clickable === 2,
+                        'q-mt-sm': true,
+                      }"
+                    >
+                      {{ props.node.label }}
+
+                      <!-- Tooltip com a descrição -->
+                      <q-tooltip v-if="props.node.description">
+                        {{ props.node.description }}
+                      </q-tooltip>
                     </span>
+
                     <!--                  <q-btn-->
                     <!--                      v-if="props.node.clickable === 2"-->
                     <!--                      flat-->
@@ -226,109 +247,6 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-
-  <!-- <q-dialog persistent v-model="showAddResource">
-    <q-card style="width: 45vw; max-width: 90vw;">
-      <q-card-section>
-        <div class="text-h7 bg-primary q-pa-sm text-white">{{ popUpTitle }}</div>
-      </q-card-section>
-
-      <q-card-section bordered class="q-pt-none">
-        <div class="row">
-          <q-input
-            v-if="addingProgram"
-            class="col-12 q-mb-sm"
-            dense
-            outlined
-            ref="programRef"
-            v-model="programInput"
-            label="Programa"
-          />
-          <q-input
-            v-if="!addingProgram"
-            class="col-12 q-mb-sm"
-            dense
-            outlined
-            ref="categoryRef"
-            v-model="nodeCategory"
-            :label="categoryLabel"
-            disable
-          />
-          <q-input
-            v-if="addingCateg"
-            class="col-12 q-mb-sm"
-            dense
-            outlined
-            ref="categoryRef"
-            v-model="categoryInput"
-            label="Categoria"
-          />
-          <q-input
-            v-if="addingSubCateg"
-            class="col-12 q-mb-sm"
-            dense
-            outlined
-            ref="subCategoryRef"
-            v-model="subCategoryInput"
-            label="Sub Categoria"
-          />
-          <q-input
-            v-if="addingResource"
-            class="col-12 q-mb-sm"
-            dense
-            outlined
-            ref="descriptionRef"
-            v-model="fileDescription"
-            label="Descricao"
-          />
-          <q-input
-            v-if="addingResource"
-            class="col q-mb-sm q-mr-sm"
-            dense
-            outlined
-            ref="fileNameRef"
-            v-model="fileName"
-            lazy-rules
-            :rules="[(val) => val.length >= 4  || 'O nome que o ficheiro irá assumir deve ter no mínimo 4 caracteres.']"
-            label="Nome"
-            disabled
-          />
-          <q-file
-            v-if="addingResource"
-            v-model="fileInput"
-            outlined
-            label="Selecione o Ficheiro. Max (20MB)"
-            max-file-size="20000000"
-            @rejected="onRejected"
-            counter
-            dense
-            class="col"
-            ref="fileRef"
-            lazy-rules
-            :rules="[(val) => !!val || 'Por favor indicar o ficheiro.']"
-            @update:model-value="excelExport"
-            :disable="submitSend"
-          >
-            <template v-slot:prepend>
-              <q-icon name="attach_file" />
-            </template>
-            <template v-if="fileInput" v-slot:append>
-              <q-icon
-                  name="cancel"
-                  @click.stop.prevent="fileInput = null"
-                  class="cursor-pointer"
-              />
-            </template>
-          </q-file>
-        </div>
-      </q-card-section>
-
-      <q-card-actions v-if="doesUserHavePermissions()" align="right">
-        <q-btn dense label="Cancelar" color="red" v-close-popup></q-btn>
-        <q-btn dense class="q-mr-sm" type="submit" color="primary" label="Gravar" @click="gravar(actualNode)" :disable="isSaveDisabled" v-close-popup></q-btn>
-      </q-card-actions>
-    </q-card>
-  </q-dialog> -->
 </template>
 
 <script setup>
@@ -479,6 +397,14 @@ const resourceRequest = (node) => {
   }
 };
 
+const handleClickResource = (node) => {
+  if (node.isLink) {
+    window.open(node.name, '_blank');
+  } else {
+    resourceRequest(node); // assume que seja um arquivo ou outro tipo
+  }
+};
+
 const resetFilter = () => {
   filter.value = '';
   filterRef.value.focus();
@@ -487,7 +413,7 @@ const resetFilter = () => {
 const newFile = ref(null);
 
 const gravar = async (node) => {
-  if (this.tipoRecurso === 'FICHEIRO') {
+  if (tipoRecurso.value === 'FICHEIRO') {
     if (node.type === 'resource') {
       // Adicionar recurso
       const programNode = nodes.value.find(
@@ -611,8 +537,7 @@ const gravar = async (node) => {
         }
       }
     }
-
-    doPatch(nodes);
+    doPatchForFile(nodes);
   }
 };
 
@@ -658,6 +583,22 @@ const doPatch = (nodes) => {
         }
     });
   }
+};
+
+const doPatchForFile = async (nodes) => {
+  const { createDTOFromResource } = useResource();
+
+  resourceObj.value.resource = JSON.stringify(nodes.value);
+  let resource = createDTOFromResource(resourceObj.value);
+
+  resourceService.updateResourceTreeWithoutFile(resource).then((res) => {
+    if (res && (res.status === 200 || res.status === 201)) {
+      alertSucess('Recurso (link) atualizado com sucesso.');
+      loadResources();
+    } else {
+      alertError('Erro ao atualizar o recurso.');
+    }
+  });
 };
 
 const loadResources = () => {
