@@ -206,6 +206,7 @@
               </q-td>
               <q-td key="actions" :props="props">
                 <q-btn
+                  v-if="!reportMode"
                   flat
                   round
                   class="q-ml-md"
@@ -288,6 +289,9 @@ import rondaService from 'src/services/api/ronda/rondaService';
 import useRonda from 'src/composables/ronda/rondaMethods';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import rondasReport from 'src/printables/rondasReport/rondasReport';
+import { useLoading } from 'src/composables/shared/loading/loading';
+
+const { closeLoading, showloading } = useLoading();
 
 const { createMentorFromDTO } = useMentor();
 const searchParams = ref(
@@ -376,16 +380,8 @@ const editRonda = async (ronda) => {
     }));
 };
 
-const gravar = async () => {
-  showAditDialog.value = false;
-  await rondaService.changeMentor(
-    selectedRonda.value.id,
-    selectedMentor.value.id
-  );
-  search();
-};
-
 const printReport = async (uuid) => {
+  showloading();
   rondaService.generateReport(uuid).then((res) => {
     if (res.status === 200 || res.status === 201) {
       const jsonResult = res.data;
@@ -399,6 +395,16 @@ const printReport = async (uuid) => {
       useSwal().alertError('Ocorreu algum erro...');
     }
   });
+  closeLoading();
+};
+
+const gravar = async () => {
+  showAditDialog.value = false;
+  await rondaService.changeMentor(
+    selectedRonda.value.id,
+    selectedMentor.value.id
+  );
+  search();
 };
 
 const emit = defineEmits(['goToMentoringAreas', 'import', 'edit']);
@@ -452,11 +458,12 @@ const unidSanitarias = computed(() => {
 });
 
 const formattedResult = computed(() => {
-  if (searchResults.value.length > 0) {
-    let res = [];
+  if (searchResults.value?.length > 0) {
+    const res = [];
+
     searchResults.value.forEach((ronda) => {
-      ronda.rondaMentors.forEach((rm) => {
-        if (reportMode.value) {
+      if (reportMode?.value) {
+        ronda.rondaMentors.forEach((rm) => {
           if (ronda.endDate) {
             startDateParam.value = ronda.startDate;
             endDateParam.value = ronda.endDate;
@@ -470,23 +477,40 @@ const formattedResult = computed(() => {
               ronda: ronda,
             });
           }
-        } else {
-          if (!ronda.endDate && ronda.rondaType.code !== 'SESSAO_ZERO')
-            res.push({
-              description: ronda.description,
-              startDate: rm.startDate,
-              endDate: rm.endDate,
-              healthFacility: ronda.healthFacility.healthFacility,
-              employee: rm.mentor.employee,
-              ronda: ronda,
+        });
+      } else {
+        if (
+          Array.isArray(ronda.rondaMentors) &&
+          ronda.rondaType?.code &&
+          ronda.healthFacility?.healthFacility
+        ) {
+          // Verifica se endDate é vazio ou null ou undefined, e o tipo é diferente de SESSAO_ZERO
+          const hasNoEndDate = ronda.endDate === '';
+          const isNotSessaoZero = ronda.rondaType.code !== 'SESSAO_ZERO';
+
+          if (isNotSessaoZero && hasNoEndDate) {
+            ronda.rondaMentors.forEach((rm) => {
+              if (rm?.mentor?.employee) {
+                if (rm.endDate === '')
+                  res.push({
+                    description: ronda.description,
+                    startDate: rm.startDate,
+                    endDate: rm.endDate,
+                    healthFacility: ronda.healthFacility.healthFacility,
+                    employee: rm.mentor.employee,
+                    ronda: ronda,
+                  });
+              }
             });
+          }
         }
-      });
+      }
     });
+
     return res;
-  } else {
-    return [];
   }
+
+  return [];
 });
 
 const filterDistricts = (val, update, abort) => {
@@ -542,8 +566,9 @@ const provinces = computed(() => {
 });
 
 onMounted(() => {
+  showloading();
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
-  console.log('currUser', currUser.value);
+  closeLoading();
 });
 
 const editMentor = (mentor) => {
@@ -552,37 +577,41 @@ const editMentor = (mentor) => {
 };
 
 const search = async () => {
-  if (selectedProvince.value) {
-    const params = {
-      province: selectedProvince.value?.id,
-      district: selectedDistrict.value?.id,
-      healthFacility: selectedUS.value?.id,
-      mentor: selectedMentor.value?.id,
-      startDate: startDate.value,
-      endDate: endDate.value,
-    };
-    Object.keys(params).forEach(
-      (key) =>
-        (params[key] === null || params[key] === undefined) &&
-        delete params[key]
-    );
+  showloading();
+  if (!selectedProvince.value) {
+    useSwal().alertError('O campo de província deve ser preenchido');
+    return;
+  }
 
-    try {
-      const response = await rondaService.search(params);
-      console.log('response', response);
-      if (response.status === 200 || response.status === 201) {
-        searchResults.value = [];
-        response.data.forEach((ronda) => {
-          searchResults.value.push(rondaService.getById(ronda.id));
-        });
-      } else {
-        useSwal().alertError('Algo correu mal na pesquisa.');
-      }
-    } catch (error) {
-      console.error(error);
+  const params = {
+    province: selectedProvince.value?.id,
+    district: selectedDistrict.value?.id,
+    healthFacility: selectedUS.value?.id,
+    mentor: selectedMentor.value?.id,
+    startDate: startDate.value,
+    endDate: endDate.value,
+  };
+
+  Object.keys(params).forEach(
+    (key) =>
+      (params[key] === null || params[key] === undefined) && delete params[key]
+  );
+
+  try {
+    const response = await rondaService.search(params);
+    if ([200, 201].includes(response.status)) {
+      const rondasDetalhadas = await Promise.all(
+        response.data.map((ronda) => rondaService.getById(ronda.id))
+      );
+      searchResults.value = rondasDetalhadas;
+    } else {
+      useSwal().alertError('Algo correu mal na pesquisa.');
     }
-  } else {
-    useSwal().alertError('A campo de provincia deve ser preenchido');
+    closeLoading();
+  } catch (error) {
+    closeLoading();
+    console.error(error);
+    useSwal().alertError('Erro na comunicação com o servidor.');
   }
 };
 
