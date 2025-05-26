@@ -5,6 +5,7 @@ import { UserDTO } from 'src/services/dto/user/UserDTO';
 import { plainToClass } from 'class-transformer';
 import useRonda from 'src/composables/ronda/rondaMethods';
 import RondaType from 'stores/model/ronda/RondaType';
+import { useSwal } from 'src/composables/shared/dialog/dialog';
 
 const rondaRepo = useRepo(Ronda);
 const rondaTypeRepo = useRepo(RondaType);
@@ -14,7 +15,6 @@ export default {
     return await api()
       .get('/ronda/getall')
       .then((resp) => {
-        console.info('Ronda', resp.data);
         this.generateAndSaveEntityFromDTO(resp.data);
         return resp;
       })
@@ -27,9 +27,7 @@ export default {
     return await api()
       .get(`/ronda/search?${new URLSearchParams(searchParam).toString()}`)
       .then((resp) => {
-        console.info('Ronda', resp.data);
         this.generateAndSaveEntityFromDTO(resp.data);
-        console.info('RESP: ', resp);
         return resp;
       })
       .catch((error) => {
@@ -61,7 +59,6 @@ export default {
   },
   generateAndSaveEntityFromDTO(dtoList: any) {
     dtoList.forEach((dto: any) => {
-      console.info('DTO', dto);
       const entity = useRonda().createRondaFromDTO(dto);
       rondaRepo.save(entity);
     });
@@ -80,7 +77,6 @@ export default {
         plainToClass(UserDTO, obj, { excludeExtraneousValues: true })
       );
       //ronda.save();
-      console.info('Saved Ronda');
     } catch (error: any) {
       console.error(error);
     }
@@ -93,9 +89,12 @@ export default {
       );
       useRonda().createRondaFromDTO(resp.data);
       return resp;
-    } catch (error) {
-      console.error('Error changing Mentor:', error.message);
-      throw error; // Rethrow the error for handling upstream
+    } catch (error: any) {
+      const backendMessage =
+        error.response?.data?.error || 'Erro ao trocar mentor.';
+      console.error('Erro ao trocar mentor:', backendMessage);
+      useSwal().alertError('Erro: ' + backendMessage);
+      throw new Error(backendMessage);
     }
   },
 

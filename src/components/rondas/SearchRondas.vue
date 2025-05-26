@@ -221,6 +221,8 @@
                   v-if="formattedResult.length > 0 && reportMode"
                   dense
                   color="primary"
+                  :loading="loadingReports[props.row.ronda.uuid]"
+                  :disable="loadingReports[props.row.ronda.uuid]"
                   icon="print"
                   @click="printReport(props.row.ronda.uuid)"
                 >
@@ -290,6 +292,7 @@ import useRonda from 'src/composables/ronda/rondaMethods';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import rondasReport from 'src/printables/rondasReport/rondasReport';
 import { useLoading } from 'src/composables/shared/loading/loading';
+import sessionService from 'src/services/api/session/sessionService';
 
 const { closeLoading, showloading } = useLoading();
 
@@ -321,6 +324,7 @@ const endDateParam = ref(null);
 const userData = JSON.parse(localStorage.getItem('userData'));
 const roles = userData.roles;
 const healthFacility = ref('');
+const loadingReports = ref({});
 
 // Defina as colunas da tabela
 const columns = [
@@ -381,7 +385,7 @@ const editRonda = async (ronda) => {
 };
 
 const printReport = async (uuid) => {
-  showloading();
+  loadingReports.value[uuid] = true;
   rondaService.generateReport(uuid).then((res) => {
     if (res.status === 200 || res.status === 201) {
       const jsonResult = res.data;
@@ -391,21 +395,48 @@ const printReport = async (uuid) => {
         startDateParam.value,
         endDateParam.value
       );
+      loadingReports.value[uuid] = false;
     } else {
+      loadingReports.value[uuid] = false;
       useSwal().alertError('Ocorreu algum erro...');
     }
+    loadingReports.value[uuid] = false;
   });
-  closeLoading();
 };
 
 const gravar = async () => {
   showAditDialog.value = false;
+  const confirmation = await useSwal().alertWarningAction(
+    'Deseja realmente alterar o mentor da ronda?'
+  );
+
+  if (!confirmation) {
+    return;
+  }
   await rondaService.changeMentor(
     selectedRonda.value.id,
     selectedMentor.value.id
   );
   search();
 };
+
+function extractProgrammaticAreasFromRonda(ronda) {
+  const areas = new Map();
+
+  if (!ronda.sessions) return [];
+
+  ronda.sessions.forEach((session) => {
+    const area = session.form?.programmaticArea;
+    if (area && area.code && area.description) {
+      areas.set(area.code, {
+        code: area.code,
+        description: area.description,
+      });
+    }
+  });
+
+  return Array.from(areas.values());
+}
 
 const emit = defineEmits(['goToMentoringAreas', 'import', 'edit']);
 const currUser = ref(new User());
