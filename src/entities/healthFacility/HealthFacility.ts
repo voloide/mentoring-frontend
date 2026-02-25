@@ -1,3 +1,4 @@
+// src/entities/healthFacility/HealthFacility.ts
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm'
 import { BaseEntity } from '../base/BaseEntity'
 import { District } from '../district/District'
@@ -11,24 +12,26 @@ export class HealthFacility extends BaseEntity {
   @JoinColumn({ name: 'district_id' })
   district!: District
 
+  // ✅ NOVOS CAMPOS
+  clinicalPartnerId?: number | null
+  otherPartnerIds?: number[] | null
+
   constructor(init?: Partial<HealthFacility>) {
     super()
-    if (init) {
-      Object.assign(this, init)
-    }
+    if (init) Object.assign(this, init)
   }
 
   static fromDTO(dto: any): HealthFacility {
     const entity = new HealthFacility()
-
     entity.updateBaseFieldsFromDTO(dto)
 
     entity.healthFacility = dto.healthFacility
 
-    // districtDTO → relacionamento
-    if (dto.districtDTO) {
-      entity.district = District.fromDTO(dto.districtDTO)
-    }
+    if (dto.districtDTO) entity.district = District.fromDTO(dto.districtDTO)
+
+    // ✅ NOVOS CAMPOS
+    entity.clinicalPartnerId = dto.clinicalPartnerId ?? null
+    entity.otherPartnerIds = dto.otherPartnerIds ?? null
 
     return entity
   }
@@ -37,7 +40,11 @@ export class HealthFacility extends BaseEntity {
     return {
       ...this.getBaseDTO(),
       healthFacility: this.healthFacility?.trim() || null,
-      districtDTO: this.district ? this.district.toDTO() : null
+      districtDTO: this.district ? this.district.toDTO() : null,
+
+      // ✅ NOVOS CAMPOS
+      clinicalPartnerId: this.clinicalPartnerId ?? null,
+      otherPartnerIds: this.otherPartnerIds ?? []
     }
   }
 }

@@ -6,19 +6,15 @@
 
 <script setup>
 import SearchRondas from 'components/rondas/SearchRondas.vue';
-import { computed, inject, onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import districtService from 'src/services/api/district/districtService';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
-import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
-import partnerService from 'src/services/api/partner/partnerService';
-import programService from 'src/services/api/program/programService';
-import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import mentorService from 'src/services/api/mentor/mentorService';
 import { useLoading } from 'src/composables/shared/loading/loading';
 import UsersService from 'src/services/api/user/UsersService';
 import rondaService from 'src/services/api/ronda/rondaService';
 
-const { closeLoading, showloading } = useLoading();
+const { closeLoading } = useLoading();
 
 const init = async () => {
   await search();

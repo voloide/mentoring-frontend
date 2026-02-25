@@ -1,31 +1,38 @@
+<!-- src/pages/settings/Cabinet.vue (padrão HealthFacility) -->
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useCabinetStore } from 'src/stores/cabinet/CabinetStore'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
 
+const cabinetStore = useCabinetStore()
+
 const { alertError, alertWarningAction } = useSwal()
 const { handleApiError } = useApiErrorHandler()
 
-const cabinetStore = useCabinetStore()
 const nameFilter = ref('')
 
 const cabinets = computed({
   get: () => cabinetStore.currentPageCabinets,
-  set: (val) => {
-    cabinetStore.cabinetsPages[cabinetStore.pagination.currentPage] = val
-    cabinetStore.currentPageCabinets = val
+  set: (val: any[]) => {
+    cabinetStore.cabinetsPages[cabinetStore.pagination.currentPage] = val as any
+    cabinetStore.currentPageCabinets = val as any
   }
 })
 
-const columns = [
-  { name: 'name', label: 'Nome', align: 'left', field: 'name', style: 'width: 70%; white-space: normal; word-break: break-word;' },
+const columns: any[] = [
+  {
+    name: 'name',
+    label: 'Nome',
+    align: 'left',
+    field: 'name',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite o nome do sector',
+    style: 'width: 70%; white-space: normal; word-break: break-word;'
+  },
   { name: 'actions', label: 'Acções', align: 'center', style: 'width: 120px;' }
 ]
-
-onMounted(async () => {
-  await loadCabinets(0, pagination.value.rowsPerPage)
-})
 
 const pagination = ref({
   sortBy: 'id',
@@ -35,48 +42,53 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-const previousRowsPerPage = ref(pagination.value.rowsPerPage)
-
-const loadCabinets = async (page: number, size: number) => {
-  await cabinetStore.fetchCabinets({
-    page,
-    size,
-    name: nameFilter.value,
-    ignoreCache: false
-  })
-  pagination.value.rowsNumber = cabinetStore.pagination.totalSize
-}
-
-const onRequest = async (props: any) => {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination
-  const rowsPerPageChanged = rowsPerPage !== previousRowsPerPage.value
-
-  if (rowsPerPageChanged) {
-    cabinetStore.cabinetsPages = {}
-    cabinetStore.currentPageCabinets = []
-    console.log('[onRequest] RowsPerPage changed → Clearing store cache')
+onMounted(async () => {
+  if (cabinetStore.currentPageCabinets.length === 0) {
+    await cabinetStore.fetchCabinets()
   }
-
-  previousRowsPerPage.value = rowsPerPage
-
-  pagination.value.page = page
-  pagination.value.rowsPerPage = rowsPerPage
-  pagination.value.sortBy = sortBy
-  pagination.value.descending = descending
-
-  const apiPage = page - 1
-  await loadCabinets(apiPage, rowsPerPage)
-}
+})
 
 const onSearch = async (name: string) => {
   nameFilter.value = name
   pagination.value.page = 1
-  await loadCabinets(0, pagination.value.rowsPerPage)
+
+  await cabinetStore.fetchCabinets({
+    page: 0,
+    size: pagination.value.rowsPerPage,
+    name,
+    ignoreCache: true
+  })
+
+  pagination.value.rowsNumber = cabinetStore.pagination.totalSize
 }
 
-const saveCabinetHandler = async (cabinetData: any) => {
+watch(
+  () => [pagination.value.page, pagination.value.rowsPerPage],
+  async ([page, size]) => {
+    await cabinetStore.fetchCabinets({
+      page: page - 1,
+      size,
+      name: nameFilter.value,
+      ignoreCache: false
+    })
+    pagination.value.rowsNumber = cabinetStore.pagination.totalSize
+  },
+  { immediate: true }
+)
+
+watch(
+  () => cabinetStore.pagination.totalSize,
+  (total) => {
+    pagination.value.rowsNumber = total
+  }
+)
+
+const saveCabinetHandler = async (rowData: any) => {
   try {
-    return await cabinetStore.saveCabinet(cabinetData)
+    const payload: any = { ...rowData }
+    delete payload._backup
+    delete payload._isNew
+    return await cabinetStore.saveCabinet(payload)
   } catch (err: any) {
     handleApiError(err, 'Erro ao salvar sector')
     throw err
@@ -95,7 +107,6 @@ const deleteCabinetHandler = async (uuid: string) => {
 const toggleStatusHandler = async (row: any) => {
   try {
     const novoStatus = row.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-
     const confirm = await alertWarningAction(
       `Deseja realmente ${novoStatus === 'ACTIVE' ? 'ativar' : 'desativar'} este sector?`
     )
@@ -123,6 +134,5 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteCabinetHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
-    @request="onRequest"
   />
 </template>

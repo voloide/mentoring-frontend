@@ -1,32 +1,38 @@
+<!-- src/pages/settings/ProfessionalCategory.vue (padrão HealthFacility) -->
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useProfessionalCategoryStore } from 'src/stores/professionalCategory/ProfessionalCategoryStore'
-import { useApiErrorHandler } from '../../composables/shared/error/useApiErrorHandler'
+import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
+
+const categoryStore = useProfessionalCategoryStore()
 
 const { alertError, alertWarningAction } = useSwal()
 const { handleApiError } = useApiErrorHandler()
-
-const categoryStore = useProfessionalCategoryStore()
 
 const nameFilter = ref('')
 
 const categories = computed({
   get: () => categoryStore.currentPageCategories,
-  set: (val) => {
-    categoryStore.categoriesPages[categoryStore.pagination.currentPage] = val
-    categoryStore.currentPageCategories = val
+  set: (val: any[]) => {
+    categoryStore.categoriesPages[categoryStore.pagination.currentPage] = val as any
+    categoryStore.currentPageCategories = val as any
   }
 })
 
-const columns = [
-  { name: 'description', label: 'Descrição', align: 'left', field: 'description', style: 'width: 70%; white-space: normal; word-break: break-word;' },
+const columns: any[] = [
+  {
+    name: 'description',
+    label: 'Descrição',
+    align: 'left',
+    field: 'description',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite a descrição',
+    style: 'width: 70%; white-space: normal; word-break: break-word;'
+  },
   { name: 'actions', label: 'Acções', align: 'center', style: 'width: 120px;' }
 ]
-
-onMounted(async () => {
-  await loadCategories(0, pagination.value.rowsPerPage)
-})
 
 const pagination = ref({
   sortBy: 'id',
@@ -36,55 +42,54 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-const previousRowsPerPage = ref(pagination.value.rowsPerPage)
+onMounted(async () => {
+  if (categoryStore.currentPageCategories.length === 0) {
+    await categoryStore.fetchCategories()
+  }
+})
 
-const loadCategories = async (page: number, size: number) => {
+const onSearch = async (name: string) => {
+  nameFilter.value = name
+  pagination.value.page = 1
+
   await categoryStore.fetchCategories({
-    page,
-    size,
-    name: nameFilter.value,
-    ignoreCache: false
+    page: 0,
+    size: pagination.value.rowsPerPage,
+    name,
+    ignoreCache: true
   })
 
   pagination.value.rowsNumber = categoryStore.pagination.totalSize
 }
 
-const onRequest = async (props) => {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination
-  const rowsPerPageChanged = rowsPerPage !== previousRowsPerPage.value
+watch(
+  () => [pagination.value.page, pagination.value.rowsPerPage],
+  async ([page, size]) => {
+    await categoryStore.fetchCategories({
+      page: page - 1,
+      size,
+      name: nameFilter.value,
+      ignoreCache: false
+    })
+    pagination.value.rowsNumber = categoryStore.pagination.totalSize
+  },
+  { immediate: true }
+)
 
-  if (rowsPerPageChanged) {
-    categoryStore.categoriesPages = {}
-    categoryStore.currentPageCategories = []
-    console.log('[onRequest] RowsPerPage changed → Clearing store cache')
+watch(
+  () => categoryStore.pagination.totalSize,
+  (total) => {
+    pagination.value.rowsNumber = total
   }
+)
 
-  previousRowsPerPage.value = rowsPerPage
-
-  pagination.value.page = page
-  pagination.value.rowsPerPage = rowsPerPage
-  pagination.value.sortBy = sortBy
-  pagination.value.descending = descending
-
-  const apiPage = page - 1
-
-  await loadCategories(apiPage, rowsPerPage)
-}
-
-const onSearch = async (name: string) => {
-  nameFilter.value = name
-  pagination.value.page = 1
-  await loadCategories(0, pagination.value.rowsPerPage)
-}
-
-const saveCategoryHandler = async (categoryData: any) => {
+const saveCategoryHandler = async (rowData: any) => {
   try {
-    const payloadToSave = { ...categoryData }
-    delete payloadToSave.undefined
-    delete payloadToSave._backup
-
-    const saved = await categoryStore.saveCategory(payloadToSave)
-    return saved
+    const payload: any = { ...rowData }
+    delete payload._backup
+    delete payload._isNew
+    delete payload.undefined
+    return await categoryStore.saveCategory(payload)
   } catch (err: any) {
     handleApiError(err, 'Erro ao salvar categoria profissional')
     throw err
@@ -103,11 +108,9 @@ const deleteCategoryHandler = async (uuid: string) => {
 const toggleStatusHandler = async (row: any) => {
   try {
     const novoStatus = row.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-
     const confirm = await alertWarningAction(
       `Deseja realmente ${novoStatus === 'ACTIVE' ? 'ativar' : 'desativar'} esta categoria profissional?`
     )
-
     if (!confirm) return
 
     const updated = await categoryStore.updateCategoryLifeCycleStatus(row.uuid, novoStatus)
@@ -132,6 +135,5 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteCategoryHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
-    @request="onRequest"
   />
 </template>
