@@ -1,32 +1,48 @@
+<!-- src/pages/settings/Program.vue (padrão HealthFacility) -->
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useProgramStore } from 'src/stores/program/ProgramStore'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
 
+const programStore = useProgramStore()
+
 const { alertError, alertWarningAction } = useSwal()
 const { handleApiError } = useApiErrorHandler()
 
-const programStore = useProgramStore()
 const nameFilter = ref('')
 
 const programs = computed({
   get: () => programStore.currentPagePrograms,
-  set: (val) => {
-    programStore.programsPages[programStore.pagination.currentPage] = val
-    programStore.currentPagePrograms = val
+  set: (val: any[]) => {
+    programStore.programsPages[programStore.pagination.currentPage] = val as any
+    programStore.currentPagePrograms = val as any
   }
 })
 
-const columns = [
-  { name: 'name', label: 'Nome', align: 'left', field: 'name', style: 'width: 30%; white-space: normal; word-break: break-word;' },
-  { name: 'description', label: 'Descrição', align: 'left', field: 'description', style: 'width: 50%; white-space: normal; word-break: break-word;' },
+const columns: any[] = [
+  {
+    name: 'name',
+    label: 'Nome',
+    align: 'left',
+    field: 'name',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite o nome',
+    style: 'width: 30%; white-space: normal; word-break: break-word;'
+  },
+  {
+    name: 'description',
+    label: 'Descrição',
+    align: 'left',
+    field: 'description',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite a descrição',
+    style: 'width: 50%; white-space: normal; word-break: break-word;'
+  },
   { name: 'actions', label: 'Acções', align: 'center', style: 'width: 120px;' }
 ]
-
-onMounted(async () => {
-  await loadPrograms(0, pagination.value.rowsPerPage)
-})
 
 const pagination = ref({
   sortBy: 'id',
@@ -36,49 +52,53 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-const previousRowsPerPage = ref(pagination.value.rowsPerPage)
+onMounted(async () => {
+  if (programStore.currentPagePrograms.length === 0) {
+    await programStore.fetchPrograms()
+  }
+})
 
-const loadPrograms = async (page: number, size: number) => {
+const onSearch = async (name: string) => {
+  nameFilter.value = name
+  pagination.value.page = 1
+
   await programStore.fetchPrograms({
-    page,
-    size,
-    name: nameFilter.value,
-    ignoreCache: false
+    page: 0,
+    size: pagination.value.rowsPerPage,
+    name,
+    ignoreCache: true
   })
 
   pagination.value.rowsNumber = programStore.pagination.totalSize
 }
 
-const onRequest = async (props) => {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination
-  const rowsPerPageChanged = rowsPerPage !== previousRowsPerPage.value
+watch(
+  () => [pagination.value.page, pagination.value.rowsPerPage],
+  async ([page, size]) => {
+    await programStore.fetchPrograms({
+      page: page - 1,
+      size,
+      name: nameFilter.value,
+      ignoreCache: false
+    })
+    pagination.value.rowsNumber = programStore.pagination.totalSize
+  },
+  { immediate: true }
+)
 
-  if (rowsPerPageChanged) {
-    programStore.programsPages = {}
-    programStore.currentPagePrograms = []
-    console.log('[onRequest] RowsPerPage changed → Clearing store cache')
+watch(
+  () => programStore.pagination.totalSize,
+  (total) => {
+    pagination.value.rowsNumber = total
   }
+)
 
-  previousRowsPerPage.value = rowsPerPage
-
-  pagination.value.page = page
-  pagination.value.rowsPerPage = rowsPerPage
-  pagination.value.sortBy = sortBy
-  pagination.value.descending = descending
-
-  const apiPage = page - 1
-  await loadPrograms(apiPage, rowsPerPage)
-}
-
-const onSearch = async (name: string) => {
-  nameFilter.value = name
-  pagination.value.page = 1
-  await loadPrograms(0, pagination.value.rowsPerPage)
-}
-
-const saveProgramHandler = async (programData: any) => {
+const saveProgramHandler = async (rowData: any) => {
   try {
-    return await programStore.saveProgram(programData)
+    const payload: any = { ...rowData }
+    delete payload._backup
+    delete payload._isNew
+    return await programStore.saveProgram(payload)
   } catch (err: any) {
     handleApiError(err, 'Erro ao salvar programa')
     throw err
@@ -97,11 +117,9 @@ const deleteProgramHandler = async (uuid: string) => {
 const toggleStatusHandler = async (row: any) => {
   try {
     const novoStatus = row.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-
     const confirm = await alertWarningAction(
       `Deseja realmente ${novoStatus === 'ACTIVE' ? 'ativar' : 'desativar'} este programa?`
     )
-
     if (!confirm) return
 
     const updated = await programStore.updateProgramLifeCycleStatus(row.uuid, novoStatus)
@@ -126,6 +144,5 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteProgramHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
-    @request="onRequest"
   />
 </template>

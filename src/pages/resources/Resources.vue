@@ -6,7 +6,6 @@
 
 <script setup>
   import EAResources from 'components/EAResources/EAResources.vue';
-  import resourceService from 'src/services/api/resource/resourceService';
   import {onMounted} from 'vue';
 
   onMounted(() => {

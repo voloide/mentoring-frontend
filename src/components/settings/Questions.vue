@@ -1,37 +1,86 @@
+<!-- src/pages/settings/Questions.vue (padrão HealthFacility + selectOptions) -->
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useQuestionStore } from 'src/stores/question/QuestionStore'
 import { useProgramStore } from 'src/stores/program/ProgramStore'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { Program } from 'src/entities/program/Program'
 
-const { alertError, alertWarningAction } = useSwal()
-const { handleApiError } = useApiErrorHandler()
-
 const questionStore = useQuestionStore()
 const programStore = useProgramStore()
 
-const nameFilter = ref('')
+const { alertError, alertWarningAction } = useSwal()
+const { handleApiError } = useApiErrorHandler()
 
-const questions = computed({
-  get: () => questionStore.currentPageQuestions,
-  set: (val) => {
-    questionStore.questionsPages[questionStore.pagination.currentPage] = val
-    questionStore.currentPageQuestions = val
-  }
-})
+const nameFilter = ref('')
 
 const programOptions = computed(() =>
   programStore.currentPagePrograms
-    .filter(p => p.lifeCycleStatus === 'ACTIVE')
-    .map(p => ({ label: p.name, value: p.id }))
+    .filter((p: any) => p.lifeCycleStatus === 'ACTIVE')
+    .map((p: any) => ({ label: p.name, value: p.id }))
 )
 
-const columns = [
-  { name: 'tableCode', label: 'Código', align: 'left', field: 'tableCode', style: 'width: 70px;' },
-  { name: 'question', label: 'Competência', align: 'left', field: 'question', style: 'width: 70%; white-space: normal; word-break: break-word;' },
-  { name: 'programId', label: 'Programa', align: 'left', field: 'programId' },
+const selectOptions = computed(() => ({
+  programOptions: programOptions.value
+}))
+
+const programLabelById = (id: number | null | undefined) => {
+  if (!id) return '—'
+  const opt = programOptions.value.find((o: any) => o.value === id)
+  return opt?.label ?? String(id)
+}
+
+const questions = computed({
+  get: () => {
+    return questionStore.currentPageQuestions.map((q: any) => {
+      const programObj = q.program ?? q.programDTO ?? null
+      return {
+        ...q,
+        programId: q.programId ?? programObj?.id ?? null
+      }
+    })
+  },
+  set: (val: any[]) => {
+    questionStore.questionsPages[questionStore.pagination.currentPage] = val as any
+    questionStore.currentPageQuestions = val as any
+  }
+})
+
+const columns: any[] = [
+  {
+    name: 'tableCode',
+    label: 'Código',
+    align: 'left',
+    field: 'tableCode',
+    editType: 'text',
+    required: true,
+    placeholder: 'Código',
+    style: 'width: 70px;'
+  },
+  {
+    name: 'question',
+    label: 'Competência',
+    align: 'left',
+    field: 'question',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite a competência',
+    style: 'width: 70%; white-space: normal; word-break: break-word;'
+  },
+  {
+    name: 'programId',
+    label: 'Programa',
+    align: 'left',
+    field: (row: any) => programLabelById(row.programId),
+    editType: 'select',
+    editOptionsKey: 'programOptions',
+    editValueField: 'programId',
+    optionLabelKey: 'label',
+    optionValueKey: 'value',
+    required: true,
+    placeholder: 'Selecione o programa'
+  },
   { name: 'actions', label: 'Ações', align: 'center', style: 'width: 120px;' }
 ]
 
@@ -43,62 +92,71 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-const previousRowsPerPage = ref(pagination.value.rowsPerPage)
-
 onMounted(async () => {
   if (programStore.currentPagePrograms.length === 0) {
     await programStore.fetchPrograms({ page: 0, size: 100 })
   }
-  await loadQuestions(0, pagination.value.rowsPerPage)
+
+  if (questionStore.currentPageQuestions.length === 0) {
+    await questionStore.fetchQuestions()
+  }
 })
 
-const loadQuestions = async (page: number, size: number) => {
+const onSearch = async (name: string) => {
+  nameFilter.value = name
+  pagination.value.page = 1
+
   await questionStore.fetchQuestions({
-    page,
-    size,
-    name: nameFilter.value,
-    ignoreCache: false
+    page: 0,
+    size: pagination.value.rowsPerPage,
+    name,
+    ignoreCache: true
   })
 
   pagination.value.rowsNumber = questionStore.pagination.totalSize
 }
 
-const onRequest = async (props) => {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination
+watch(
+  () => [pagination.value.page, pagination.value.rowsPerPage],
+  async ([page, size]) => {
+    await questionStore.fetchQuestions({
+      page: page - 1,
+      size,
+      name: nameFilter.value,
+      ignoreCache: false
+    })
+    pagination.value.rowsNumber = questionStore.pagination.totalSize
+  },
+  { immediate: true }
+)
 
-  const rowsPerPageChanged = rowsPerPage !== previousRowsPerPage.value
-
-  if (rowsPerPageChanged) {
-    questionStore.questionsPages = {}
-    questionStore.currentPageQuestions = []
+watch(
+  () => questionStore.pagination.totalSize,
+  (total) => {
+    pagination.value.rowsNumber = total
   }
+)
 
-  previousRowsPerPage.value = rowsPerPage
-
-  pagination.value = { page, rowsPerPage, sortBy, descending, rowsNumber: pagination.value.rowsNumber }
-
-  await loadQuestions(page - 1, rowsPerPage)
-}
-
-const onSearch = async (name: string) => {
-  nameFilter.value = name
-  pagination.value.page = 1
-  await loadQuestions(0, pagination.value.rowsPerPage)
-}
-
-const saveQuestionHandler = async (questionData: any) => {
+const saveQuestionHandler = async (rowData: any) => {
   try {
-    const selectedProgram = programStore.currentPagePrograms.find(p => p.id === questionData.programId)
-    if (!selectedProgram) throw new Error(`Programa com ID ${questionData.programId} não encontrado.`)
+    const selectedProgram = programStore.currentPagePrograms.find((p: any) => p.id === rowData.programId)
+    if (!selectedProgram) throw new Error(`Programa com ID ${rowData.programId} não encontrado.`)
 
-    const payload = {
-      ...questionData,
+    const payload: any = {
+      ...rowData,
       program: new Program({ id: selectedProgram.id, uuid: selectedProgram.uuid })
     }
 
     delete payload._backup
+    delete payload._isNew
+    delete payload.programDTO
+
     const saved = await questionStore.saveQuestion(payload)
-    saved.program = selectedProgram
+
+    // manter UI
+    ;(saved as any).program = selectedProgram
+    ;(saved as any).programId = selectedProgram.id
+
     return saved
   } catch (err: any) {
     handleApiError(err, 'Erro ao salvar competência')
@@ -118,11 +176,9 @@ const deleteQuestionHandler = async (uuid: string) => {
 const toggleStatusHandler = async (row: any) => {
   try {
     const novoStatus = row.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-
     const confirm = await alertWarningAction(
       `Deseja realmente ${novoStatus === 'ACTIVE' ? 'ativar' : 'desativar'} esta competência?`
     )
-
     if (!confirm) return
 
     const updated = await questionStore.updateQuestionLifeCycleStatus(row.uuid, novoStatus)
@@ -140,14 +196,13 @@ const toggleStatusHandler = async (row: any) => {
     :columns="columns"
     :loading="questionStore.loading"
     v-model:pagination="pagination"
-    :program-options="programOptions"
     :rows-per-page-options="[10, 20, 50, 100]"
+    :select-options="selectOptions"
     :confirm-error="alertError"
     :confirm-delete="alertWarningAction"
     @save="(row, { resolve, reject }) => saveQuestionHandler(row).then(resolve).catch(reject)"
     @delete="(row, { resolve, reject }) => deleteQuestionHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
-    @request="onRequest"
   />
 </template>

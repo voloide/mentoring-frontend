@@ -43,7 +43,6 @@ import programmaticAreaService from 'src/services/api/programmaticArea/programma
 // Stores
 import { useProvinceStore } from 'src/stores/province/ProvinceStore'
 import { useDistrictStore } from 'src/stores/district/DistrictStore'
-import { useHealthFacilityStore } from 'src/stores/healthFacility/HealthFacilityStore'
 import { useProfessionalCategoryStore } from 'src/stores/professionalCategory/ProfessionalCategoryStore'
 import { usePartnerStore } from 'src/stores/partner/PartnerStore'
 
@@ -58,7 +57,6 @@ const selectedMentor = ref(null)
 // Stores
 const provinceStore = useProvinceStore()
 const districtStore = useDistrictStore()
-const healthFacilityStore = useHealthFacilityStore()
 const professionalCategoryStore = useProfessionalCategoryStore()
 const partnerStore = usePartnerStore()
 

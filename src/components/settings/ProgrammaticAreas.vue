@@ -1,49 +1,83 @@
+<!-- src/pages/settings/ProgrammaticArea.vue (padrão HealthFacility + selectOptions) -->
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useProgrammaticAreaStore } from 'src/stores/programaticArea/ProgrammaticAreaStore'
+import { useProgramStore } from 'src/stores/program/ProgramStore'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
-import { useProgramStore } from 'src/stores/program/ProgramStore'
 import { Program } from 'src/entities/program/Program'
-
-const { alertError, alertWarningAction } = useSwal()
-const { handleApiError } = useApiErrorHandler()
 
 const areaStore = useProgrammaticAreaStore()
 const programStore = useProgramStore()
 
+const { alertError, alertWarningAction } = useSwal()
+const { handleApiError } = useApiErrorHandler()
+
 const nameFilter = ref('')
 
+/**
+ * v-model do EditableTable
+ */
 const areas = computed({
-  get: () => areaStore.currentPageAreas,
-  set: (val) => {
-    areaStore.areasPages[areaStore.pagination.currentPage] = val
-    areaStore.currentPageAreas = val
+  get: () => {
+    return areaStore.currentPageAreas.map((a: any) => {
+      const programObj = a.program ?? a.programDTO ?? null
+
+      return {
+        ...a,
+        programId: a.programId ?? programObj?.id ?? null,
+        programName: programObj?.name ?? programObj?.designation ?? '' // depende do teu DTO
+      }
+    })
+  },
+  set: (val: any[]) => {
+    areaStore.areasPages[areaStore.pagination.currentPage] = val as any
+    areaStore.currentPageAreas = val as any
   }
 })
 
 const programOptions = computed(() => {
   return programStore.currentPagePrograms
-    .filter(program => program.lifeCycleStatus === 'ACTIVE')
-    .map(program => ({
-      label: program.name,
-      value: program.id
-    }))
+    .filter((p: any) => p.lifeCycleStatus === 'ACTIVE')
+    .map((p: any) => ({ label: p.name, value: p.id }))
 })
 
-const columns = [
-  { name: 'name', label: 'Nome', align: 'left', field: 'name', style: 'width: 60%; white-space: normal; word-break: break-word;' },
-  { name: 'programId', label: 'Programa', align: 'left', field: 'programId' },
+const selectOptions = computed(() => ({
+  programOptions: programOptions.value
+}))
+
+const programLabelById = (id: number | null | undefined) => {
+  if (!id) return '—'
+  const opt = programOptions.value.find((o: any) => o.value === id)
+  return opt?.label ?? String(id)
+}
+
+const columns: any[] = [
+  {
+    name: 'name',
+    label: 'Nome',
+    align: 'left',
+    field: 'name',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite o nome',
+    style: 'width: 60%; white-space: normal; word-break: break-word;'
+  },
+  {
+    name: 'programId',
+    label: 'Programa',
+    align: 'left',
+    field: (row: any) => programLabelById(row.programId),
+    editType: 'select',
+    editOptionsKey: 'programOptions',
+    editValueField: 'programId',
+    optionLabelKey: 'label',
+    optionValueKey: 'value',
+    required: true,
+    placeholder: 'Selecione o programa'
+  },
   { name: 'actions', label: 'Acções', align: 'center', style: 'width: 120px;' }
 ]
-
-onMounted(async () => {
-  if (programStore.currentPagePrograms.length === 0) {
-    await programStore.fetchPrograms({ page: 0, size: 100 })
-  }
-
-  await loadAreas(0, pagination.value.rowsPerPage)
-})
 
 const pagination = ref({
   sortBy: 'id',
@@ -53,68 +87,72 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-const previousRowsPerPage = ref(pagination.value.rowsPerPage)
+onMounted(async () => {
+  if (programStore.currentPagePrograms.length === 0) {
+    await programStore.fetchPrograms({ page: 0, size: 100 })
+  }
 
-const loadAreas = async (page: number, size: number) => {
+  if (areaStore.currentPageAreas.length === 0) {
+    await areaStore.fetchAreas()
+  }
+})
+
+const onSearch = async (name: string) => {
+  nameFilter.value = name
+  pagination.value.page = 1
+
   await areaStore.fetchAreas({
-    page,
-    size,
-    name: nameFilter.value,
-    ignoreCache: false
+    page: 0,
+    size: pagination.value.rowsPerPage,
+    name,
+    ignoreCache: true
   })
 
   pagination.value.rowsNumber = areaStore.pagination.totalSize
 }
 
-const onRequest = async (props) => {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination
-  const rowsPerPageChanged = rowsPerPage !== previousRowsPerPage.value
+watch(
+  () => [pagination.value.page, pagination.value.rowsPerPage],
+  async ([page, size]) => {
+    await areaStore.fetchAreas({
+      page: page - 1,
+      size,
+      name: nameFilter.value,
+      ignoreCache: false
+    })
+    pagination.value.rowsNumber = areaStore.pagination.totalSize
+  },
+  { immediate: true }
+)
 
-  if (rowsPerPageChanged) {
-    areaStore.areasPages = {}
-    areaStore.currentPageAreas = []
-    console.log('[onRequest] RowsPerPage changed → Clearing store cache')
+watch(
+  () => areaStore.pagination.totalSize,
+  (total) => {
+    pagination.value.rowsNumber = total
   }
+)
 
-  previousRowsPerPage.value = rowsPerPage
-
-  pagination.value.page = page
-  pagination.value.rowsPerPage = rowsPerPage
-  pagination.value.sortBy = sortBy
-  pagination.value.descending = descending
-
-  const apiPage = page - 1
-
-  await loadAreas(apiPage, rowsPerPage)
-}
-
-const onSearch = async (name: string) => {
-  nameFilter.value = name
-  pagination.value.page = 1
-  await loadAreas(0, pagination.value.rowsPerPage)
-}
-
-const saveAreaHandler = async (areaData: any) => {
+const saveAreaHandler = async (rowData: any) => {
   try {
-    const selectedProgram = programStore.currentPagePrograms.find(p => p.id === areaData.programId)
+    const selectedProgram = programStore.currentPagePrograms.find((p: any) => p.id === rowData.programId)
+    if (!selectedProgram) throw new Error(`Programa com ID ${rowData.programId} não encontrado.`)
 
-    if (!selectedProgram) {
-      throw new Error(`Programa com ID ${areaData.programId} não encontrado.`)
+    const payloadToSave: any = {
+      ...rowData,
+      program: new Program({ id: selectedProgram.id, uuid: selectedProgram.uuid })
     }
 
-    const payloadToSave = {
-      ...areaData,
-      program: new Program({
-        id: selectedProgram.id,
-        uuid: selectedProgram.uuid
-      })
-    }
-
-    delete payloadToSave.undefined
     delete payloadToSave._backup
+    delete payloadToSave._isNew
+    delete payloadToSave.undefined
+    delete payloadToSave.programName
 
     const saved = await areaStore.saveArea(payloadToSave)
-    saved.program = selectedProgram
+
+    // manter UI
+    ;(saved as any).program = selectedProgram
+    ;(saved as any).programId = selectedProgram.id
+
     return saved
   } catch (err: any) {
     handleApiError(err, 'Erro ao salvar área programática')
@@ -134,11 +172,9 @@ const deleteAreaHandler = async (uuid: string) => {
 const toggleStatusHandler = async (row: any) => {
   try {
     const novoStatus = row.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-
     const confirm = await alertWarningAction(
       `Deseja realmente ${novoStatus === 'ACTIVE' ? 'ativar' : 'desativar'} esta área programática?`
     )
-
     if (!confirm) return
 
     const updated = await areaStore.updateAreaLifeCycleStatus(row.uuid, novoStatus)
@@ -156,14 +192,13 @@ const toggleStatusHandler = async (row: any) => {
     :columns="columns"
     :loading="areaStore.loading"
     v-model:pagination="pagination"
-    :program-options="programOptions"
     :rows-per-page-options="[10, 20, 50, 100]"
+    :select-options="selectOptions"
     :confirm-error="alertError"
     :confirm-delete="alertWarningAction"
     @save="(row, { resolve, reject }) => saveAreaHandler(row).then(resolve).catch(reject)"
     @delete="(row, { resolve, reject }) => deleteAreaHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
-    @request="onRequest"
   />
 </template>

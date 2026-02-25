@@ -1,33 +1,48 @@
+<!-- src/pages/settings/Partner.vue (padrão HealthFacility) -->
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { usePartnerStore } from 'src/stores/partner/PartnerStore'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
 
+const partnerStore = usePartnerStore()
+
 const { alertError, alertWarningAction } = useSwal()
 const { handleApiError } = useApiErrorHandler()
-
-const partnerStore = usePartnerStore()
 
 const nameFilter = ref('')
 
 const partners = computed({
   get: () => partnerStore.currentPagePartners,
-  set: (val) => {
-    partnerStore.partnersPages[partnerStore.pagination.currentPage] = val
-    partnerStore.currentPagePartners = val
+  set: (val: any[]) => {
+    partnerStore.partnersPages[partnerStore.pagination.currentPage] = val as any
+    partnerStore.currentPagePartners = val as any
   }
 })
 
-const columns = [
-  { name: 'name', label: 'Nome', align: 'left', field: 'name', style: 'width: 35%' },
-  { name: 'description', label: 'Descrição', align: 'left', field: 'description', style: 'width: 55%' },
+const columns: any[] = [
+  {
+    name: 'name',
+    label: 'Nome',
+    align: 'left',
+    field: 'name',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite o nome',
+    style: 'width: 35%'
+  },
+  {
+    name: 'description',
+    label: 'Descrição',
+    align: 'left',
+    field: 'description',
+    editType: 'text',
+    required: true,
+    placeholder: 'Digite a descrição',
+    style: 'width: 55%'
+  },
   { name: 'actions', label: 'Ações', align: 'center', style: 'width: 120px;' }
 ]
-
-onMounted(async () => {
-  await loadPartners(0, pagination.value.rowsPerPage)
-})
 
 const pagination = ref({
   sortBy: 'id',
@@ -37,55 +52,54 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-const previousRowsPerPage = ref(pagination.value.rowsPerPage)
+onMounted(async () => {
+  if (partnerStore.currentPagePartners.length === 0) {
+    await partnerStore.fetchPartners()
+  }
+})
 
-const loadPartners = async (page: number, size: number) => {
+const onSearch = async (name: string) => {
+  nameFilter.value = name
+  pagination.value.page = 1
+
   await partnerStore.fetchPartners({
-    page,
-    size,
-    name: nameFilter.value,
-    ignoreCache: false
+    page: 0,
+    size: pagination.value.rowsPerPage,
+    name,
+    ignoreCache: true
   })
 
   pagination.value.rowsNumber = partnerStore.pagination.totalSize
 }
 
-const onRequest = async (props) => {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination
-  const rowsPerPageChanged = rowsPerPage !== previousRowsPerPage.value
+watch(
+  () => [pagination.value.page, pagination.value.rowsPerPage],
+  async ([page, size]) => {
+    await partnerStore.fetchPartners({
+      page: page - 1,
+      size,
+      name: nameFilter.value,
+      ignoreCache: false
+    })
+    pagination.value.rowsNumber = partnerStore.pagination.totalSize
+  },
+  { immediate: true }
+)
 
-  if (rowsPerPageChanged) {
-    partnerStore.partnersPages = {}
-    partnerStore.currentPagePartners = []
-    console.log('[onRequest] RowsPerPage changed → Clearing store cache')
+watch(
+  () => partnerStore.pagination.totalSize,
+  (total) => {
+    pagination.value.rowsNumber = total
   }
+)
 
-  previousRowsPerPage.value = rowsPerPage
-
-  pagination.value.page = page
-  pagination.value.rowsPerPage = rowsPerPage
-  pagination.value.sortBy = sortBy
-  pagination.value.descending = descending
-
-  const apiPage = page - 1
-
-  await loadPartners(apiPage, rowsPerPage)
-}
-
-const onSearch = async (name: string) => {
-  nameFilter.value = name
-  pagination.value.page = 1
-  await loadPartners(0, pagination.value.rowsPerPage)
-}
-
-const savePartnerHandler = async (partnerData: any) => {
+const savePartnerHandler = async (rowData: any) => {
   try {
-    const payloadToSave = { ...partnerData }
-    delete payloadToSave._backup
-    delete payloadToSave.undefined
-
-    const saved = await partnerStore.savePartner(payloadToSave)
-    return saved
+    const payload: any = { ...rowData }
+    delete payload._backup
+    delete payload._isNew
+    delete payload.undefined
+    return await partnerStore.savePartner(payload)
   } catch (err: any) {
     handleApiError(err, 'Erro ao salvar parceiro')
     throw err
@@ -104,11 +118,9 @@ const deletePartnerHandler = async (uuid: string) => {
 const toggleStatusHandler = async (row: any) => {
   try {
     const novoStatus = row.lifeCycleStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-
     const confirm = await alertWarningAction(
       `Deseja realmente ${novoStatus === 'ACTIVE' ? 'ativar' : 'desativar'} este parceiro?`
     )
-
     if (!confirm) return
 
     const updated = await partnerStore.updatePartnerLifeCycleStatus(row.uuid, novoStatus)
@@ -133,6 +145,5 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deletePartnerHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
-    @request="onRequest"
   />
 </template>

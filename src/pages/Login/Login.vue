@@ -85,11 +85,12 @@
               />
             </div>
           </q-form>
-          <div class="row q-mt-sm justify-center">
+          <div class="row q-mt-sm justify-center" v-if="false">
             <q-btn
               flat
               color="light-blue-10"
               @click="showForgotPassword = true"
+              
             >
               Esqueceu a Password?
             </q-btn>

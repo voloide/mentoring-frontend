@@ -56,11 +56,6 @@ const routes: RouteRecordRaw[] = [
         path: '/settings',
         component: () => import('pages/Settings/Settings.vue'),
       },
-      {
-        path: '/progresso',
-        component: () => import('pages/Progress/Progress.vue'),
-        meta: { title: 'Progresso de Rondas/Sessões' },
-      },
     ],
   },
   {
