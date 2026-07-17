@@ -1,104 +1,87 @@
 <template>
-  <div class="row q-pa-sm text-center justify-center">
-    <div class="col-lg-3 col-md-6 col-sm-10">
-      <div style="margin-top: 100px">
-        <div
-          class="col-auto text-grey text-caption q-pt-sm row no-wrap items-center justify-center"
-        >
-          <q-avatar size="180px">
-            <q-img src="~assets/mentoring.png" />
-          </q-avatar>
+  <div class="login-screen row items-center justify-center">
+    <div class="login-blob login-blob--one"></div>
+    <div class="login-blob login-blob--two"></div>
+
+    <div class="login-wrap">
+      <div class="login-brand column items-center">
+        <div class="login-brand__logo">
+          <q-img src="~assets/mentoring.png" fit="contain" />
         </div>
-        <div class="row text-center column">
-          <p
-            style="font-family: 'line-awesome'"
-            class="text-gray text-h4 text-weight-bold text-blue-10"
-          >
-            Mentoria
-          </p>
-        </div>
+        <div class="login-brand__title">Mentoria</div>
       </div>
-      <q-card class="q-mt-lg" style="max-width: 100%">
-        <q-card-section class="login" style="padding: 20px" align="center">
-          <q-form class="q-gutter-md" @submit.prevent="authUser">
-            <div
-              class="col-12 text-grey-1 text-h5 text-weight-medium"
-              style="margin-bottom: 30px"
+
+      <q-card flat class="login-card">
+        <q-card-section class="login-card__section">
+          <div class="login-card__heading">Bem-vindo de volta</div>
+          <div class="login-card__subheading">Inicia sessão para continuar</div>
+
+          <q-form class="q-mt-lg" @submit.prevent="authUser">
+            <q-input
+              outlined
+              class="login-input"
+              ref="usernameRef"
+              v-model="username"
+              label="Utilizador"
+              :rules="[
+                (val) =>
+                  val.length >= 3 ||
+                  'O nome do utilizador deve ter um minimo de 4 caracteres',
+              ]"
             >
-              LOGIN
-            </div>
-            <div class="row q-mb-sm q-mt-lg justify-center">
-              <q-input
-                outlined
-                class="col-12 col-lg-8"
-                bg-color="white"
-                ref="usernameRef"
-                v-model="username"
-                color="red-9"
-                label-color="light-blue-10"
-                label="Utilizador"
-                :rules="[
-                  (val) =>
-                    val.length >= 3 ||
-                    'O nome do utilizador deve ter um minimo de 4 caracteres',
-                ]"
-                dense
-              >
-                <template v-slot:append>
-                  <q-icon name="person" color="light-blue-10" />
-                </template>
-              </q-input>
-            </div>
-            <div class="row q-mb-sm q-mt-lg justify-center">
-              <q-input
-                class="col-12 col-lg-8"
-                outlined
-                bg-color="white"
-                color="red-9"
-                label-color="light-blue-10"
-                v-model="password"
-                ref="passwordRef"
-                type="password"
-                label="Password"
-                :rules="[
-                  (val) =>
-                    val.length >= 4 ||
-                    'A senha deve ter um minimo de 4 caracteres',
-                ]"
-                dense
-              >
-                <template v-slot:append>
-                  <q-icon name="lock_open" color="light-blue-10" />
-                </template>
-              </q-input>
-            </div>
-            <div class="row q-mt-lg justify-center q-mb-lg">
-              <q-btn
-                :loading="submitting"
-                class="col-12 col-lg-6 q-py-sm glossy"
-                unelevated
-                rounded
-                color="light-blue-12"
-                type="submit"
-                label="Entrar"
-                style="border: solid 1px white"
-              />
-            </div>
+              <template v-slot:prepend>
+                <q-icon name="person" />
+              </template>
+            </q-input>
+
+            <q-input
+              class="login-input q-mt-md"
+              outlined
+              v-model="password"
+              ref="passwordRef"
+              :type="showPassword ? 'text' : 'password'"
+              label="Password"
+              :rules="[
+                (val) =>
+                  val.length >= 4 ||
+                  'A senha deve ter um minimo de 4 caracteres',
+              ]"
+            >
+              <template v-slot:prepend>
+                <q-icon name="lock_open" />
+              </template>
+              <template v-slot:append>
+                <q-icon
+                  :name="showPassword ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="showPassword = !showPassword"
+                />
+              </template>
+            </q-input>
+
+            <q-btn
+              :loading="submitting"
+              class="login-submit q-mt-lg"
+              unelevated
+              rounded
+              type="submit"
+              label="Entrar"
+              no-caps
+            />
           </q-form>
-          <div class="row q-mt-sm justify-center" v-if="false">
+
+          <div class="row justify-center q-mt-sm" v-if="false">
             <q-btn
               flat
-              color="light-blue-10"
+              no-caps
+              color="primary"
               @click="showForgotPassword = true"
-              
             >
               Esqueceu a Password?
             </q-btn>
           </div>
 
-          <div class="row">
-            <label class="col text-right">v{{ appVersion }}</label>
-          </div>
+          <div class="login-version">v{{ appVersion }}</div>
         </q-card-section>
       </q-card>
     </div>
@@ -146,6 +129,7 @@ const password = ref('');
 const usernameRef = ref(null);
 const passwordRef = ref(null);
 const submitting = ref(false);
+const showPassword = ref(false);
 const router = useRouter();
 const { alertSucess, alertError } = useSwal();
 const appVersion = version;
@@ -224,8 +208,144 @@ const authUser = async () => {
 };
 </script>
 
-<style lang="scss">
-.login {
-  background-color: $primary;
+<style lang="scss" scoped>
+.login-screen {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    darken($primary, 18%) 0%,
+    $primary 55%,
+    lighten($primary, 12%) 100%
+  );
+}
+
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(0px);
+  opacity: 0.35;
+  pointer-events: none;
+
+  &--one {
+    width: 420px;
+    height: 420px;
+    top: -140px;
+    left: -120px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5), transparent 70%);
+  }
+
+  &--two {
+    width: 340px;
+    height: 340px;
+    bottom: -120px;
+    right: -100px;
+    background: radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.35), transparent 70%);
+  }
+}
+
+.login-wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  animation: login-rise 0.45s ease-out;
+}
+
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-brand {
+  margin-bottom: 20px;
+
+  &__logo {
+    width: 96px;
+    height: 96px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    :deep(.q-img) {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__title {
+    margin-top: 14px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.login-card {
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+
+  &__section {
+    padding: 32px 28px 24px;
+  }
+
+  &__heading {
+    font-size: 20px;
+    font-weight: 700;
+    color: $dark;
+    text-align: center;
+  }
+
+  &__subheading {
+    font-size: 13px;
+    color: #8a8f98;
+    text-align: center;
+    margin-top: 4px;
+  }
+}
+
+.login-input {
+  :deep(.q-field__control) {
+    border-radius: 12px;
+  }
+}
+
+.login-submit {
+  width: 100%;
+  height: 46px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, $primary, darken($primary, 10%));
+  color: #fff;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 10px 24px rgba(22, 143, 199, 0.4);
+    transform: translateY(-1px);
+  }
+}
+
+.login-version {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 11px;
+  color: #b7bcc5;
 }
 </style>
