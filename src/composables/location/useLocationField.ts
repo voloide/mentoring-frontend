@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useProvinceStore } from 'src/stores/province/ProvinceStore'
 import { useDistrictStore } from 'src/stores/district/DistrictStore'
 

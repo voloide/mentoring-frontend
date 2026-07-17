@@ -116,7 +116,7 @@ const submitReset = async () => {
       token: token.value,
       password: password.value,
       confirmPassword: confirmPassword.value,
-    }).then((resp) => {
+    }).then(() => {
       alertSucess('Senha atualizada com sucesso!');
       router.push('/Login');
     });

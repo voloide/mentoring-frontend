@@ -1,5 +1,5 @@
-import District from "src/stores/model/location/District";
-import useProvince from "../province/provinceMethods";
+import District from 'src/stores/model/location/District';
+import useProvince from '../province/provinceMethods';
 
 export default function useDistrict() {
 

@@ -1,7 +1,5 @@
-import Employee from 'src/stores/model/employee/Employee';
 import useEmployee from 'src/composables/employee/employeeMethods';
 import useUserRole from 'src/composables/userRole/userRoleMethods';
-import Mentor from 'src/stores/model/mentor/Mentor';
 import User from 'src/stores/model/user/User';
 
 export default function useUser() {

@@ -1,4 +1,4 @@
-import EvaluationType from "src/stores/model/question/EvaluationType";
+import EvaluationType from 'src/stores/model/question/EvaluationType';
 
 export default function useEvaluationType() {
 

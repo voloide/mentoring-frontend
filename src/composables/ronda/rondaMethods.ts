@@ -1,19 +1,10 @@
 import useDistrict from 'src/composables/district/districtMethods';
-import HealthFacility from 'stores/model/healthfacility/HealthFacility';
 import useHealthFacility from 'src/composables/healthFacility/healthFacility';
 import Ronda from 'stores/model/ronda/Ronda';
 import RondaType from 'stores/model/ronda/RondaType';
 import RondaMentee from 'stores/model/ronda/RondaMentee';
-import Mentees from 'stores/model/mentees/Mentees';
-import useEmployee from 'src/composables/employee/employeeMethods';
 import employeeService from 'src/services/api/employee/employeeService';
-import rondaService from 'src/services/api/ronda/rondaService';
 import RondaMentor from 'stores/model/ronda/RondaMentor';
-import Mentor from 'stores/model/mentor/Mentor';
-import Employee from 'stores/model/employee/Employee';
-import ProfessionalCategory from 'stores/model/professionalCategory/ProfessionalCategory';
-import Partner from 'stores/model/partner/Partner';
-import Location from 'stores/model/location/Location';
 import useMentor from 'src/composables/mentor/mentorMethods';
 
 export default function useRonda() {
@@ -35,14 +26,6 @@ export default function useRonda() {
       // rondaMentees: doCreateRondaMenteeFromDTO(rondaDTO),
       rondaMentors: doCreateRondaMentorsFromDTO(rondaDTO),
     });
-  }
-  function doCreateRondaMenteeFromDTO(ronda: any) {
-    const rondaMenteesDTO: RondaMentee[] = [];
-    ronda.rondaMentees.forEach((rondaMentee: any) => {
-      const rm = createRondaMenteeFromDTO(rondaMentee.rondaMentee, ronda);
-      rondaMenteesDTO.push(rm);
-    });
-    return rondaMenteesDTO;
   }
   function doCreateRondaMentorsFromDTO(ronda: any) {
     const rondaMentorsDTO: RondaMentor[] = [];
@@ -100,24 +83,6 @@ export default function useRonda() {
       })),
     };
     return rondaDTO;
-  }
-
-  function createRondaMenteeFromDTO(rondaMenteeDTO: any, ronda: any) {
-    return new RondaMentee({
-      uuid: rondaMenteeDTO.uuid,
-      startDate: rondaMenteeDTO.startDate,
-      createdAt: rondaMenteeDTO.createdAt,
-      // relationships
-      tutored: new Mentees({
-        id: rondaMenteeDTO.tutored.id,
-        uuid: rondaMenteeDTO.tutored.uuid,
-        zeroEvaluationDone: rondaMenteeDTO.tutored.zeroEvaluationDone,
-        employee_id: rondaMenteeDTO.tutored.employee.id,
-        employee: employeeService.getById(rondaMenteeDTO.tutored.employee.id),
-      }),
-      ronda_id: ronda.ronda.id,
-      tutored_id: rondaMenteeDTO.tutored.id,
-    });
   }
 
   // function createRondaMentorFromDTO(rondaMentorDTO: any, ronda: any) {

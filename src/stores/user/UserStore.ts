@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import UserService from 'src/services/user/UserService';
 import { replaceOrInsert } from 'src/utils/storeUtils';
-import { paginateArray, flattenPages } from 'src/utils/paginationUtils';
+import { flattenPages } from 'src/utils/paginationUtils';
 import { User } from 'src/entities/user/User';
 
 export const useUserStore = defineStore('user', {
@@ -24,10 +24,6 @@ export const useUserStore = defineStore('user', {
       const defaultSize = this.pagination.pageSize;
       const page = params.page ?? 0;
       const size = params.size ?? defaultSize;
-      const ignoreCache = params.ignoreCache ?? false;
-
-      const isSearch = params.query.trim() !== '';
-      const useCache = !ignoreCache && !isSearch && this.usersPages[page];
 
       // if (useCache) {
       //   this.currentPageUsers = this.usersPages[page]

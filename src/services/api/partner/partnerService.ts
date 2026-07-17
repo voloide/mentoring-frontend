@@ -1,6 +1,5 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import { plainToClass } from 'class-transformer';
 import Partner from 'src/stores/model/partner/Partner';
 import usePartner from 'src/composables/partner/partnerMethods';
 

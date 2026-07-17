@@ -6,7 +6,7 @@
 import { onMounted } from 'vue';
 import { UserDTO } from 'src/services/dto/user/UserDTO'
 import User from 'src/stores/model/user/User'
-import { plainToClass, instanceToInstance, instanceToPlain } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 onMounted(() => {
   transformTest();
 });
@@ -16,35 +16,8 @@ const transformTest = () => {
     lastName: 'Doe',
     email: 'johndoe@example.com',
     age: 30,
-    password: "secretpass"
+    password: 'secretpass'
   });
-  const user = {
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'johndoe@example.com',
-    age: 30,
-    password: "secretpass", 
-    confirmPassword: "secretpass"
-  };
-  const userDTO = plainToClass(UserDTO, userPinia, { excludeExtraneousValues: true });
-  
-
-  const userDTO1 = new UserDTO({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'johndoe@example.com',
-    age: 30,
-    password: "secretpass"
-  });
-
- 
-  const u = new User({
-    id: 10,
-    uuid: 'dasdasdasdasdasd',
-    firstName: userDTO.firstName,
-    lastName: userDTO.lastName,
-    email: userDTO.email
-  })
-
+  plainToClass(UserDTO, userPinia, { excludeExtraneousValues: true });
 }
 </script>

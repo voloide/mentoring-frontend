@@ -139,16 +139,13 @@
 </template>
 
 <script setup>
-import PartnerService from 'src/services/api/partner/partnerService';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import partnerService from 'src/services/api/partner/partnerService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import healthFacilityService from "src/services/api/healthfacility/healthFacilityService";
-import usePartner from "src/composables/partner/partnerMethods";
-import programService from "src/services/api/program/programService";
-import {Loading} from "quasar";
+import usePartner from 'src/composables/partner/partnerMethods';
+import {Loading} from 'quasar';
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
@@ -224,10 +221,10 @@ const submitForm = () => {
     description: data.value.description,
   };
 
-  partnerService.savePartner(partner).then((res) => {
+  partnerService.savePartner(partner).then(() => {
     closeForm();
     newRowAdded.value = false;
-    partnerService.getAll().then(results => {
+    partnerService.getAll().then(() => {
       searchResults.value = partnerService.piniaGetAll();;
     });
   });
@@ -274,8 +271,8 @@ const deletePartner = (partner) => {
     if (result) {
       partnerService.deletePartner(partner).then((response) => {
         if (response.status === 200 || esponse.status === 201) {
-          alertSucess('Parceiro apagado com sucesso!').then((result) => {
-            partnerService.getAll().then((res) => {
+          alertSucess('Parceiro apagado com sucesso!').then(() => {
+            partnerService.getAll().then(() => {
               searchResults.value = partnerService.piniaGetAll();
             })
           })
@@ -286,7 +283,7 @@ const deletePartner = (partner) => {
         console.error(error);
       });
     } else {
-      console.info("OK. the Item Has not removed")
+      console.info('OK. the Item Has not removed')
     }
   });
 }

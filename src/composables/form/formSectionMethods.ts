@@ -1,13 +1,11 @@
 import FormSection from 'src/stores/model/form/FormSection';
 import useSection from 'src/composables/section/sectionMethods';
-import useForm from 'src/composables/form/formMethods';
 import useFormSectionQuestion from './formSectionQuestionMethods';
 
 export default function useFormSection() {
 
   function createFormSectionFromDTO(formSectionDTO) {
     const { createSectionFromDTO } = useSection();
-    const { createFormFromDTO } = useForm();
 
     const formSection = new FormSection({
       id: formSectionDTO.id,
@@ -22,7 +20,6 @@ export default function useFormSection() {
 
   function createDTOFromFormSection(formSection) {
     const { createDTOFromSection } = useSection();
-    const { createDTOFromForm } = useForm();
 
     const formSectionDTO = {
       id: formSection.id,

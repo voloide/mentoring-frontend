@@ -1,7 +1,5 @@
-import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
 import Employee from 'src/stores/model/employee/Employee';
-import useMentor from "src/composables/mentor/mentorMethods"
 const employeeRepo = useRepo(Employee);
 
 export default {

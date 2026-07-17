@@ -235,7 +235,7 @@ import useResource from 'src/composables/resource/resourceMethods';
 import moment from 'moment';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 
-const { alertError, alertSucess, alertWarningAction } = useSwal();
+const { alertError, alertSucess } = useSwal();
 
 const tipoRecurso = ref('FICHEIRO');
 const linkUrl = ref('');
@@ -244,7 +244,6 @@ const resourceOptions = ref([
   { label: 'Link', value: 'LINK' },
 ]);
 
-const search = ref(null);
 const filter = ref('');
 const filterRef = ref(null);
 const showAddResource = ref(false);
@@ -520,12 +519,6 @@ const gravar = async (node) => {
   }
 };
 
-function generateFileName(originalName) {
-  const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
-  const extension = originalName.split('.').pop();
-  return `${originalName}_${timestamp}.${extension}`;
-}
-
 const doPatch = (nodes) => {
   const { createDTOFromResource } = useResource();
 
@@ -537,11 +530,6 @@ const doPatch = (nodes) => {
     fileRef.value.validate();
 
     if (!fileNameRef.value.hasError && !fileRef.value.hasError) {
-      const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
-      const newFileName = `${fileName.value}_${timestamp}.${fileInput.value.name
-        .split('.')
-        .pop()}`;
-
       let formData = new FormData();
       formData.append('id', resource.id);
       formData.append('uuid', resource.uuid);
@@ -581,7 +569,7 @@ const doPatchForFile = async (nodes) => {
 };
 
 const loadResources = () => {
-  resourceService.getAll().then((res) => {
+  resourceService.getAll().then(() => {
     resourceObj.value = resourceService.piniaGetAll()[0];
     nodes.value = JSON.parse(resourceObj.value.resource);
   });

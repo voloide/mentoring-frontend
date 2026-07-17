@@ -1,6 +1,5 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import { plainToClass } from 'class-transformer';
 import Province from 'src/stores/model/location/Province';
 import useProvince from 'src/composables/province/provinceMethods';
 

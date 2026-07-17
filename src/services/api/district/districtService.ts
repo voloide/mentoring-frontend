@@ -1,6 +1,5 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import { plainToClass } from 'class-transformer';
 import useDistrict from 'src/composables/district/districtMethods';
 import District from 'src/stores/model/location/District';
 

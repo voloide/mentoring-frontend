@@ -223,20 +223,19 @@
 </template>
 
 <script setup>
-import { onMounted, ref, inject, defineEmits } from 'vue';
+import { onMounted, ref, defineEmits } from 'vue';
 import questionService from 'src/services/api/question/questionService';
 import User from 'src/stores/model/user/User';
 import UsersService from 'src/services/api/user/UsersService';
 import { computed } from 'vue';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import useQuestion from 'src/composables/question/questionMethods';
-import {Loading, QSpinnerRings} from "quasar";
-import programService from "src/services/api/program/programService";
+import {Loading, QSpinnerRings} from 'quasar';
+import programService from 'src/services/api/program/programService';
 
 const { createQuestionFromDTO,createDTOFromQuestion } = useQuestion();
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
-const step = inject('step');
 const searchResults = ref([]);
 const selectedQuestion = ref('');
 const openForm = ref(false);
@@ -269,7 +268,7 @@ const columns = [
   { name: 'options', align: 'left', label: 'Opções', sortable: false },
 ];
 
-const emit = defineEmits(['goToQuestioningAreas']);
+defineEmits(['goToQuestioningAreas']);
 const currUser = ref(new User());
 
 const loading = ref(true);
@@ -392,7 +391,7 @@ const deleteQuestion = (questionId) => {
           .deleteQuestion(questionId)
           .then((response) => {
             if (response.status === 200 || response.status === 201) {
-              alertSucess('Competência apagada com sucesso!').then((result) => {
+              alertSucess('Competência apagada com sucesso!').then(() => {
                 search()
               });
             } else {

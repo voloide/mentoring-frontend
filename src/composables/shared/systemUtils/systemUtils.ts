@@ -1,7 +1,6 @@
 
 import { Platform } from 'quasar';
 import { computed } from 'vue';
-import { LocalStorage } from 'quasar';
 //import mixinplatform from '../mixins/mixin-system-platform'
 
 export function useSystemUtils() {

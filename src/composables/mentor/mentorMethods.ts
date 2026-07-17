@@ -1,6 +1,6 @@
 import useEmployee from 'src/composables/employee/employeeMethods'
 import useTutorProgrammaticArea from '../tutorProgrammaticArea/tutorProgrammaticAreaMethods'
-import Mentor from "src/stores/model/mentor/Mentor";
+import Mentor from 'src/stores/model/mentor/Mentor';
 
 export default function useMentor() {
 

@@ -100,7 +100,6 @@ import Question from 'src/stores/model/question/Question';
 import ResponseType from 'src/stores/model/question/ResponseType';
 import EvaluationType from 'src/stores/model/question/EvaluationType';
 import questionService from 'src/services/api/question/questionService';
-import { Loading, QSpinnerRings } from 'quasar';
 import { v4 as uuid } from 'uuid';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import Program from 'src/stores/model/program/Program';
@@ -110,7 +109,7 @@ const props = defineProps(['searchParams', 'formSection', 'selectedForm']);
 const emit = defineEmits(['close','addSelectedQuestions']);
 
 // Alert utility
-const { alertSucess, alertError, alertWarningAction } = useSwal();
+const { alertError } = useSwal();
 
 const loading = ref(false);
 // Pagination state
@@ -213,12 +212,6 @@ watch(pagination, () => {
     searchQuestions();
   }
 });
-
-// Function to initiate the search (from the user clicking a button)
-const initiateSearch = () => {
-  isSearchInitialized.value = true; // Mark that the user has initiated a search
-  searchQuestions();
-};
 
 const close =()=> {
   emit('close');

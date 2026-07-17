@@ -1,5 +1,4 @@
 import { Model } from 'pinia-orm';
-import Form from './Form';
 import Question from '../question/Question';
 import EvaluationType from '../question/EvaluationType';
 import ResponseType from '../question/ResponseType';

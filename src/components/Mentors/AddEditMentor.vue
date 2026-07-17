@@ -364,7 +364,7 @@
 </template>
 <script setup>
 // Imports
-import { inject, ref, computed, onMounted, watch } from 'vue';
+import { inject, ref, computed, onMounted } from 'vue';
 import Mentor from 'src/stores/model/mentor/Mentor';
 import Employee from 'src/stores/model/employee/Employee';
 import Location from 'src/stores/model/location/Location';
@@ -421,7 +421,6 @@ const myForm = ref(null);
 const selectedMentor = inject('selectedMentor');
 const step = inject('step');
 const isEditStep = computed(() => step.value === 'edit');
-const mentorLocations = ref([]);
 
 onMounted(() => {
   if (isEditStep.value) {

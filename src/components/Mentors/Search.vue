@@ -169,9 +169,9 @@ import mentorService from 'src/services/api/mentor/mentorService'
 import Mentor from 'src/stores/model/mentor/Mentor'
 import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
-import { onMounted, ref, toRaw, inject } from 'vue'
+import { onMounted, ref } from 'vue'
 import UsersService from 'src/services/api/user/UsersService'
-import useMentor from "src/composables/mentor/mentorMethods"
+import useMentor from 'src/composables/mentor/mentorMethods'
 import { Loading, QSpinnerRings } from 'quasar';
 
 
@@ -180,7 +180,6 @@ const searchParams = ref(new Mentor({
                             employee: new Employee()
                         }));
 const { fullName } = useEmployee();
-const step = inject('step');
 const searchResults = ref([]);
 const selectedMentor = ref('');
 const columns = [

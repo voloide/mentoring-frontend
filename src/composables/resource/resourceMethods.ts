@@ -1,4 +1,4 @@
-import Resource from "src/stores/model/resource/Resource";
+import Resource from 'src/stores/model/resource/Resource';
 
 export default function useResource() {
 

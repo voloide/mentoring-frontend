@@ -1,7 +1,5 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import { UserDTO } from 'src/services/dto/user/UserDTO';
-import { plainToClass } from 'class-transformer';
 import Mentor from 'src/stores/model/mentor/Mentor';
 import useMentor from 'src/composables/mentor/mentorMethods';
 

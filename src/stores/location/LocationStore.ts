@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { replaceOrInsert } from 'src/utils/storeUtils'
-import { paginateArray, flattenPages } from 'src/utils/paginationUtils'
+import { flattenPages } from 'src/utils/paginationUtils'
 import { Location } from 'src/entities/location/Location'
 import LocationService from 'src/services/location/LocationService'
 

@@ -288,22 +288,17 @@ import AddOrRemoveQuestions from './AddOrRemoveQuestions.vue';
 import FormSectionQuestion from 'stores/model/form/FormSectionQuestion';
 import Question from 'src/stores/model/question/Question';
 import EvaluationType from 'src/stores/model/question/EvaluationType';
-import Program from 'src/stores/model/program/Program';
-import ResponseType from 'src/stores/model/question/ResponseType';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import { reactive, watch, ref, computed, inject, onMounted } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
+import { reactive, watch, ref, computed, inject } from 'vue';
 import QuestionCategory from 'src/stores/model/question/QuestionCategory';
 import evaluationTypeService from 'src/services/api/question/evaluationTypeService';
 import responseTypeService from 'src/services/api/question/responseTypeService';
-import formQuestionService from "src/services/api/form/formSectionQuestionService";
+import formQuestionService from 'src/services/api/form/formSectionQuestionService';
 import evaluationLocationService from 'src/services/api/question/evaluationLocationService'
 import EvaluatioLocation from 'src/stores/model/question/EvaluationLocation';
 
 // Alert utility
 const { alertSucess, alertError, alertWarningAction } = useSwal();
-
-const responseLocations = ref([]);
 
 const selectedForm = inject('selectedForm');
 // Props passed to the component
@@ -360,20 +355,6 @@ const columns = [
 // Flag for showing the AddOrRemoveQuestions dialog
 const showAddOrRemoveQuestions = ref(false);
 
-// Initialize a new form question
-const initNewQuestion = () => {
-  const newQuestion = new FormSectionQuestion({
-    uuid: uuidv4(),
-    question: new Question({ program: new Program() }),
-    evaluationType: new EvaluationType(),
-    responseType: new ResponseType(),
-    evaluationLocation: new EvaluatioLocation()
-  });
-
-  localFormSection.formSectionQuestions.unshift(newQuestion);
-  emit('update-section', localFormSection); // Emit updated section
-};
-
 const fsqInUse = (formSectionQuestion) => formSectionQuestion.in_use;
 
 
@@ -387,7 +368,7 @@ const removeFormSectionQuestions = (formSectionQuestion) => {
             .disassociateQuesion(formSectionQuestion.id)
             .then((response) => {
               if (response.status === 200 || response.status === 201) {
-                alertSucess('Competência desassociada com sucesso!').then((result) => {
+                alertSucess('Competência desassociada com sucesso!').then(() => {
                   localFormSection.formSectionQuestions = localFormSection.formSectionQuestions.filter(
                     (q) => q.uuid !== formSectionQuestion.uuid
                   );
@@ -528,12 +509,12 @@ const evaluationLocations = computed(() => {
 const evaluationTypes = computed(() => {
   const allEvaluationTypes = evaluationTypeService.piniaGetAll();
 
-  if (selectedForm.value.targetFile === "0") {
+  if (selectedForm.value.targetFile === '0') {
     // Return only the option with code "Consulta"
-    return allEvaluationTypes.filter((type) => type.code === "Consulta");
-  } else if (selectedForm.value.targetPatient === "0") {
+    return allEvaluationTypes.filter((type) => type.code === 'Consulta');
+  } else if (selectedForm.value.targetPatient === '0') {
     // Return only the option with code "Ficha"
-    return allEvaluationTypes.filter((type) => type.code === "Ficha");
+    return allEvaluationTypes.filter((type) => type.code === 'Ficha');
   } else {
     // Return all options if no special conditions
     return allEvaluationTypes;

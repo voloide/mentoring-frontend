@@ -6,7 +6,6 @@ import { useHealthFacilityStore } from 'src/stores/healthFacility/HealthFacility
 import { useProvinceStore } from 'src/stores/province/ProvinceStore'
 import { useDistrictStore } from 'src/stores/district/DistrictStore'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
-import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useRoleStore } from 'src/stores/role/RoleStore'
 import { useProgramStore } from 'src/stores/program/ProgramStore'
 import { useProfessionalCategoryStore } from 'src/stores/professionalCategory/ProfessionalCategoryStore'
@@ -16,15 +15,14 @@ import UserPasswordResetDialog from 'src/components/Users/UserPasswordResetDialo
 
 
 const { alertError, alertWarningAction } = useSwal()
-const { handleApiError } = useApiErrorHandler()
 
 defineEmits(['selectUser'])
 
 const userStore = useUserStore()
-const partnerStore = usePartnerStore()
-const healthFacilityStore = useHealthFacilityStore()
+usePartnerStore()
+useHealthFacilityStore()
 const provinceStore = useProvinceStore()
-const districtStore = useDistrictStore()
+useDistrictStore()
 const roleStore = useRoleStore()
 const programStore = useProgramStore()
 const professionalCategoryStore = useProfessionalCategoryStore()

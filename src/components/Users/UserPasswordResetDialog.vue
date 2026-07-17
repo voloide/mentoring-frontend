@@ -44,17 +44,17 @@ const userStore = useUserStore()
 
 const handlePasswordReset = async () => {
   if (newPassword.value !== confirmPassword.value) {
-    alertError("Senhas não coincidem.")
+    alertError('Senhas não coincidem.')
     return
   }
 
    if (newPassword.value.length < 6) {
-    alertError("A nova senha deve ter no mínimo 6 caracteres.")
+    alertError('A nova senha deve ter no mínimo 6 caracteres.')
     return
   }
   
     if (newPassword.value.length > 20) {
-        alertError("A nova senha deve ter no máximo 20 caracteres.")
+        alertError('A nova senha deve ter no máximo 20 caracteres.')
         return
     }
 

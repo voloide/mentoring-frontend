@@ -278,39 +278,25 @@
 <script setup>
 import useEmployee from 'src/composables/employee/employeeMethods';
 import mentorService from 'src/services/api/mentor/mentorService';
-import Mentor from 'src/stores/model/mentor/Mentor';
-import Employee from 'src/stores/model/employee/Employee';
 import User from 'src/stores/model/user/User';
 import { onMounted, ref, inject, computed } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
-import useMentor from 'src/composables/mentor/mentorMethods';
 import provinceService from 'src/services/api/province/provinceService';
 import districtService from 'src/services/api/district/districtService';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
 import rondaService from 'src/services/api/ronda/rondaService';
-import useRonda from 'src/composables/ronda/rondaMethods';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
 import rondasReport from 'src/printables/rondasReport/rondasReport';
 import { useLoading } from 'src/composables/shared/loading/loading';
-import sessionService from 'src/services/api/session/sessionService';
 
 const { closeLoading, showloading } = useLoading();
 
-const { createMentorFromDTO } = useMentor();
-const searchParams = ref(
-  new Mentor({
-    employee: new Employee(),
-  })
-);
 const reportMode = inject('reportMode');
 const showAditDialog = ref(false);
 const selectedRonda = ref(null);
 const selectedMentor = ref(null);
 const { fullName } = useEmployee();
-const step = inject('step');
 const searchResults = ref([]);
-const options = ref([]);
-const row = ref(null);
 const selectedProvince = ref(null);
 const selectedDistrict = ref(null);
 const selectedUS = ref(null);
@@ -321,8 +307,7 @@ const startDate = ref(null);
 const endDate = ref(null);
 const startDateParam = ref(null);
 const endDateParam = ref(null);
-const userData = JSON.parse(localStorage.getItem('userData'));
-const roles = userData.roles;
+JSON.parse(localStorage.getItem('userData'));
 const healthFacility = ref('');
 const loadingReports = ref({});
 
@@ -420,25 +405,7 @@ const gravar = async () => {
   search();
 };
 
-function extractProgrammaticAreasFromRonda(ronda) {
-  const areas = new Map();
-
-  if (!ronda.sessions) return [];
-
-  ronda.sessions.forEach((session) => {
-    const area = session.form?.programmaticArea;
-    if (area && area.code && area.description) {
-      areas.set(area.code, {
-        code: area.code,
-        description: area.description,
-      });
-    }
-  });
-
-  return Array.from(areas.values());
-}
-
-const emit = defineEmits(['goToMentoringAreas', 'import', 'edit']);
+defineEmits(['goToMentoringAreas', 'import', 'edit']);
 const currUser = ref(new User());
 
 const onChangeProvincia = () => {
@@ -465,10 +432,6 @@ const onChangeHealthFacility = async () => {
     filteredMentors.value = [];
   }
 };
-
-const mentors = computed(() => {
-  return mentorService.getMentorList();
-});
 
 const districts = computed(() => {
   if (selectedProvince.value) {
@@ -544,7 +507,7 @@ const formattedResult = computed(() => {
   return [];
 });
 
-const filterDistricts = (val, update, abort) => {
+const filterDistricts = (val, update) => {
   const stringOptions = districts.value;
   if (val === '') {
     update(() => {
@@ -568,7 +531,7 @@ const filterDistricts = (val, update, abort) => {
   }
 };
 
-const filterUSs = (val, update, abort) => {
+const filterUSs = (val, update) => {
   const stringOptions = unidSanitarias.value;
   if (val === '') {
     update(() => {
@@ -601,11 +564,6 @@ onMounted(() => {
   currUser.value = JSON.parse(JSON.stringify(UsersService.getLogedUser()));
   closeLoading();
 });
-
-const editMentor = (mentor) => {
-  selectedMentor.value = mentor;
-  emit('edit', mentor);
-};
 
 const search = async () => {
   showloading();
@@ -656,7 +614,4 @@ const clearSearchParams = () => {
   searchResults.value = [];
 };
 
-const manageMentoringAreas = (mentor) => {
-  emit('goToMentoringAreas', mentor);
-};
 </script>

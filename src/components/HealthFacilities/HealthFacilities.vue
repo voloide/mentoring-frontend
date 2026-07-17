@@ -188,8 +188,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, inject, watch } from 'vue';
-import useEmployee from 'src/composables/employee/employeeMethods';
+import { ref, onMounted, computed, watch } from 'vue';
 import healthFacilityService from 'src/services/api/healthfacility/healthFacilityService';
 import UsersService from 'src/services/api/user/UsersService';
 import districtService from 'src/services/api/district/districtService';
@@ -203,8 +202,6 @@ const { createHealthFacilityFromDTO } = useHealthFacility();
 
 const { closeLoading, showloading } = useLoading();
 const { alertError, alertSucess, alertWarningAction } = useSwal();
-const { fullName } = useEmployee();
-const step = inject('step');
 const searchResults = ref([]);
 const loading = ref(true);
 
@@ -243,7 +240,7 @@ const onRequest = (props) => {
   loadData();
 };
 
-const emit = defineEmits(['goToHealthFacilityingAreas']);
+defineEmits(['goToHealthFacilityingAreas']);
 const currUser = ref(new User());
 
 onMounted(() => {
@@ -300,10 +297,10 @@ const submitForm = () => {
     healthFacility: data.value.healthFacility,
     districtDTO: data.value.district,
   };
-  healthFacilityService.saveHealthFacility(healthFacility).then((res) => {
+  healthFacilityService.saveHealthFacility(healthFacility).then(() => {
     closeForm();
     newRowAdded.value = false;
-    healthFacilityService.getAll().then((results) => {
+    healthFacilityService.getAll().then(() => {
       searchResults.value = healthFacilityService.piniaGetAll();
       loading.value = false;
     });
@@ -333,7 +330,7 @@ const saveUpdate = () => {
     .updateHealthFacility(
       useHealthFacility().createDTOFromHealthFacility(healthFacility)
     )
-    .then((res) => {
+    .then(() => {
       healthFacilityService.getAll().then(() => {
         searchResults.value = healthFacilityService.piniaGetAll();
         loading.value = false;
@@ -361,8 +358,8 @@ const deleteHealthFacility = (id) => {
           .then((response) => {
             if (response.status === 200 || response.status === 201) {
               alertSucess('Unidade sanitaria apagada com sucesso!').then(
-                (result) => {
-                  healthFacilityService.getAll().then((res) => {
+                () => {
+                  healthFacilityService.getAll().then(() => {
                     searchResults.value = healthFacilityService.piniaGetAll();
                     loading.value = false;
                   });
@@ -415,7 +412,7 @@ const clearField = (field) => {
 
 watch(
   () => pagination.value.page,
-  (newPage) => {
+  () => {
     loadData();
   }
 );

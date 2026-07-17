@@ -1,4 +1,4 @@
-import EvaluationLocation from "src/stores/model/question/EvaluationLocation";
+import EvaluationLocation from 'src/stores/model/question/EvaluationLocation';
 
 export default function useEvaluationLocation() {
 

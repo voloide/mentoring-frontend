@@ -72,7 +72,7 @@ export default {
 
   async post(obj: string) {
     try {
-      const resp = await api().post(
+      await api().post(
         'ronda',
         plainToClass(UserDTO, obj, { excludeExtraneousValues: true })
       );

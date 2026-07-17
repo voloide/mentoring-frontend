@@ -2,7 +2,6 @@ import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
 import Resource from 'src/stores/model/resource/Resource';
 import useResource from 'src/composables/resource/resourceMethods';
-import { handleError } from 'vue';
 
 const repo = useRepo(Resource);
 const { createResourceFromDTO } = useResource();
@@ -68,7 +67,7 @@ export default {
 
   async loadFile(fileName: string) {
     let responseStatus = null;
-    const resp = await api()
+    await api()
       .get('/resources/load', {
         responseType: 'blob',
         params: { fileName },

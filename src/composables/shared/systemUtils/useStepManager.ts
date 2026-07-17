@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 
 export default function useStepManager(step) {
   // Computed properties to control visibility of steps

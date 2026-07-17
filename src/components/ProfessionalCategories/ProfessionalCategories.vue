@@ -175,7 +175,6 @@ import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import programmaticAreaService from "src/services/api/programmaticArea/programmaticAreaService";
 
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 const searchResults = ref([]);
@@ -216,7 +215,7 @@ const submitForm = () => {
   };
   professionalCategoryService
     .saveProfessionalCategory(professionalCategory)
-    .then((res) => {
+    .then(() => {
       searchResults.value = ProfessionalCategoryService.piniaGetAll();
       newRowAdded.value = false;
       closeForm
@@ -243,7 +242,7 @@ const saveUpdate = () => {
     description: data.value.description,
   };
 
-  professionalCategoryService.updateProfessionalCategory(professionalCategory).then((res) => {
+  professionalCategoryService.updateProfessionalCategory(professionalCategory).then(() => {
     searchResults.value = professionalCategoryService.piniaGetAll();
     resetFields();
   });
@@ -264,8 +263,8 @@ const deleteProfessionalCategory = (ProfessionalCategory) => {
         .then((response) => {
           if (response.status === 200 || esponse.status === 201) {
             alertSucess('categoria profissional apagada com sucesso!').then(
-              (result) => {
-                professionalCategoryService.getAll().then((res) => {
+              () => {
+                professionalCategoryService.getAll().then(() => {
                   searchResults.value = ProfessionalCategoryService.piniaGetAll();
                 })
                 // if (result) {

@@ -139,10 +139,8 @@ import menteesService from 'src/services/api/mentees/menteesService';
 import Mentees from 'src/stores/model/mentees/Mentees';
 import Employee from 'src/stores/model/employee/Employee';
 import User from 'src/stores/model/user/User';
-import { onMounted, ref, toRaw, inject } from 'vue';
+import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
-import { provide } from 'vue';
-import { useRouter } from 'vue-router';
 
 const searchParams = ref(
   new Mentees({
@@ -151,10 +149,8 @@ const searchParams = ref(
 );
 
 const { fullName } = useEmployee();
-const step = inject('step');
 const searchResults = ref([]);
 const selectedMentees = ref('');
-const router = useRouter();
 
 const columns = [
   {
@@ -218,7 +214,7 @@ const search = () => {
 
   menteesService
     .search(params)
-    .then((response) => {
+    .then(() => {
       searchResults.value = menteesService.getMenteesList();
     })
     .catch((error) => {

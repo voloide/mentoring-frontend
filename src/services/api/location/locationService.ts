@@ -1,4 +1,3 @@
-import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
 import Location from 'src/stores/model/location/Location';
 

@@ -50,7 +50,6 @@ export default {
         // Alignment and Border Format
         const centerAlignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
         const leftAlignment = { vertical: 'middle', horizontal: 'left', wrapText: false };
-        const thinBorder = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
 
         worksheet.getCell('A1').alignment = cellRepublica.alignment = cellTitle.alignment = headerRow.alignment = centerAlignment;
         cellPeriodo.alignment = cellPeriodo.alignment = leftAlignment;

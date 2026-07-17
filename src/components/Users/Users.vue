@@ -356,7 +356,7 @@ const search = async () => {
 
 watch(
   () => pagination.value.page,
-  (newPage) => {
+  () => {
     loadData();
   }
 );

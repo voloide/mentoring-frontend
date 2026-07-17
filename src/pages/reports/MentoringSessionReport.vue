@@ -5,15 +5,13 @@
 </template>
 
 <script setup>
-import { onMounted, inject, computed } from 'vue';
+import { onMounted, inject } from 'vue';
 import { useLoading } from 'src/composables/shared/loading/loading';
-import UsersService from 'src/services/api/user/UsersService';
 import sessionService from 'src/services/api/session/sessionService'; // Crie este se ainda não tiver
 import MentoringSessionReport from 'components/reports/MentoringSessionReport.vue';
 
-const { showloading, closeLoading } = useLoading();
+const { closeLoading } = useLoading();
 const reportMode = inject('reportMode');
-const currUser = computed(() => UsersService.getLogedUser());
 
 const init = async () => {
   // showloading();

@@ -1,7 +1,5 @@
-import TutorProgrammaticArea from "stores/model/tutorProgrammaticArea/TutorProgrammaticArea";
+import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea';
 import useProgrammaticArea from '../programmaticArea/programmaticAreaMethods';
-import useProgram from "src/composables/program/programMethods";
-import useMentor from '../mentor/mentorMethods';
 
 export default function useTutorProgrammaticArea() {
 
@@ -30,7 +28,6 @@ export default function useTutorProgrammaticArea() {
 
     function createDTOFromTutorProgrammaticArea(tutorProgrammaticArea: TutorProgrammaticArea) {
       const { createDTOFromProgrammaticArea } = useProgrammaticArea()
-      const {createDTOFromMentor} = useMentor()
 
         const tutorProgrammaticAreaDTO = {
             id: tutorProgrammaticArea.id,

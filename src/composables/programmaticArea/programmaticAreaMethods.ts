@@ -1,5 +1,5 @@
-import ProgrammaticArea from "src/stores/model/programmaticArea/ProgrammaticArea";
-import useProgram from "src/composables/program/programMethods";
+import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
+import useProgram from 'src/composables/program/programMethods';
 
 export default function useProgrammaticArea() {
 

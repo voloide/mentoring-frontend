@@ -1,5 +1,5 @@
-import HealthFacility from "src/stores/model/healthfacility/HealthFacility";
-import useDistrict from "../district/districtMethods";
+import HealthFacility from 'src/stores/model/healthfacility/HealthFacility';
+import useDistrict from '../district/districtMethods';
 
 export default function useHealthFacility() {
 

@@ -178,8 +178,8 @@ import User from 'src/stores/model/user/User';
 import { onMounted, ref } from 'vue';
 import UsersService from 'src/services/api/user/UsersService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import {Loading} from "quasar";
-import useProgram from "src/composables/program/programMethods";
+import {Loading} from 'quasar';
+import useProgram from 'src/composables/program/programMethods';
 
 const { createProgramFromDTO } = useProgram();
 const { alertError, alertSucess, alertWarningAction } = useSwal();
@@ -268,7 +268,7 @@ const submitForm = () => {
     name: data.value.name,
     description: data.value.description,
   };
-  programService.saveProgram(program).then((response) => {
+  programService.saveProgram(program).then(() => {
     closeForm();
     getAllPrograms()
   });
@@ -295,7 +295,7 @@ const saveUpdate = () => {
     name: data.value.name,
     description: data.value.description,
   };
-  programService.updateProgram(program).then((res) => {
+  programService.updateProgram(program).then(() => {
     getAllPrograms();
     resetFields();
   });
@@ -317,8 +317,8 @@ const deleteProgram = (program) => {
           .then((response) => {
             if (response.status === 200 || response.status === 201) {
               alertSucess('Programa apagado com sucesso!').then(
-                (result) => {
-                  programService.getAll().then((res) => {
+                () => {
+                  programService.getAll().then(() => {
                     searchResults.value = programService.piniaGetAll();
                   })
                   // if (result) {

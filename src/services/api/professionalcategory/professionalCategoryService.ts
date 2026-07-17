@@ -2,11 +2,9 @@ import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
 import ProfessionalCategory from 'src/stores/model/professionalCategory/ProfessionalCategory';
 import useProfessionalCategory from 'src/composables/professionalCategory/professionalCategoryMethods';
-import usePartner from 'src/composables/partner/partnerMethods';
 
 const repo = useRepo(ProfessionalCategory);
 const { createProfessionalCategoryFromDTO } = useProfessionalCategory();
-const { createPartnerFromDTO } = usePartner();
 
 export default {
   async getAll() {

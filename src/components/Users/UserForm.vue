@@ -146,7 +146,6 @@ import { useRoleStore } from 'src/stores/role/RoleStore';
 import { useStringUtils } from 'src/composables/shared/stringutils/stringUtils';
 import { Loading, QSpinnerRings } from 'quasar';
 import { listActiveAndInactiveLifeCycleStatuses } from 'src/utils/LifeCycleStatus';
-import useUser from 'src/composables/user/userMethods';
 import { useLoading } from 'src/composables/shared/loading/loading'
 import { User } from 'src/entities/user/User';
 import { Employee } from 'src/entities/employee/Employee';
@@ -169,7 +168,6 @@ const user = ref(new User({
 }))
 
 const { alertSucess, alertError } = useSwal();
-const { createDTOFromUser } = useUser();
 const { stringContains } = useStringUtils();
 
 const provinceStore = useProvinceStore();
@@ -314,7 +312,7 @@ const submitForm = async () => {
   Loading.show({ spinner: QSpinnerRings });
 
   try {
-    const savedUser = await userStore.saveUser(user.value);
+    await userStore.saveUser(user.value);
     await alertSucess(props.selectedUser?.id
       ? 'Utilizador actualizado.'
       : 'Utilizador registado com sucesso');
@@ -328,8 +326,6 @@ const submitForm = async () => {
 };
 
 
-const cancel = () => emit('cancel');
-
 const onChangeProvincia = () => {
   user.value.employee.locations[0].district = '';
   user.value.employee.locations[0].healthFacility = '';
@@ -342,17 +338,7 @@ const onChangeDistrito = async (district) => {
   }
 };
 
-const onChangeVinculo = async (selected) => {
-  if (selected === 'SNS') {
-    user.value.employee.partner = await partnerStore.getByName('MISAU');
-  } else {
-    user.value.employee.partner = '';
-  }
-};
 
-const onChangeStatus = () => {
-  //
-}
 </script>
 
 <style scoped></style>

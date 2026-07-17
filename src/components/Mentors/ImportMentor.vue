@@ -129,12 +129,11 @@
 </template>
 <script setup>
 import * as XLSX from 'xlsx';
-import useEmployee from 'src/composables/employee/employeeMethods'
 import useMentor from 'src/composables/mentor/mentorMethods'
 import Mentor from 'src/stores/model/mentor/Mentor'
 import Employee from 'src/stores/model/employee/Employee'
 import User from 'src/stores/model/user/User'
-import { onMounted, ref, toRaw, inject } from 'vue'
+import { onMounted, ref } from 'vue'
 import UsersService from 'src/services/api/user/UsersService'
 import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
@@ -145,23 +144,15 @@ import healthFacilityService from 'src/services/api/healthfacility/healthFacilit
 import Location from 'stores/model/location/Location';
 import partnerService from 'src/services/api/partner/partnerService';
 import professionalCategoryService from 'src/services/api/professionalcategory/professionalCategoryService';
-import employeeService from 'src/services/api/employee/employeeService';
-import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea';
 import mentorService from 'src/services/api/mentor/mentorService';
 import { v4 as uuidv4 } from 'uuid';
-import {useLoading} from "src/composables/shared/loading/loading";
+import {useLoading} from 'src/composables/shared/loading/loading';
 
-const { alertError, alertSucess, alertWarningAction, alertInfo } = useSwal();
+const { alertError, alertInfo } = useSwal();
 
-
-const searchParams = ref(new Mentor({
-                            employee: new Employee()
-                        }));
-const { fullName } = useEmployee();
 const { createDTOFromMentor } = useMentor();
 const fileRef = ref(null);
 const importResults = ref([]);
-const selectedMentor = ref('');
 const selectedSheet = ref('');
 const selectedSheetRef = ref(null);
 const totalImported = ref(0)
@@ -198,9 +189,6 @@ onMounted(() => {
     currUser.value = JSON.parse(JSON.stringify((UsersService.getLogedUser())));
 });
 
-const editMentor = (mentor) => {
-    selectedMentor.value = mentor;
-}
 const cleanForm = () => {
   submitLoading.value = false;
   submitSend.value = false;
@@ -269,8 +257,6 @@ const startComposingMentor = async (rowFromExcel) => {
   let partner = null
   let professionalCategory = null
   let employee = null
-  let programmaticArea = null
-  let tutorProgrammaticArea = null
   let mentor = null
   if (district) {
     province = provinceService.getById(district.province_id)
@@ -290,7 +276,7 @@ const startComposingMentor = async (rowFromExcel) => {
         })
         // Pegar Parceiro (Devera sempre ter um)
         if (rowFromExcel.Nome_da_Instituicao === '') {
-          partner = partnerService.getByName("MISAU");
+          partner = partnerService.getByName('MISAU');
         } else {
           partner = partnerService.getByName(rowFromExcel.Nome_da_Instituicao)
         }

@@ -375,7 +375,6 @@ import partnerService from 'src/services/api/partner/partnerService';
 import userMentees from 'src/composables/mentees/menteesMethods';
 import menteesService from 'src/services/api/mentees/menteesService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import { useRouter, useRoute } from 'vue-router';
 import { Loading, QSpinnerRings } from 'quasar';
 
 const mentee = ref(
@@ -394,14 +393,13 @@ const emit = defineEmits(['editMentees', 'close']);
 
 const { createDTOFromMentees } = userMentees();
 const { stringContains } = useStringUtils();
-const { alertSucess, alertError, alertSucessAction } = useSwal();
+const { alertSucess, alertError } = useSwal();
 const filterRedDistricts = ref([]);
 const filterRedHealthFacilities = ref([]);
 const filterRedCategories = ref([]);
 const filterRedPartners = ref([]);
 const selectedMenteeLaborInfo = ref('');
 const menteeLaborInfo = ref(['SNS', 'ONG']);
-const location = ref(new Location());
 
 //Ref's
 const nameRef = ref(null);
@@ -417,10 +415,7 @@ const provinceRef = ref(null);
 const districtRef = ref(null);
 const hfRef = ref(null);
 
-const router = useRouter();
-
 const selectedMentee = inject('selectedMentee');
-const step = inject('step');
 mentee.value = menteesService.getById(selectedMentee.value.id);
 
 onMounted(() => {
@@ -494,7 +489,7 @@ const submitForm = () => {
       .update(createDTOFromMentees(new Mentees(target_copy)))
       .then((resp) => {
         if (resp.status === 200 || resp.status === 201) {
-          alertSucess('Mentorando actualizado.').then((result) => {
+          alertSucess('Mentorando actualizado.').then(() => {
             cancel();
           });
         } else {
@@ -533,7 +528,7 @@ const isValidPhoneNumber = (phoneNumber) => {
   return phoneNumber !== '' && !stringContains(phoneNumber, '_');
 };
 
-const filterPartners = (val, update, abort) => {
+const filterPartners = (val, update) => {
   const stringOptions = partners;
   if (val === '') {
     update(() => {
@@ -557,7 +552,7 @@ const filterPartners = (val, update, abort) => {
   }
 };
 
-const filterDistricts = (val, update, abort) => {
+const filterDistricts = (val, update) => {
   const stringOptions = districts;
   if (val === '') {
     update(() => {
@@ -596,7 +591,7 @@ const healthFacilities = computed(() => {
   }
 });
 
-const filterHealthFacilities = (val, update, abort) => {
+const filterHealthFacilities = (val, update) => {
   const stringOptions = healthFacilities;
   if (val === '') {
     update(() => {
@@ -624,7 +619,7 @@ const filterHealthFacilities = (val, update, abort) => {
   }
 };
 
-const filterCategories = (val, update, abort) => {
+const filterCategories = (val, update) => {
   const stringOptions = categories;
   if (val === '') {
     update(() => {
@@ -648,10 +643,6 @@ const filterCategories = (val, update, abort) => {
         });
     });
   }
-};
-
-const init = () => {
-  mentee.value.employee.locations.push(location);
 };
 
 const onChangeProvincia = () => {

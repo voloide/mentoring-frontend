@@ -1,10 +1,9 @@
-import useRole from 'src/composables/role/roleMethods'
 import useEmployee from '../employee/employeeMethods';
 import TutorProgrammaticArea from 'stores/model/tutorProgrammaticArea/TutorProgrammaticArea'
 
 export default function useTutorEmployee() {
 
-    function createTutorProgrammaticAreaFromDTO(tutorProgramaticArea: any, tutor: any) {
+    function createTutorProgrammaticAreaFromDTO(tutorProgramaticArea: any) {
         const { createEmployeeFromDTO } = useEmployee();
         return new TutorProgrammaticArea({
             id: tutorProgramaticArea.id,

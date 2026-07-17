@@ -1,6 +1,5 @@
 import api from '../apiService/apiService';
 import { useRepo } from 'pinia-orm';
-import { plainToClass } from 'class-transformer';
 import HealthFacility from 'src/stores/model/healthfacility/HealthFacility';
 import useHealthFacility from 'src/composables/healthFacility/healthFacility';
 

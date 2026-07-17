@@ -1,4 +1,4 @@
-import Partner from "src/stores/model/partner/Partner";
+import Partner from 'src/stores/model/partner/Partner';
 
 export default function usePartner() {
 

@@ -1,4 +1,4 @@
-import Province from "src/stores/model/location/Province";
+import Province from 'src/stores/model/location/Province';
 
 export default function useProvince() {
     

@@ -199,7 +199,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, watch, inject } from 'vue';
+import { ref, computed, onMounted, watch, inject } from 'vue';
 import ProgrammaticArea from 'src/stores/model/programmaticArea/ProgrammaticArea';
 import Program from 'src/stores/model/program/Program';
 import User from 'src/stores/model/user/User';
@@ -208,16 +208,11 @@ import programService from 'src/services/api/program/programService';
 import programmaticAreaService from 'src/services/api/programmaticArea/programmaticAreaService';
 import formService from 'src/services/api/form/formService';
 import { useSwal } from 'src/composables/shared/dialog/dialog';
-import useStepManager from 'src/composables/shared/systemUtils/useStepManager';
 import { Loading, QSpinnerRings } from 'quasar';
 import useForm from 'src/composables/form/formMethods';
 
-import { v4 as uuid } from 'uuid';
-import Form from 'stores/model/form/Form'; // Import the Step Manager composable
-
 const props = defineProps(['params']);
 
-const { changeStepToEdit } = useStepManager(); // Extract the function to change step to edit
 const { createFormFromDTO, createDTOFromForm } = useForm();
 const searchParams = ref({
   code: '',
@@ -227,9 +222,7 @@ const searchParams = ref({
 });
 
 const form = inject('form');
-const step = inject('step');
 
-const isSearchInitialized = ref(false);
 const isLoading = ref(false);
 
 // Pagination state
@@ -263,8 +256,6 @@ watch(
 
 // Search results (populated from API)
 const searchResults = ref([]);
-const selectedProgram = ref(null);
-const selectedProgrammaticArea = ref(null);
 const filterRedProgrammaticAreas = ref([]);
 const { alertError, alertSucess, alertWarningAction } = useSwal();
 
@@ -305,7 +296,7 @@ onMounted(() => {
 
 const programs = computed(() => programService.piniaGetAll());
 
-const filterProgrammaticAreas = (val, update, abort) => {
+const filterProgrammaticAreas = (val, update) => {
   const stringOptions = programmaticAreas;
   if (val === '') {
     update(() => {

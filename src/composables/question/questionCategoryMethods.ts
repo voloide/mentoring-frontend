@@ -1,4 +1,4 @@
-import QuestionCategory from "src/stores/model/question/QuestionCategory";
+import QuestionCategory from 'src/stores/model/question/QuestionCategory';
 
 export default function useQuestionCatgeory() {
 

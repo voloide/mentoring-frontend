@@ -1,4 +1,4 @@
-import ResponseType from "src/stores/model/question/ResponseType";
+import ResponseType from 'src/stores/model/question/ResponseType';
 
 export default function useResponseType() {
 

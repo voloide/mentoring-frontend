@@ -288,7 +288,7 @@
 </template>
 
 <script setup>
-import { inject, ref, computed, onMounted, reactive, provide, watch } from 'vue';
+import { inject, ref, computed, onMounted, provide, watch } from 'vue';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid
 import FormSection from 'src/stores/model/form/FormSection';
 import programService from 'src/services/api/program/programService';
@@ -306,7 +306,7 @@ import evaluationTypeService from 'src/services/api/question/evaluationTypeServi
 
 // Inject the step from the parent
 const step = inject('step');
-const { isEditStep, printCurrentStep } = useStepManager(step);
+const { isEditStep } = useStepManager(step);
 
 const emit = defineEmits(['close','cancel']);
 
@@ -350,7 +350,7 @@ watch(() => form.value.evaluationLocation, async (newVal, oldVal) => {
   }
   const selectedObject = evaluationLocations.value.find(loc => loc.uuid === newVal);
 
-  if (newVal === "123e4567-e89b-12d3-a456-426614174001" || newVal === "123e4567-e89b-12d3-a456-426614174000") {
+  if (newVal === '123e4567-e89b-12d3-a456-426614174001' || newVal === '123e4567-e89b-12d3-a456-426614174000') {
     
     // Check if there are any formSectionQuestions before proceeding
     const hasQuestions = form.value.formSections.some(section => section.formSectionQuestions.length > 0);
@@ -358,7 +358,7 @@ watch(() => form.value.evaluationLocation, async (newVal, oldVal) => {
       return; // Do nothing if there are no formSectionQuestions
     }
 
-    const selectedLocation = newVal === "123e4567-e89b-12d3-a456-426614174001" ? "Comunidade" : "Unidade Sanitária";
+    const selectedLocation = newVal === '123e4567-e89b-12d3-a456-426614174001' ? 'Comunidade' : 'Unidade Sanitária';
 
     const result = await alertWarningAction(
       `O Local da Mentoria das competências será atualizado para "${selectedLocation}". Deseja continuar?`
@@ -469,8 +469,8 @@ const goToFormQuestions = async (form) => {
   }
 
   // Fetch evaluation types from Pinia
-  const evaluationFicha = evaluationTypeService.getByUuid("d5a6fc46-b4bb-4eeb-8c82-921836fdc31d"); // "Ficha"
-  const evaluationConsulta = evaluationTypeService.getByUuid("4ec6bfa7-9bc8-4e7f-9836-d67a476432f9"); // "Consulta"
+  const evaluationFicha = evaluationTypeService.getByUuid('d5a6fc46-b4bb-4eeb-8c82-921836fdc31d'); // "Ficha"
+  const evaluationConsulta = evaluationTypeService.getByUuid('4ec6bfa7-9bc8-4e7f-9836-d67a476432f9'); // "Consulta"
 
   let needsConfirmation = false;
   let updateToFicha = false;
@@ -510,7 +510,7 @@ const goToFormQuestions = async (form) => {
       message.push('O Tipo de Avaliação das competências será atualizado de "Ficha" para "Consulta" devido à alteração do número de avaliações de fichas.');
     }
 
-    const result = await alertWarningAction(message.join("\n\n"));
+    const result = await alertWarningAction(message.join('\n\n'));
 
     if (!result) {
       return; // User canceled the update
@@ -573,32 +573,6 @@ const searchFormQuestions = (form) => {
   });
 };
 
-// Method to remove form questions
-const removeFormQuestions = (formQuestion) => {
-  // Show the warning before removal
-  alertWarningAction('Tem certeza que deseja remover esta competência?').then((result) => {
-    if (result) {
-      // Check if the formQuestion has an id (indicating it's saved in the database)
-      if (!formQuestion.id) {
-        // If id is null, simply remove it from the array without calling the API
-        form.value.formQuestions = form.value.formQuestions.filter(fQ => fQ.uuid !== formQuestion.uuid);
-        alertSucess('Competência removida com sucesso!');
-      } else {
-        // If the id exists, call the API to remove the formQuestion from the backend
-        const params = { formId: form.value.id };
-        formQuestionService.remove(params, formQuestion)
-          .then(() => {
-            // Remove the question from the array after successful API call
-            form.value.formQuestions = form.value.formQuestions.filter(fQ => fQ.id !== formQuestion.id);
-            alertSucess('Competência removida com sucesso!');
-          })
-          .catch(alertError);
-      }
-    }
-  });
-};
-
-
 // Initialize new form section
 const initFormSection = () => {
   // Check if any section is in edition mode
@@ -649,12 +623,6 @@ const saveSection = (section) => {
       existingSection.section?.uuid === section.section?.uuid
   );
 
-  const isDuplicateSequence = form.value.formSections.some(
-    (existingSection) =>
-      existingSection.uuid !== section.uuid &&
-      existingSection.sequence === section.sequence
-  );
-
   if (isDuplicateSection) {
     alertError('Esta secção já foi adicionada. Por favor, escolha uma secção diferente.');
     return;
@@ -689,7 +657,7 @@ const deleteSection = (sectionn) => {
             .deleteFormSection(sectionn.id)
             .then((response) => {
               if (response.status === 200 || response.status === 201) {
-                alertSucess('Secção excluida com sucesso!').then((result) => {
+                alertSucess('Secção excluida com sucesso!').then(() => {
 
                     form.value.formSections = form.value.formSections.filter((section) => section.uuid !== sectionn.uuid);
 
@@ -702,7 +670,7 @@ const deleteSection = (sectionn) => {
               console.error(error);
             });
         } else {
-          alertSucess('Secção excluida com sucesso!').then((result) => {
+          alertSucess('Secção excluida com sucesso!').then(() => {
 
             form.value.formSections = form.value.formSections.filter((section) => section.uuid !== sectionn.uuid);
 

@@ -13,7 +13,7 @@ const TOKEN_REFRESH_MARGIN = 2 * 60 * 1000; // Refresh token 2 minutes before ex
 export default {
   async post(obj: string) {
     try {
-      const resp = await api().post(
+      await api().post(
         'user',
         plainToClass(UserDTO, obj, { excludeExtraneousValues: true })
       );
@@ -42,7 +42,6 @@ export default {
     userRepo.save(user);
   },
   getLogedUser() {
-    const userloged = JSON.stringify(localStorage.getItem('username'));
     return (
       userRepo
         .query()

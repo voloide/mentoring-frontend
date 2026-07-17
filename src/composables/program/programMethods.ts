@@ -1,6 +1,5 @@
 
-import Program from "src/stores/model/program/Program";
-import useProgramaticArea from '../programmaticArea/programmaticAreaMethods'
+import Program from 'src/stores/model/program/Program';
 
 export default function useProgram() {
 
@@ -23,16 +22,6 @@ export default function useProgram() {
           code: program.code,
         }
         return  programDTO;
-    }
-
-    function createProgramaticAreaDTO(program:any) {
-      const { createDTOFromProgrammaticArea } = useProgramaticArea();
-      const generatedProgrammaticAreas = [];
-      program.programmaticAreas.forEach((programmaticArea) => {
-        programmaticArea.progrm = program
-        generatedProgrammaticAreas.push(createDTOFromProgrammaticArea(programmaticArea));
-      });
-      return generatedProgrammaticAreas;
     }
 
     return {

@@ -1,4 +1,4 @@
-import FormType from "src/stores/model/form/FormType";
+import FormType from 'src/stores/model/form/FormType';
 
 export default function useFormType() {
 

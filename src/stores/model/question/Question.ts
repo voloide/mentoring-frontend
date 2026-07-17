@@ -1,6 +1,5 @@
 import { Model } from 'pinia-orm';
 import Program from '../program/Program';
-import EvaluatioLocation from '../question/EvaluationLocation';
 
 export default class Question extends Model {
   static entity = 'questions';

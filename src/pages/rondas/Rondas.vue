@@ -38,7 +38,7 @@ const search = () => {
 
   mentorService
     .search(params)
-    .then((response) => {
+    .then(() => {
       console.log('');
     })
     .catch((error) => {

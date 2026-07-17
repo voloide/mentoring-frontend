@@ -1,10 +1,6 @@
-import Form from "src/stores/model/form/Form";
-import useProgrammaticArea from "src/composables/programmaticArea/programmaticAreaMethods";
-import useFormType from "./formTypeMethods";
-import useFormSectionQuestion from "./formSectionQuestionMethods";
-import usePartner from "src/composables/partner/partnerMethods";
-import useSection from "src/composables/section/sectionMethods";
-import useFormSection from "src/composables/form/formSectionMethods";
+import Form from 'src/stores/model/form/Form';
+import useProgrammaticArea from 'src/composables/programmaticArea/programmaticAreaMethods';
+import useFormSection from 'src/composables/form/formSectionMethods';
 import useEvaluationLocation from '../question/evaluationLocationMethods';
 
 export default function useForm() {
@@ -13,8 +9,6 @@ export default function useForm() {
 
     function createFormFromDTO(formDTO: any) {
       const { createProgrammaticAreaFromDTO } = useProgrammaticArea();
-      const { createPartnerFromDTO } = usePartner();
-      const { createFormSectionFromDTO } = useFormSection();
 
       return new Form({
         id: formDTO.id,
@@ -40,8 +34,6 @@ export default function useForm() {
 
     function createDTOFromForm(form: Form) {
       const { createDTOFromProgrammaticArea } = useProgrammaticArea();
-      const { createDTOFromPartner } = usePartner();
-      const { createDTOFromFormSection } = useFormSection();
 
         const formDTO = {
           id: form.id,
@@ -60,26 +52,6 @@ export default function useForm() {
           formSections: createDTOsListFromFormSections(form.formSections), // Handling form sections
         };
         return formDTO;
-    }
-
-    function createFormQuestionsListFromDTOs(formQuestionDTOS: any) {
-      const { createFormSectionQuestionFromDTO } = useFormSectionQuestion();
-      const generatedFormQuestions = [];
-      formQuestionDTOS.forEach((formQuestionDTO) => {
-        const formQuestion = createFormSectionQuestionFromDTO(formQuestionDTO);
-        generatedFormQuestions.push(formQuestion);
-      });
-      return generatedFormQuestions;
-    }
-
-    function createDTOsListFromFormQuestions(formQuestions: any) {
-      const { createDTOFromFormSectionQuestion } = useFormSectionQuestion();
-      const generatedFormQuestions = [];
-      formQuestions.forEach((formQuestion) => {
-        const formQuestionDTO = createDTOFromFormSectionQuestion(formQuestion);
-        generatedFormQuestions.push(formQuestionDTO);
-      });
-      return generatedFormQuestions;
     }
 
     function createFormSectionsListFromDTOs(formSectionDTOS: any) {

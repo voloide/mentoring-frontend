@@ -187,7 +187,7 @@ const adicionarNovaLinha = () => {
   }
 };
 
-const removerLinha = (row) => {
+const removerLinha = () => {
   const index = mentorProgrammaticAreas.value.findIndex(item => item.id === null);
   mentorProgrammaticAreas.value.splice(index, 1);
   newAreaBeingAdded.value = false;
@@ -203,9 +203,9 @@ const salvarNovaLinha = (row) => {
     if (!alreadyExists) {
       const newTutorProgramaticArea = TutorProgrammaticAreaService.createNewTutorProgrammaticArea(selectedMentor.value.id,row.programmaticArea.id)
 
-      TutorProgrammaticAreaService.save(newTutorProgramaticArea, selectedMentor.value).then((resp) => {
+      TutorProgrammaticAreaService.save(newTutorProgramaticArea, selectedMentor.value).then(() => {
         selectedMentor.value = mentorService.getById(selectedMentor.value.id)
-        mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas.map((item, index) => ({
+        mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas.map((item) => ({
           id: item.id,
           programmaticArea: item.programmaticArea,
           acao: item.id,
@@ -259,9 +259,9 @@ const confirmFormLifeCycleChange = (tutorProgrammaticArea) => {
                 tpa.lifeCycleStatus = 'ACTIVE'
             }
 
-            TutorProgrammaticAreaService.changeLifeCycleStatus(createDTOFromTutorProgrammaticArea(tpa), selectedMentor.value).then((resp) => {
+            TutorProgrammaticAreaService.changeLifeCycleStatus(createDTOFromTutorProgrammaticArea(tpa), selectedMentor.value).then(() => {
                 selectedMentor.value = mentorService.getById(selectedMentor.value.id)
-                mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas.map((item, index) => ({
+                mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas.map((item) => ({
                     id: item.id,
                     programmaticArea: item.programmaticArea,
                     acao: item.id,
@@ -280,7 +280,7 @@ onMounted(() => {
   programs.value = programService.getProgramList()
   programaticAreas.value = programmaticAreaService.piniaGetAll()
   mentorProgrammaticAreas.value = selectedMentor.value.tutorProgrammaticAreas ?
-    selectedMentor.value.tutorProgrammaticAreas.map((item, index) => ({
+    selectedMentor.value.tutorProgrammaticAreas.map((item) => ({
       id: item.id,
       programmaticArea: item.programmaticArea,
       acao: item.id,
