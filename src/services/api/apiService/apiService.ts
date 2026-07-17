@@ -1,25 +1,13 @@
-import axios, {
-  Axios,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from 'axios';
-import { useSystemUtils } from 'src/composables/shared/systemUtils/systemUtils';
-import { LocalStorage } from 'quasar';
-import useNotify from 'src/composables/shared/notify/useNotify';
+import axios from 'axios';
 // import { Notify } from 'quasar';
 
-const { website } = useSystemUtils();
-const { notifyError } = useNotify();
-
 const instance = axios.create({
-  baseURL: 'http://localhost:8087/api',
+  baseURL: process.env.VUE_APP_API_BASE_URL,
   responseType: 'json',
   validateStatus(status) {
     return status >= 200 && status < 300;
   },
 });
-const numTries = 0;
 
 // Função para fazer o logout
 function logout() {

@@ -11,8 +11,13 @@
 
 const { configure } = require('quasar/wrappers');
 const path = require('path');
+const dotenv = require('dotenv');
 
-module.exports = configure(function (/* ctx */) {
+module.exports = configure(function (ctx) {
+  const base = dotenv.config().parsed || {};
+  const modeFile = ctx.dev ? '.env.development' : '.env.production';
+  const modeEnv = dotenv.config({ path: modeFile, override: true }).parsed || {};
+
   return {
     eslint: {
       // fix: true,
@@ -56,7 +61,7 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
-      env: require('dotenv').config({ override: true }).parsed,
+      env: { ...base, ...modeEnv },
       target: {
         browser: [ 'es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1' ],
         node: 'node16'
