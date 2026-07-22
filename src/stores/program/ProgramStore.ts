@@ -6,7 +6,8 @@ import { paginateArray, flattenPages } from 'src/utils/paginationUtils'
 
 export const useProgramStore = defineStore('program', {
   state: () => ({
-    programsPages: {} as Record<number, Program[]>,
+    // chave = `${page}:${size}` (ver PartnerStore para o porquê)
+    programsPages: {} as Record<string, Program[]>,
     currentPagePrograms: [] as Program[],
     currentProgram: null as Program | null,
     loading: false,
@@ -37,10 +38,12 @@ export const useProgramStore = defineStore('program', {
       const defaultSize = this.pagination.pageSize
       const page = params.page ?? 0
       const size = params.size ?? defaultSize
+      const cacheKey = `${page}:${size}`
 
-      if (useCache && this.programsPages[page]) {
-        this.currentPagePrograms = this.programsPages[page]
+      if (useCache && this.programsPages[cacheKey]) {
+        this.currentPagePrograms = this.programsPages[cacheKey]
         this.pagination.currentPage = page
+        this.pagination.pageSize = size
         return
       }
 
@@ -55,7 +58,10 @@ export const useProgramStore = defineStore('program', {
 
         if (!usePagination) {
           const paged = paginateArray(programs, defaultSize)
-          this.programsPages = paged
+          this.programsPages = {}
+          for (const p in paged) {
+            this.programsPages[`${p}:${defaultSize}`] = paged[p]
+          }
           this.currentPagePrograms = paged[0] ?? []
           this.pagination = {
             totalSize: programs.length,
@@ -64,7 +70,7 @@ export const useProgramStore = defineStore('program', {
             pageSize: defaultSize
           }
         } else {
-          this.programsPages[page] = programs
+          this.programsPages[cacheKey] = programs
           this.currentPagePrograms = programs
           this.pagination = {
             totalSize: response.total,
@@ -114,15 +120,15 @@ export const useProgramStore = defineStore('program', {
           : await ProgramService.save(dtoToSend)
 
         const saved = Program.fromDTO(savedDto)
-        const page = this.pagination.currentPage
+        const cacheKey = `${this.pagination.currentPage}:${this.pagination.pageSize}`
 
-        if (!this.programsPages[page]) {
-          this.programsPages[page] = []
+        if (!this.programsPages[cacheKey]) {
+          this.programsPages[cacheKey] = []
         }
 
-        this.programsPages[page] = replaceOrInsert(this.programsPages[page], saved, 'name')
+        this.programsPages[cacheKey] = replaceOrInsert(this.programsPages[cacheKey], saved, 'name')
 
-        this.currentPagePrograms = [...this.programsPages[page]]
+        this.currentPagePrograms = [...this.programsPages[cacheKey]]
         this.currentProgram = saved
 
         return saved
@@ -146,7 +152,7 @@ export const useProgramStore = defineStore('program', {
           }
         }
 
-        this.currentPagePrograms = this.programsPages[this.pagination.currentPage] ?? []
+        this.currentPagePrograms = this.programsPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentProgram?.uuid === uuid) {
           this.currentProgram = updated
@@ -171,7 +177,7 @@ export const useProgramStore = defineStore('program', {
           )
         }
 
-        this.currentPagePrograms = this.programsPages[this.pagination.currentPage] ?? []
+        this.currentPagePrograms = this.programsPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentProgram?.uuid === uuid) {
           this.currentProgram = null

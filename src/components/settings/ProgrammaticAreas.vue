@@ -91,10 +91,6 @@ onMounted(async () => {
   if (programStore.currentPagePrograms.length === 0) {
     await programStore.fetchPrograms({ page: 0, size: 100 })
   }
-
-  if (areaStore.currentPageAreas.length === 0) {
-    await areaStore.fetchAreas()
-  }
 })
 
 const onSearch = async (name: string) => {
@@ -131,6 +127,11 @@ watch(
     pagination.value.rowsNumber = total
   }
 )
+
+const onTableRequest = (req: any) => {
+  pagination.value.page = req.pagination.page
+  pagination.value.rowsPerPage = req.pagination.rowsPerPage
+}
 
 const saveAreaHandler = async (rowData: any) => {
   try {
@@ -200,5 +201,6 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteAreaHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
+    @request="onTableRequest"
   />
 </template>

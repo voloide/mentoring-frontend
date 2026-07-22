@@ -6,7 +6,11 @@ import { paginateArray, flattenPages } from 'src/utils/paginationUtils'
 
 export const usePartnerStore = defineStore('partner', {
   state: () => ({
-    partnersPages: {} as Record<number, Partner[]>,
+    // chave = `${page}:${size}` — inclui o size porque este store é usado
+    // tanto para a tabela paginada (size pequeno) como para preencher
+    // dropdowns noutros ecrãs (size grande); sem o size na chave, um pedido
+    // de dropdown para a "página 0" sobrepunha-se ao cache da tabela.
+    partnersPages: {} as Record<string, Partner[]>,
     currentPagePartners: [] as Partner[],
     currentPartner: null as Partner | null,
     loading: false,
@@ -37,10 +41,12 @@ export const usePartnerStore = defineStore('partner', {
       const defaultSize = this.pagination.pageSize
       const page = params.page ?? 0
       const size = params.size ?? defaultSize
+      const cacheKey = `${page}:${size}`
 
-      if (useCache && this.partnersPages[page]) {
-        this.currentPagePartners = this.partnersPages[page]
+      if (useCache && this.partnersPages[cacheKey]) {
+        this.currentPagePartners = this.partnersPages[cacheKey]
         this.pagination.currentPage = page
+        this.pagination.pageSize = size
         return
       }
 
@@ -55,7 +61,10 @@ export const usePartnerStore = defineStore('partner', {
 
         if (!usePagination) {
           const paged = paginateArray(partners, defaultSize)
-          this.partnersPages = paged
+          this.partnersPages = {}
+          for (const p in paged) {
+            this.partnersPages[`${p}:${defaultSize}`] = paged[p]
+          }
           this.currentPagePartners = paged[0] ?? []
           this.pagination = {
             totalSize: partners.length,
@@ -64,7 +73,7 @@ export const usePartnerStore = defineStore('partner', {
             pageSize: defaultSize
           }
         } else {
-          this.partnersPages[page] = partners
+          this.partnersPages[cacheKey] = partners
           this.currentPagePartners = partners
           this.pagination = {
             totalSize: response.total,
@@ -110,14 +119,14 @@ export const usePartnerStore = defineStore('partner', {
           : await partnerService.save(dtoToSend)
 
         const saved = Partner.fromDTO(savedDto)
-        const page = this.pagination.currentPage
+        const cacheKey = `${this.pagination.currentPage}:${this.pagination.pageSize}`
 
-        if (!this.partnersPages[page]) {
-          this.partnersPages[page] = []
+        if (!this.partnersPages[cacheKey]) {
+          this.partnersPages[cacheKey] = []
         }
 
-        this.partnersPages[page] = replaceOrInsert(this.partnersPages[page], saved, 'name')
-        this.currentPagePartners = [...this.partnersPages[page]]
+        this.partnersPages[cacheKey] = replaceOrInsert(this.partnersPages[cacheKey], saved, 'name')
+        this.currentPagePartners = [...this.partnersPages[cacheKey]]
         this.currentPartner = saved
 
         return saved
@@ -141,7 +150,7 @@ export const usePartnerStore = defineStore('partner', {
           }
         }
 
-        this.currentPagePartners = this.partnersPages[this.pagination.currentPage] ?? []
+        this.currentPagePartners = this.partnersPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentPartner?.uuid === uuid) {
           this.currentPartner = updated
@@ -164,7 +173,7 @@ export const usePartnerStore = defineStore('partner', {
           this.partnersPages[page] = this.partnersPages[page].filter(p => p.uuid !== uuid)
         }
 
-        this.currentPagePartners = this.partnersPages[this.pagination.currentPage] ?? []
+        this.currentPagePartners = this.partnersPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentPartner?.uuid === uuid) {
           this.currentPartner = null

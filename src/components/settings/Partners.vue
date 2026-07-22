@@ -1,6 +1,6 @@
 <!-- src/pages/settings/Partner.vue (padrão HealthFacility) -->
 <script setup lang="ts">
-import { onMounted, computed, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { usePartnerStore } from 'src/stores/partner/PartnerStore'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
@@ -52,11 +52,6 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-onMounted(async () => {
-  if (partnerStore.currentPagePartners.length === 0) {
-    await partnerStore.fetchPartners()
-  }
-})
 
 const onSearch = async (name: string) => {
   nameFilter.value = name
@@ -92,6 +87,11 @@ watch(
     pagination.value.rowsNumber = total
   }
 )
+
+const onTableRequest = (req: any) => {
+  pagination.value.page = req.pagination.page
+  pagination.value.rowsPerPage = req.pagination.rowsPerPage
+}
 
 const savePartnerHandler = async (rowData: any) => {
   try {
@@ -145,5 +145,6 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deletePartnerHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
+    @request="onTableRequest"
   />
 </template>

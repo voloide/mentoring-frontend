@@ -201,10 +201,6 @@ const pagination = ref({
 })
 
 onMounted(async () => {
-  if (healthFacilityStore.currentPageHealthFacilities.length === 0) {
-    await healthFacilityStore.fetchHealthFacilities()
-  }
-
   if (provinceStore.currentPageProvinces.length === 0) {
     await provinceStore.fetchProvinces({ page: 0, size: 100 })
   }
@@ -255,6 +251,11 @@ watch(
     pagination.value.rowsNumber = total
   }
 )
+
+const onTableRequest = (req: any) => {
+  pagination.value.page = req.pagination.page
+  pagination.value.rowsPerPage = req.pagination.rowsPerPage
+}
 
 const saveHealthFacilityHandler = async (rowData: any) => {
   try {
@@ -340,5 +341,6 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteHealthFacilityHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
+    @request="onTableRequest"
   />
 </template>

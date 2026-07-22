@@ -1,6 +1,6 @@
 <!-- src/pages/settings/ProfessionalCategory.vue (padrão HealthFacility) -->
 <script setup lang="ts">
-import { onMounted, computed, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useProfessionalCategoryStore } from 'src/stores/professionalCategory/ProfessionalCategoryStore'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
@@ -42,11 +42,6 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-onMounted(async () => {
-  if (categoryStore.currentPageCategories.length === 0) {
-    await categoryStore.fetchCategories()
-  }
-})
 
 const onSearch = async (name: string) => {
   nameFilter.value = name
@@ -82,6 +77,11 @@ watch(
     pagination.value.rowsNumber = total
   }
 )
+
+const onTableRequest = (req: any) => {
+  pagination.value.page = req.pagination.page
+  pagination.value.rowsPerPage = req.pagination.rowsPerPage
+}
 
 const saveCategoryHandler = async (rowData: any) => {
   try {
@@ -135,5 +135,6 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteCategoryHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
+    @request="onTableRequest"
   />
 </template>

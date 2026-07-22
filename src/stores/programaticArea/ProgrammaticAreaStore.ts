@@ -6,7 +6,8 @@ import { paginateArray, flattenPages } from 'src/utils/paginationUtils'
 
 export const useProgrammaticAreaStore = defineStore('programmaticArea', {
   state: () => ({
-    areasPages: {} as Record<number, ProgrammaticArea[]>,
+    // chave = `${page}:${size}` (ver PartnerStore para o porquê)
+    areasPages: {} as Record<string, ProgrammaticArea[]>,
     currentPageAreas: [] as ProgrammaticArea[],
     currentArea: null as ProgrammaticArea | null,
     loading: false,
@@ -37,10 +38,12 @@ export const useProgrammaticAreaStore = defineStore('programmaticArea', {
       const defaultSize = this.pagination.pageSize
       const page = params.page ?? 0
       const size = params.size ?? defaultSize
+      const cacheKey = `${page}:${size}`
 
-      if (useCache && this.areasPages[page]) {
-        this.currentPageAreas = this.areasPages[page]
+      if (useCache && this.areasPages[cacheKey]) {
+        this.currentPageAreas = this.areasPages[cacheKey]
         this.pagination.currentPage = page
+        this.pagination.pageSize = size
         return
       }
 
@@ -55,7 +58,10 @@ export const useProgrammaticAreaStore = defineStore('programmaticArea', {
 
         if (!usePagination) {
           const paged = paginateArray(areas, defaultSize)
-          this.areasPages = paged
+          this.areasPages = {}
+          for (const p in paged) {
+            this.areasPages[`${p}:${defaultSize}`] = paged[p]
+          }
           this.currentPageAreas = paged[0] ?? []
           this.pagination = {
             totalSize: areas.length,
@@ -64,7 +70,7 @@ export const useProgrammaticAreaStore = defineStore('programmaticArea', {
             pageSize: defaultSize
           }
         } else {
-          this.areasPages[page] = areas
+          this.areasPages[cacheKey] = areas
           this.currentPageAreas = areas
           this.pagination = {
             totalSize: response.total,
@@ -114,14 +120,14 @@ export const useProgrammaticAreaStore = defineStore('programmaticArea', {
           : await ProgrammaticAreaService.save(dtoToSend)
 
         const saved = ProgrammaticArea.fromDTO(savedDto)
-        const page = this.pagination.currentPage
+        const cacheKey = `${this.pagination.currentPage}:${this.pagination.pageSize}`
 
-        if (!this.areasPages[page]) {
-          this.areasPages[page] = []
+        if (!this.areasPages[cacheKey]) {
+          this.areasPages[cacheKey] = []
         }
 
-        this.areasPages[page] = replaceOrInsert(this.areasPages[page], saved, 'name')
-        this.currentPageAreas = [...this.areasPages[page]]
+        this.areasPages[cacheKey] = replaceOrInsert(this.areasPages[cacheKey], saved, 'name')
+        this.currentPageAreas = [...this.areasPages[cacheKey]]
         this.currentArea = saved
 
         return saved
@@ -145,7 +151,7 @@ export const useProgrammaticAreaStore = defineStore('programmaticArea', {
           }
         }
 
-        this.currentPageAreas = this.areasPages[this.pagination.currentPage] ?? []
+        this.currentPageAreas = this.areasPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentArea?.uuid === uuid) {
           this.currentArea = updatedArea
@@ -168,7 +174,7 @@ export const useProgrammaticAreaStore = defineStore('programmaticArea', {
           this.areasPages[page] = this.areasPages[page].filter(a => a.uuid !== uuid)
         }
 
-        this.currentPageAreas = this.areasPages[this.pagination.currentPage] ?? []
+        this.currentPageAreas = this.areasPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentArea?.uuid === uuid) {
           this.currentArea = null

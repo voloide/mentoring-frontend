@@ -6,7 +6,8 @@ import { paginateArray, flattenPages } from 'src/utils/paginationUtils'
 
 export const useProfessionalCategoryStore = defineStore('professionalCategory', {
   state: () => ({
-    categoriesPages: {} as Record<number, ProfessionalCategory[]>,
+    // chave = `${page}:${size}` (ver PartnerStore para o porquê)
+    categoriesPages: {} as Record<string, ProfessionalCategory[]>,
     currentPageCategories: [] as ProfessionalCategory[],
     currentCategory: null as ProfessionalCategory | null,
     loading: false,
@@ -37,10 +38,12 @@ export const useProfessionalCategoryStore = defineStore('professionalCategory', 
       const defaultSize = this.pagination.pageSize
       const page = params.page ?? 0
       const size = params.size ?? defaultSize
+      const cacheKey = `${page}:${size}`
 
-      if (useCache && this.categoriesPages[page]) {
-        this.currentPageCategories = this.categoriesPages[page]
+      if (useCache && this.categoriesPages[cacheKey]) {
+        this.currentPageCategories = this.categoriesPages[cacheKey]
         this.pagination.currentPage = page
+        this.pagination.pageSize = size
         return
       }
 
@@ -55,7 +58,10 @@ export const useProfessionalCategoryStore = defineStore('professionalCategory', 
 
         if (!usePagination) {
           const paged = paginateArray(categories, defaultSize)
-          this.categoriesPages = paged
+          this.categoriesPages = {}
+          for (const p in paged) {
+            this.categoriesPages[`${p}:${defaultSize}`] = paged[p]
+          }
           this.currentPageCategories = paged[0] ?? []
           this.pagination = {
             totalSize: categories.length,
@@ -64,7 +70,7 @@ export const useProfessionalCategoryStore = defineStore('professionalCategory', 
             pageSize: defaultSize
           }
         } else {
-          this.categoriesPages[page] = categories
+          this.categoriesPages[cacheKey] = categories
           this.currentPageCategories = categories
           this.pagination = {
             totalSize: response.total,
@@ -114,15 +120,15 @@ export const useProfessionalCategoryStore = defineStore('professionalCategory', 
           : await ProfessionalCategoryService.save(dtoToSend)
 
         const saved = ProfessionalCategory.fromDTO(savedDto)
-        const page = this.pagination.currentPage
+        const cacheKey = `${this.pagination.currentPage}:${this.pagination.pageSize}`
 
-        if (!this.categoriesPages[page]) {
-          this.categoriesPages[page] = []
+        if (!this.categoriesPages[cacheKey]) {
+          this.categoriesPages[cacheKey] = []
         }
 
-        this.categoriesPages[page] = replaceOrInsert(this.categoriesPages[page], saved, 'description')
+        this.categoriesPages[cacheKey] = replaceOrInsert(this.categoriesPages[cacheKey], saved, 'description')
 
-        this.currentPageCategories = [...this.categoriesPages[page]]
+        this.currentPageCategories = [...this.categoriesPages[cacheKey]]
         this.currentCategory = saved
 
         return saved
@@ -146,7 +152,7 @@ export const useProfessionalCategoryStore = defineStore('professionalCategory', 
           }
         }
 
-        this.currentPageCategories = this.categoriesPages[this.pagination.currentPage] ?? []
+        this.currentPageCategories = this.categoriesPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentCategory?.uuid === uuid) {
           this.currentCategory = updatedCategory
@@ -171,7 +177,7 @@ export const useProfessionalCategoryStore = defineStore('professionalCategory', 
           )
         }
 
-        this.currentPageCategories = this.categoriesPages[this.pagination.currentPage] ?? []
+        this.currentPageCategories = this.categoriesPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentCategory?.uuid === uuid) {
           this.currentCategory = null

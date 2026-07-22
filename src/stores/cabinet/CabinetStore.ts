@@ -6,7 +6,8 @@ import { paginateArray, flattenPages } from 'src/utils/paginationUtils'
 
 export const useCabinetStore = defineStore('cabinet', {
   state: () => ({
-    cabinetsPages: {} as Record<number, Cabinet[]>,
+    // chave = `${page}:${size}` (ver PartnerStore para o porquê)
+    cabinetsPages: {} as Record<string, Cabinet[]>,
     currentPageCabinets: [] as Cabinet[],
     currentCabinet: null as Cabinet | null,
     loading: false,
@@ -37,10 +38,12 @@ export const useCabinetStore = defineStore('cabinet', {
       const defaultSize = this.pagination.pageSize
       const page = params.page ?? 0
       const size = params.size ?? defaultSize
+      const cacheKey = `${page}:${size}`
 
-      if (useCache && this.cabinetsPages[page]) {
-        this.currentPageCabinets = this.cabinetsPages[page]
+      if (useCache && this.cabinetsPages[cacheKey]) {
+        this.currentPageCabinets = this.cabinetsPages[cacheKey]
         this.pagination.currentPage = page
+        this.pagination.pageSize = size
         return
       }
 
@@ -55,7 +58,10 @@ export const useCabinetStore = defineStore('cabinet', {
 
         if (!usePagination) {
           const paged = paginateArray(cabinets, defaultSize)
-          this.cabinetsPages = paged
+          this.cabinetsPages = {}
+          for (const p in paged) {
+            this.cabinetsPages[`${p}:${defaultSize}`] = paged[p]
+          }
           this.currentPageCabinets = paged[0] ?? []
           this.pagination = {
             totalSize: cabinets.length,
@@ -64,7 +70,7 @@ export const useCabinetStore = defineStore('cabinet', {
             pageSize: defaultSize
           }
         } else {
-          this.cabinetsPages[page] = cabinets
+          this.cabinetsPages[cacheKey] = cabinets
           this.currentPageCabinets = cabinets
           this.pagination = {
             totalSize: response.total,
@@ -113,15 +119,15 @@ export const useCabinetStore = defineStore('cabinet', {
           : await CabinetService.save(dtoToSend)
 
         const saved = Cabinet.fromDTO(savedDto)
-        const page = this.pagination.currentPage
+        const cacheKey = `${this.pagination.currentPage}:${this.pagination.pageSize}`
 
-        if (!this.cabinetsPages[page]) {
-          this.cabinetsPages[page] = []
+        if (!this.cabinetsPages[cacheKey]) {
+          this.cabinetsPages[cacheKey] = []
         }
 
-        this.cabinetsPages[page] = replaceOrInsert(this.cabinetsPages[page], saved, 'name')
+        this.cabinetsPages[cacheKey] = replaceOrInsert(this.cabinetsPages[cacheKey], saved, 'name')
 
-        this.currentPageCabinets = [...this.cabinetsPages[page]]
+        this.currentPageCabinets = [...this.cabinetsPages[cacheKey]]
         this.currentCabinet = saved
 
         return saved
@@ -145,7 +151,7 @@ export const useCabinetStore = defineStore('cabinet', {
           }
         }
 
-        this.currentPageCabinets = this.cabinetsPages[this.pagination.currentPage] ?? []
+        this.currentPageCabinets = this.cabinetsPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentCabinet?.uuid === uuid) {
           this.currentCabinet = updated
@@ -170,7 +176,7 @@ export const useCabinetStore = defineStore('cabinet', {
           )
         }
 
-        this.currentPageCabinets = this.cabinetsPages[this.pagination.currentPage] ?? []
+        this.currentPageCabinets = this.cabinetsPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentCabinet?.uuid === uuid) {
           this.currentCabinet = null

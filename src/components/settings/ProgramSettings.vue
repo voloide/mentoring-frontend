@@ -1,6 +1,6 @@
 <!-- src/pages/settings/Program.vue (padrão HealthFacility) -->
 <script setup lang="ts">
-import { onMounted, computed, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useProgramStore } from 'src/stores/program/ProgramStore'
 import { useApiErrorHandler } from 'src/composables/shared/error/useApiErrorHandler'
 import { useSwal } from 'src/composables/shared/dialog/dialog'
@@ -52,11 +52,6 @@ const pagination = ref({
   rowsNumber: 0
 })
 
-onMounted(async () => {
-  if (programStore.currentPagePrograms.length === 0) {
-    await programStore.fetchPrograms()
-  }
-})
 
 const onSearch = async (name: string) => {
   nameFilter.value = name
@@ -92,6 +87,11 @@ watch(
     pagination.value.rowsNumber = total
   }
 )
+
+const onTableRequest = (req: any) => {
+  pagination.value.page = req.pagination.page
+  pagination.value.rowsPerPage = req.pagination.rowsPerPage
+}
 
 const saveProgramHandler = async (rowData: any) => {
   try {
@@ -144,5 +144,6 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteProgramHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
+    @request="onTableRequest"
   />
 </template>

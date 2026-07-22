@@ -6,7 +6,8 @@ import { paginateArray, flattenPages } from 'src/utils/paginationUtils'
 
 export const useQuestionStore = defineStore('question', {
   state: () => ({
-    questionsPages: {} as Record<number, Question[]>,
+    // chave = `${page}:${size}` (ver PartnerStore para o porquê)
+    questionsPages: {} as Record<string, Question[]>,
     currentPageQuestions: [] as Question[],
     currentQuestion: null as Question | null,
     loading: false,
@@ -33,14 +34,16 @@ export const useQuestionStore = defineStore('question', {
       const size = params.size ?? defaultSize
       const name = params.name ?? ''
       const ignoreCache = params.ignoreCache ?? false
+      const cacheKey = `${page}:${size}`
 
       const isSearch = name.trim() !== ''
       const usePagination = params.page !== undefined || params.size !== undefined
-      const useCache = !ignoreCache && !isSearch && this.questionsPages[page]
+      const useCache = !ignoreCache && !isSearch && this.questionsPages[cacheKey]
 
       if (useCache) {
-        this.currentPageQuestions = this.questionsPages[page]
+        this.currentPageQuestions = this.questionsPages[cacheKey]
         this.pagination.currentPage = page
+        this.pagination.pageSize = size
         return
       }
 
@@ -55,7 +58,10 @@ export const useQuestionStore = defineStore('question', {
 
         if (!isSearch && !usePagination) {
           const paged = paginateArray(questions, defaultSize)
-          this.questionsPages = paged
+          this.questionsPages = {}
+          for (const p in paged) {
+            this.questionsPages[`${p}:${defaultSize}`] = paged[p]
+          }
           this.currentPageQuestions = paged[0] ?? []
           this.pagination = {
             totalSize: questions.length,
@@ -64,7 +70,7 @@ export const useQuestionStore = defineStore('question', {
             pageSize: defaultSize
           }
         } else {
-          this.questionsPages[page] = questions
+          this.questionsPages[cacheKey] = questions
           this.currentPageQuestions = questions
           this.pagination = {
             totalSize: response.total,
@@ -113,14 +119,14 @@ export const useQuestionStore = defineStore('question', {
           : await QuestionService.save(dtoToSend)
 
         const saved = Question.fromDTO(savedDto)
-        const page = this.pagination.currentPage
+        const cacheKey = `${this.pagination.currentPage}:${this.pagination.pageSize}`
 
-        if (!this.questionsPages[page]) {
-          this.questionsPages[page] = []
+        if (!this.questionsPages[cacheKey]) {
+          this.questionsPages[cacheKey] = []
         }
 
-        this.questionsPages[page] = replaceOrInsert(this.questionsPages[page], saved, 'question')
-        this.currentPageQuestions = [...this.questionsPages[page]]
+        this.questionsPages[cacheKey] = replaceOrInsert(this.questionsPages[cacheKey], saved, 'question')
+        this.currentPageQuestions = [...this.questionsPages[cacheKey]]
         this.currentQuestion = saved
 
         return saved
@@ -144,7 +150,7 @@ export const useQuestionStore = defineStore('question', {
           }
         }
 
-        this.currentPageQuestions = this.questionsPages[this.pagination.currentPage] ?? []
+        this.currentPageQuestions = this.questionsPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentQuestion?.uuid === uuid) {
           this.currentQuestion = updatedQuestion
@@ -169,7 +175,7 @@ export const useQuestionStore = defineStore('question', {
           )
         }
 
-        this.currentPageQuestions = this.questionsPages[this.pagination.currentPage] ?? []
+        this.currentPageQuestions = this.questionsPages[`${this.pagination.currentPage}:${this.pagination.pageSize}`] ?? []
 
         if (this.currentQuestion?.uuid === uuid) {
           this.currentQuestion = null

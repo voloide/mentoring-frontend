@@ -96,10 +96,6 @@ onMounted(async () => {
   if (programStore.currentPagePrograms.length === 0) {
     await programStore.fetchPrograms({ page: 0, size: 100 })
   }
-
-  if (questionStore.currentPageQuestions.length === 0) {
-    await questionStore.fetchQuestions()
-  }
 })
 
 const onSearch = async (name: string) => {
@@ -136,6 +132,11 @@ watch(
     pagination.value.rowsNumber = total
   }
 )
+
+const onTableRequest = (req: any) => {
+  pagination.value.page = req.pagination.page
+  pagination.value.rowsPerPage = req.pagination.rowsPerPage
+}
 
 const saveQuestionHandler = async (rowData: any) => {
   try {
@@ -204,5 +205,6 @@ const toggleStatusHandler = async (row: any) => {
     @delete="(row, { resolve, reject }) => deleteQuestionHandler(row.uuid).then(resolve).catch(reject)"
     @search="onSearch"
     @toggle-status="toggleStatusHandler"
+    @request="onTableRequest"
   />
 </template>
