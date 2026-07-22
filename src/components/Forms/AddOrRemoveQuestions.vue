@@ -2,14 +2,14 @@
   <q-card style="width: 85vw; max-width: 90vw;">
     <div class="page-container">
       <div>
-        <q-banner dense inline-actions class="text-white bg-primary q-px-md">
+        <q-banner dense inline-actions class="text-white bg-primary q-px-md section-banner">
           Pesquisa de Competências do {{ selectedForm.programmaticArea.program.description }}
           <template v-slot:action>
             <q-btn
               flat
               round
               class="q-ml-md"
-              color="red"
+              color="grey-4"
               icon="close"
               @click="close"
             >
@@ -77,13 +77,19 @@
           <q-btn
             label="Fechar"
             class="float-right"
-            color="red"
+            outline
+            rounded
+            no-caps
+            color="grey-8"
             @click="close"
           />
           <q-btn
             class="float-right q-ml-md"
             type="submit"
             label="Adicionar"
+            unelevated
+            rounded
+            no-caps
             color="primary"
             @click="addSelectedQuestions()"
           />

@@ -1,8 +1,9 @@
 <template>
-  <div v-if="isFormDataVisible">
+  <transition name="step-fade" mode="out-in">
+  <div v-if="isFormDataVisible" key="form-data">
     <div class="q-ma-md page-container">
-      <div class="page-input-container q-pa-md">
-        <q-banner dense inline-actions class="text-white bg-primary q-px-md">
+      <div class="page-input-container manage-form q-pa-md">
+        <q-banner dense inline-actions class="text-white bg-primary q-px-md section-banner">
           Identificação da Tabela de Competências
         </q-banner>
 
@@ -22,7 +23,7 @@
         </div>
 
         <!-- Programmatic Area and Program -->
-        <div class="row">
+        <div class="row q-mt-md">
           <div class="col">
             <q-select
               class="row"
@@ -91,7 +92,7 @@
         </div>
 
         <!-- Description and Target Fields -->
-        <div class="row">
+        <div class="row q-mt-md">
           <q-input
             outlined
             label="Descrição"
@@ -129,7 +130,7 @@
         <!-- Form Sections Table -->
          <div class="row">
         <div class="col q-mt-lg">
-          <q-banner dense inline-actions class="text-white bg-primary q-px-md">
+          <q-banner dense inline-actions class="text-white bg-primary q-px-md section-banner section-banner--flush">
             Secções da Tabela
             <template v-slot:action>
               <q-btn outline dense flat round color="white" icon="add" @click="initFormSection" />
@@ -239,7 +240,7 @@
                         <q-tooltip class="bg-green-5">Editar Secção</q-tooltip>
                       </q-btn>
                       <span
-                        style="color: green"
+                        class="status-chip"
                         v-if="!props.row.inEdition && props.row.in_use"
                       >
                         Em uso
@@ -266,12 +267,15 @@
         <!-- Action Buttons -->
         <div class="row q-my-sm">
           <q-space />
-          <q-btn label="Fechar" class="float-right" color="yellow-7" @click="close" />
-          <q-btn label="Cancelar" class="float-right q-ml-md" color="red" @click="cancel" />
+          <q-btn label="Fechar" class="float-right" outline rounded no-caps color="grey-8" @click="close" />
+          <q-btn label="Cancelar" class="float-right q-ml-md" outline rounded no-caps color="grey-8" @click="cancel" />
           <q-btn
             class="float-right q-ml-md"
             type="submit"
             label="Avançar"
+            unelevated
+            rounded
+            no-caps
             color="primary"
             @click="goToFormQuestions(form)"
           />
@@ -280,11 +284,8 @@
     </div>
   </div>
   <!-- Form Questions Data Section -->
-  <div >
-    <ManageQuestions v-if="isFormQuestionsDataVisible" @goBack="goBack" @close="close"/>
-  </div>
-
-
+  <ManageQuestions v-else-if="isFormQuestionsDataVisible" key="form-questions" @goBack="goBack" @close="close"/>
+  </transition>
 </template>
 
 <script setup>

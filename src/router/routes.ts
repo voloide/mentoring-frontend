@@ -14,6 +14,10 @@ const routes: RouteRecordRaw[] = [
     },
     children: [
       {
+        path: '',
+        redirect: '/home',
+      },
+      {
         path: '/mentors',
         component: () => import('pages/Mentors/Mentors.vue'),
       },

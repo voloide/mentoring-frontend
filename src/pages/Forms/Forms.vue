@@ -1,15 +1,18 @@
 <template>
   <div style="height: 100%">
-    <!-- Show the Search component when in the 'search' step -->
-    <search
-      v-if="isSearchStep"
-      @create="changeToCreateStep"
-      @edit="changeToEditStep"
-      @goToForms="goToForms"
-    />
+    <transition name="step-fade" mode="out-in">
+      <!-- Show the Search component when in the 'search' step -->
+      <search
+        v-if="isSearchStep"
+        key="search-step"
+        @create="changeToCreateStep"
+        @edit="changeToEditStep"
+        @goToForms="goToForms"
+      />
 
-    <!-- Show the AddEdit (ManageForm) component when in the 'create' step -->
-    <add-edit v-if="isEditOrCreate" @goToForms="goToForms" @close="close" />
+      <!-- Show the AddEdit (ManageForm) component when in the 'create'/'edit' step -->
+      <add-edit v-else-if="isEditOrCreate" key="edit-step" @goToForms="goToForms" @close="close" />
+    </transition>
   </div>
 </template>
 

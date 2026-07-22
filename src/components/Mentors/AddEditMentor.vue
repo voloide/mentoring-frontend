@@ -3,21 +3,21 @@
     <div class="q-ma-md page-container">
       <form @submit.prevent="submitForm" ref="myForm">
         <div class="q-ma-md">
-          <q-banner dense inline-actions class="text-white bg-primary q-px-md">
+          <q-banner dense inline-actions class="text-white bg-primary q-px-md section-banner">
             Dados do Mentor
             <template v-slot:action>
               <q-img src="~assets/mentoring.png" />
             </template>
           </q-banner>
-          <div class="page-input-container q-pa-md">
+          <div class="page-input-container manage-form q-pa-md">
             <div class="q-mt-lg">
               <div class="row items-center q-mb-md">
-                <q-icon name="person_outline" size="sm" />
-                <span class="q-pl-sm text-subtitle2"
+                <q-icon name="person_outline" size="sm" color="primary" />
+                <span class="q-pl-sm text-subtitle2 text-weight-bold"
                   >Identificação do Mentor</span
                 >
               </div>
-              <q-separator color="grey-13" size="1px" />
+              <q-separator color="grey-4" size="1px" />
             </div>
             <div class="row q-my-sm">
               <q-input
@@ -88,10 +88,10 @@
             </div>
             <div class="q-mt-lg">
               <div class="row items-center q-mb-md">
-                <q-icon name="call" size="sm" />
-                <span class="q-pl-sm text-subtitle2">Contacto</span>
+                <q-icon name="call" size="sm" color="primary" />
+                <span class="q-pl-sm text-subtitle2 text-weight-bold">Contacto</span>
               </div>
-              <q-separator color="grey-13" size="1px" />
+              <q-separator color="grey-4" size="1px" />
             </div>
             <div class="row q-my-sm">
               <q-input
@@ -143,10 +143,10 @@
             </div>
             <div class="q-mt-lg">
               <div class="row items-center q-mb-md">
-                <q-icon name="engineering" size="sm" />
-                <span class="q-pl-sm text-subtitle2">Informação Laboral</span>
+                <q-icon name="engineering" size="sm" color="primary" />
+                <span class="q-pl-sm text-subtitle2 text-weight-bold">Informação Laboral</span>
               </div>
-              <q-separator color="grey-13" size="1px" />
+              <q-separator color="grey-4" size="1px" />
             </div>
             <div class="row q-my-sm">
               <q-select
@@ -258,10 +258,10 @@
             </div>
             <div class="q-mt-lg">
               <div class="row items-center q-mb-md">
-                <q-icon name="local_hospital" size="sm" />
-                <span class="q-pl-sm text-subtitle2">Unidade Sanitária</span>
+                <q-icon name="local_hospital" size="sm" color="primary" />
+                <span class="q-pl-sm text-subtitle2 text-weight-bold">Unidade Sanitária</span>
               </div>
-              <q-separator color="grey-13" size="1px" />
+              <q-separator color="grey-4" size="1px" />
             </div>
             <div class="row q-my-sm">
               <q-select
@@ -345,7 +345,10 @@
               <q-btn
                 label="Cancelar"
                 class="float-right"
-                color="red"
+                outline
+                rounded
+                no-caps
+                color="grey-8"
                 type="button"
                 @click="cancel"
               />
@@ -353,6 +356,9 @@
                 class="float-right q-ml-md"
                 type="submit"
                 label="Submeter"
+                unelevated
+                rounded
+                no-caps
                 color="primary"
               />
             </div>

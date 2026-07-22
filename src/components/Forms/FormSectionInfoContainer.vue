@@ -4,7 +4,7 @@
             <q-banner
                 dense
                 inline-actions
-                class="text-white q-px-sm"
+                class="text-white q-px-sm section-banner section-banner--flush"
                 :class="{'bg-teal-7': !localFormSection.inEdition, 'bg-red-7': localFormSection.inEdition}"
                 >
               [Secção: {{ formSection.sequence }}] -   <span style="color: amber-10;">{{ formSection.section.description }}</span>

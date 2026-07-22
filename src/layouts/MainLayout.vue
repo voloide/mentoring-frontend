@@ -1,68 +1,80 @@
 <template>
   <q-layout view="hHh lpR fFf" style="height: 100%">
-    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" class="menu">
+    <q-header class="app-header" bordered>
+      <q-toolbar class="app-toolbar">
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          class="lt-md"
+          @click="leftDrawerOpen = !leftDrawerOpen"
+        />
+        <q-avatar size="32px" class="app-toolbar__logo">
+          <q-img src="~assets/mentoring.png" fit="contain" />
+        </q-avatar>
+        <q-toolbar-title class="app-toolbar__title">Mentoria</q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer
+      show-if-above
+      v-model="leftDrawerOpen"
+      side="left"
+      bordered
+      class="menu"
+    >
       <!-- Drawer content -->
-      <div class="row q-mb-lg">
-        <div class="col text-center" style="margin-top: 20%">
-          <q-icon name="account_circle" color="white" size="7.4em" />
-          <div class="text-grey-1 text-subtitle1 q-mt-md">
-            {{ fullName(currUser?.employee || {}) }}
-          </div>
-          <div class="text-grey-1 text-subtitle1 q-mt-sm">
-            {{ currUser?.employee?.email || 'N/A' }}
-          </div>
+      <div class="menu-profile column items-center">
+        <q-avatar size="72px" class="menu-profile__avatar">
+          <q-icon name="account_circle" color="white" size="72px" />
+        </q-avatar>
+        <div class="menu-profile__name">
+          {{ fullName(currUser?.employee || {}) }}
+        </div>
+        <div class="menu-profile__email">
+          {{ currUser?.employee?.email || 'N/A' }}
         </div>
       </div>
 
-      <q-separator spaced color="white" />
-      <div class="row q-mt-md">
-        <q-list padding class="text-white col">
-          <q-item
-            v-for="menuOption in visibleMenuOptions"
-            :key="menuOption.link"
-            clickable
-            v-ripple
-            :active="link === menuOption.link"
-            @click="link = menuOption.link"
-            active-class="my-menu-link"
-            :to="menuOption.to"
-            exact
-          >
-            <q-item-section avatar>
-              <q-icon :name="menuOption.icon" />
-            </q-item-section>
-            <q-item-section>{{ menuOption.label }}</q-item-section>
-          </q-item>
+      <q-list padding class="menu-list">
+        <q-item
+          v-for="menuOption in visibleMenuOptions"
+          :key="menuOption.link"
+          clickable
+          v-ripple
+          :active="link === menuOption.link"
+          @click="link = menuOption.link"
+          active-class="menu-list__item--active"
+          class="menu-list__item"
+          :to="menuOption.to"
+          exact
+        >
+          <q-item-section avatar>
+            <q-icon :name="menuOption.icon" />
+          </q-item-section>
+          <q-item-section>{{ menuOption.label }}</q-item-section>
+        </q-item>
+      </q-list>
 
-          <q-separator spaced color="white" />
-
-          <q-item
-            clickable
-            v-ripple
-            :active="link === 'logout'"
-            @click="logout"
-            active-class="my-menu-link"
-          >
-            <q-item-section avatar>
-              <q-icon name="logout" />
-            </q-item-section>
-            <q-item-section>Log out</q-item-section>
-          </q-item>
-        </q-list>
-      </div>
+      <q-list padding class="menu-list menu-list--footer">
+        <q-item
+          clickable
+          v-ripple
+          :active="link === 'logout'"
+          @click="logout"
+          active-class="menu-list__item--active"
+          class="menu-list__item"
+        >
+          <q-item-section avatar>
+            <q-icon name="logout" />
+          </q-item-section>
+          <q-item-section>Log out</q-item-section>
+        </q-item>
+      </q-list>
     </q-drawer>
 
-    <q-page-container style="padding-top: 10px; height: 100%">
-      <q-banner
-        dense
-        inline-actions
-        class="text-white bg-primary q-mx-md q-px-md text-center"
-      >
-        Mentoria
-        <template v-slot:action>
-          <q-img src="~assets/mentoring.png" />
-        </template>
-      </q-banner>
+    <q-page-container style="height: 100%">
       <router-view style="height: 100%" />
     </q-page-container>
 
@@ -224,11 +236,70 @@ const stayLoggedIn = () => {
 </script>
 
 <style lang="scss">
-.menu {
-  background-color: $primary;
+.app-header {
+  background: #fff;
+  color: $dark;
 }
-.my-menu-link {
-  color: black;
-  background: white;
+
+.app-toolbar {
+  min-height: 56px;
+
+  &__logo {
+    margin-left: 4px;
+  }
+
+  &__title {
+    margin-left: 10px;
+    font-weight: 700;
+    color: $primary;
+  }
+}
+
+.menu {
+  background: linear-gradient(180deg, $primary 0%, darken($primary, 12%) 100%);
+}
+
+.menu-profile {
+  padding: 28px 16px 20px;
+
+  &__avatar {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+  }
+
+  &__name {
+    margin-top: 12px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: center;
+  }
+
+  &__email {
+    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+.menu-list {
+  &--footer {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  &__item {
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    margin: 2px 10px;
+
+    &--active {
+      color: $primary;
+      background: #fff;
+      font-weight: 600;
+    }
+  }
 }
 </style>

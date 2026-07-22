@@ -4,7 +4,7 @@
         <div class="page-input-container q-pa-md">
           <!-- Banner for Competencies -->
           <div class="q-mt-lg">
-            <q-banner dense inline-actions class="text-white bg-primary q-px-sm">
+            <q-banner dense inline-actions class="text-white bg-primary q-px-sm section-banner">
               Competências Associadas à <span style="color: amber-10;">[{{ selectedForm.name }}]</span>
             </q-banner>
           </div>
@@ -32,13 +32,16 @@
           <!-- Action Buttons -->
           <div class="row q-my-sm q-mt-lg">
             <q-space />
-            <q-btn label="Cancelar" class="float-right" color="red" @click="cancel" />
-            <q-btn label="Voltar" class="float-right q-ml-md" color="amber-4" @click="goBack" />
+            <q-btn label="Cancelar" class="float-right" outline rounded no-caps color="grey-8" @click="cancel" />
+            <q-btn label="Voltar" class="float-right q-ml-md" outline rounded no-caps color="grey-8" @click="goBack" />
             <q-btn
               class="float-right q-ml-md"
               type="submit"
               :loading="submitLoading"
               label="Terminar"
+              unelevated
+              rounded
+              no-caps
               color="primary"
               @click="saveOrUpdate()"
             />

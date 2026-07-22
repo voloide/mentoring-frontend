@@ -1,7 +1,7 @@
 <template>
     <div class="q-pt-sm" style="height: 100%;">
 
-        <div class="q-ma-md q-pa-md page-container">
+        <div class="q-ma-md q-pa-md page-container manage-form">
             <div class="row">
                 <q-input
                     outlined
@@ -64,7 +64,9 @@
 
                     @click="search"
                     class="q-ml-md q-mb-xs float-right"
-                    square
+                    unelevated
+                    rounded
+                    no-caps
                     color="primary"
                     icon="search"
                 >
@@ -74,8 +76,10 @@
 
                     @click="clearSearchParams"
                     class="q-ml-md q-mb-xs float-right"
-                    square
-                    color="amber"
+                    outline
+                    rounded
+                    no-caps
+                    color="grey-8"
                     icon="clear"
                 >
                     <q-tooltip class="bg-amber-5">Limpar</q-tooltip>
@@ -124,7 +128,7 @@
                                 flat
                                 round
                                 class="q-ml-md"
-                                color="yellow-10"
+                                color="orange-7"
                                 icon="edit_note"
                                 @click="manageMentoringAreas(props.row)"
                                 >
@@ -135,7 +139,7 @@
                                 flat
                                 round
                                 class="q-ml-md"
-                                color="green-8"
+                                color="grey-8"
                                 icon="edit"
                                 @click="editMentor(props.row)"
                                 >
