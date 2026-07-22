@@ -568,6 +568,7 @@ onMounted(() => {
 const search = async () => {
   showloading();
   if (!selectedProvince.value) {
+    closeLoading();
     useSwal().alertError('O campo de província deve ser preenchido');
     return;
   }
