@@ -45,8 +45,12 @@ export default {
   },
   async updateResourceTreeWithoutFile(resourceDTO: any) {
     let resp = null;
+    const formData = new FormData();
+    formData.append('id', resourceDTO.id);
+    formData.append('uuid', resourceDTO.uuid);
+    formData.append('resource', resourceDTO.resource);
     resp = await api()
-      .patch('/resources/updateresourcetreewithoutfile', resourceDTO)
+      .patch('/resources/updateresourcetree', formData)
       .then((resp) => {
         repo.save(createResourceFromDTO(resp.data));
         return resp;

@@ -1,14 +1,18 @@
 <template>
   <div class="q-pt-sm" style="height: 100%">
-    <div class="q-ma-md q-pa-md page-container">
+    <div class="q-ma-md q-pa-md page-container manage-form ea-resources">
       <div class="row">
         <q-input
           ref="filterRef"
-          filled
+          outlined
+          dense
           v-model="filter"
           label="Filtro"
           class="col"
         >
+          <template v-slot:prepend>
+            <q-icon name="search" />
+          </template>
           <template v-slot:append>
             <q-icon
               v-if="filter !== ''"
@@ -20,72 +24,67 @@
         </q-input>
       </div>
 
-      <div class="row q-mt-sm">
-        <q-card flat bordered class="my-card col">
-          <q-card-section class="">
-            <q-tree
-              :nodes="nodes"
-              node-key="label"
-              :filter="filter"
-              v-model:selected="selectedNode"
-            >
-              <template #default-header="props">
-                <div>
-                  <q-btn
-                    v-if="
-                      ['resource', 'subCateg', 'categ', 'program'].includes(
-                        props.node.type
-                      )
-                    "
-                    @click="resourceRequest(props.node)"
+      <div class="row q-mt-md">
+        <div class="col">
+          <q-tree
+            :nodes="nodes"
+            node-key="label"
+            :filter="filter"
+            v-model:selected="selectedNode"
+          >
+            <template #default-header="props">
+              <div>
+                <q-btn
+                  v-if="
+                    ['resource', 'subCateg', 'categ', 'program'].includes(
+                      props.node.type
+                    )
+                  "
+                  @click="resourceRequest(props.node)"
+                  flat
+                  dense
+                  no-caps
+                  rounded
+                  size="sm"
+                  icon="add"
+                  class="add-node-btn"
+                >
+                  {{ props.node.label }}
+                </q-btn>
+                <div v-else class="row">
+                  <q-icon
+                    v-if="props.node.isLink"
+                    name="link"
+                    class="q-mr-sm text-primary"
+                  />
+
+                  <span
+                    @click="handleClickResource(props.node)"
                     :class="{
-                      'text-orange': [
-                        'resource',
-                        'subCateg',
-                        'categ',
-                        'program',
-                      ].includes(props.node.type),
+                      'text-blue': props.node.clickable === 2,
+                      'q-mt-sm': true,
                     }"
-                    dense
-                    size="sm"
                   >
                     {{ props.node.label }}
-                  </q-btn>
-                  <div v-else class="row">
-                    <q-icon
-                      v-if="props.node.isLink"
-                      name="link"
-                      class="q-mr-sm text-primary"
-                    />
 
-                    <span
-                      @click="handleClickResource(props.node)"
-                      :class="{
-                        'text-blue': props.node.clickable === 2,
-                        'q-mt-sm': true,
-                      }"
-                    >
-                      {{ props.node.label }}
-
-                      <!-- Tooltip com a descrição -->
-                      <q-tooltip v-if="props.node.description">
-                        {{ props.node.description }}
-                      </q-tooltip>
-                    </span>
-                  </div>
+                    <!-- Tooltip com a descrição -->
+                    <q-tooltip v-if="props.node.description">
+                      {{ props.node.description }}
+                    </q-tooltip>
+                  </span>
                 </div>
-              </template>
-            </q-tree>
-          </q-card-section>
-        </q-card>
+              </div>
+            </template>
+          </q-tree>
+        </div>
       </div>
     </div>
   </div>
 
   <q-dialog persistent v-model="showAddResource">
-    <q-card style="width: 45vw; max-width: 90vw">
+    <q-card style="width: 45vw; max-width: 90vw" class="manage-form">
       <q-card-section>
-        <div class="text-h7 bg-primary q-pa-sm text-white">
+        <div class="text-h7 bg-primary q-pa-sm text-white section-banner">
           {{ popUpTitle }}
         </div>
       </q-card-section>
@@ -212,9 +211,20 @@
       </q-card-section>
 
       <q-card-actions v-if="doesUserHavePermissions()" align="right">
-        <q-btn dense label="Cancelar" color="red" v-close-popup />
         <q-btn
           dense
+          outline
+          rounded
+          no-caps
+          label="Cancelar"
+          color="grey-8"
+          v-close-popup
+        />
+        <q-btn
+          dense
+          unelevated
+          rounded
+          no-caps
           class="q-mr-sm"
           type="submit"
           color="primary"
@@ -397,79 +407,91 @@ const gravar = async (node) => {
       const programNode = nodes.value.find(
         (item) => item.label === node.program
       );
-      if (programNode) {
-        const categoryNode = programNode.children.find(
-          (item) => item.label === node.category
-        );
-        if (categoryNode) {
-          const subCategoryNode = categoryNode.children.find(
-            (item) => item.label === node.subCategory
-          );
-          if (subCategoryNode) {
-            const now = moment();
-            timestamp.value = now.format('YYYYMMDDHHmmss');
-            let newFileName = `${fileName.value}_${
-              timestamp.value
-            }.${fileInput.value.name.split('.').pop()}`;
-            newFile.value = new File([fileInput.value], newFileName);
-            subCategoryNode.children.unshift({
-              label: newFileName,
-              clickable: 2,
-              description: fileDescription.value,
-              name: newFileName,
-            });
-            fileSelected.value = true;
-          }
-        }
+      if (!programNode) {
+        alertError('Não foi possível localizar o programa para adicionar o recurso.');
+        return;
       }
+      const categoryNode = programNode.children.find(
+        (item) => item.label === node.category
+      );
+      if (!categoryNode) {
+        alertError('Não foi possível localizar a categoria para adicionar o recurso.');
+        return;
+      }
+      const subCategoryNode = categoryNode.children.find(
+        (item) => item.label === node.subCategory
+      );
+      if (!subCategoryNode) {
+        alertError('Não foi possível localizar a sub-categoria para adicionar o recurso.');
+        return;
+      }
+      const now = moment();
+      timestamp.value = now.format('YYYYMMDDHHmmss');
+      let newFileName = `${fileName.value}_${
+        timestamp.value
+      }.${fileInput.value.name.split('.').pop()}`;
+      newFile.value = new File([fileInput.value], newFileName);
+      subCategoryNode.children.unshift({
+        label: newFileName,
+        clickable: 2,
+        description: fileDescription.value,
+        name: newFileName,
+      });
+      fileSelected.value = true;
     } else if (node.type === 'subCateg') {
       // Adicionar Sub Categoria
       const programNode = nodes.value.find(
         (item) => item.label === node.program
       );
-      if (programNode) {
-        const categoryNode = programNode.children.find(
-          (item) => item.label === node.category
-        );
-        if (categoryNode) {
-          categoryNode.children.unshift({
-            label: subCategoryInput.value,
-            clickable: 0,
-            children: [
-              {
-                label: 'Adicionar Recurso',
-                clickable: 1,
-                icon: 'add',
-                program: node.program,
-                category: node.category,
-                subCategory: subCategoryInput.value,
-                type: 'resource',
-              },
-            ],
-          });
-        }
+      if (!programNode) {
+        alertError('Não foi possível localizar o programa para adicionar a sub categoria.');
+        return;
       }
+      const categoryNode = programNode.children.find(
+        (item) => item.label === node.category
+      );
+      if (!categoryNode) {
+        alertError('Não foi possível localizar a categoria para adicionar a sub categoria.');
+        return;
+      }
+      categoryNode.children.unshift({
+        label: subCategoryInput.value,
+        clickable: 0,
+        children: [
+          {
+            label: 'Adicionar Recurso',
+            clickable: 1,
+            icon: 'add',
+            program: node.program,
+            category: node.category,
+            subCategory: subCategoryInput.value,
+            type: 'resource',
+          },
+        ],
+      });
     } else if (node.type === 'categ') {
       // Adicionar Categoria
       const programNode = nodes.value.find(
         (item) => item.label === node.program
       );
-      if (programNode) {
-        programNode.children.unshift({
-          label: categoryInput.value,
-          clickable: 0,
-          children: [
-            {
-              label: 'Adicionar Sub Categoria',
-              clickable: 1,
-              icon: 'add',
-              program: node.program,
-              category: categoryInput.value,
-              type: 'subCateg',
-            },
-          ],
-        });
+      if (!programNode) {
+        alertError('Não foi possível localizar o programa para adicionar a categoria.');
+        return;
       }
+      programNode.children.unshift({
+        label: categoryInput.value,
+        clickable: 0,
+        children: [
+          {
+            label: 'Adicionar Sub Categoria',
+            clickable: 1,
+            icon: 'add',
+            program: node.program,
+            category: categoryInput.value,
+            type: 'subCateg',
+          },
+        ],
+      });
     } else if (node.type === 'program') {
       // Adicionar Programa
       nodes.value.unshift({
@@ -496,25 +518,31 @@ const gravar = async (node) => {
     }
 
     const programNode = nodes.value.find((item) => item.label === node.program);
-    if (programNode) {
-      const categoryNode = programNode.children.find(
-        (item) => item.label === node.category
-      );
-      if (categoryNode) {
-        const subCategoryNode = categoryNode.children.find(
-          (item) => item.label === node.subCategory
-        );
-        if (subCategoryNode) {
-          subCategoryNode.children.unshift({
-            label: fileName.value,
-            clickable: 2,
-            description: fileDescription.value,
-            name: linkUrl.value,
-            isLink: true, // opcional: para distinguir no render
-          });
-        }
-      }
+    if (!programNode) {
+      alertError('Não foi possível localizar o programa para adicionar o recurso.');
+      return;
     }
+    const categoryNode = programNode.children.find(
+      (item) => item.label === node.category
+    );
+    if (!categoryNode) {
+      alertError('Não foi possível localizar a categoria para adicionar o recurso.');
+      return;
+    }
+    const subCategoryNode = categoryNode.children.find(
+      (item) => item.label === node.subCategory
+    );
+    if (!subCategoryNode) {
+      alertError('Não foi possível localizar a sub-categoria para adicionar o recurso.');
+      return;
+    }
+    subCategoryNode.children.unshift({
+      label: fileName.value,
+      clickable: 2,
+      description: fileDescription.value,
+      name: linkUrl.value,
+      isLink: true, // opcional: para distinguir no render
+    });
     doPatchForFile(nodes);
   }
 };
@@ -536,18 +564,22 @@ const doPatch = (nodes) => {
       formData.append('resource', resource.resource);
       formData.append('file', newFile.value);
       resourceService.updateResourceTree(formData).then((res) => {
-        if (res)
-          if (res.status === 200 || res.status === 201) {
-            loadResources();
-          }
+        if (res && (res.status === 200 || res.status === 201)) {
+          loadResources();
+        } else {
+          alertError('Erro ao gravar o recurso. Tente novamente.');
+          loadResources();
+        }
       });
     }
   } else {
     resourceService.updateResourceTreeWithoutFile(resource).then((res) => {
-      if (res)
-        if (res.status === 200 || res.status === 201) {
-          loadResources();
-        }
+      if (res && (res.status === 200 || res.status === 201)) {
+        loadResources();
+      } else {
+        alertError('Erro ao gravar as alterações. Tente novamente.');
+        loadResources();
+      }
     });
   }
 };
@@ -575,16 +607,26 @@ const loadResources = () => {
   });
 };
 
+// Mesma lista de papéis autorizada no backend (ResourceController: create,
+// updateresourcetree). Um utilizador pode ter vários papéis (ex: admin
+// nacional que também é mentor de uma unidade sanitária) — basta ter um
+// papel elevado para ter permissão, mesmo que também tenha um papel restrito.
+const RESOURCE_MANAGEMENT_ROLES = [
+  'NATIONAL_ADMINISTRATOR',
+  'PROVINCIAL_ADMINISTRATOR',
+  'DISTRICT_ADMINISTRATOR',
+  'NATIONAL_MENTOR',
+  'PROVINCIAL_MENTOR',
+  'DISTRICT_MENTOR',
+];
+
 const doesUserHavePermissions = () => {
   const userData = JSON.parse(localStorage.getItem('userData'));
   const roles = userData.roles;
-  for (let i = 0; i < roles.length; i++) {
-    if (roles[i] === 'MENTEE' || roles[i] === 'HEALTH_FACILITY_MENTOR') {
-      return false;
-    }
-    return true;
+  if (!roles || roles.length === 0) {
+    return false;
   }
-  return false;
+  return roles.some((role) => RESOURCE_MANAGEMENT_ROLES.includes(role));
 };
 
 onMounted(() => {
@@ -603,4 +645,22 @@ watch(tipoRecurso, (newValue) => {
 });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.ea-resources {
+  :deep(.add-node-btn) {
+    background: rgba(245, 124, 0, 0.12);
+    color: #e65100;
+    font-weight: 600;
+    padding: 2px 12px;
+  }
+
+  :deep(.q-tree__node-header) {
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: #f5f8fb;
+    }
+  }
+}
+</style>
